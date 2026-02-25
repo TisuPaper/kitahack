@@ -37,11 +37,17 @@ all_preds, all_labels = [], []
 
 with torch.no_grad():
     for x, y in loader:
-        x, y = x.to(device), y.to(device)
+        x = x.to(device)
+        # If y is a tuple of strings from dataset.py since we haven't encoded them
+        if isinstance(y, tuple) or isinstance(y, list):
+            y_tensor = torch.tensor([1 if label == 'FAKE' else 0 for label in y]).to(device)
+        else:
+            y_tensor = y.to(device)
+            
         outputs = model(x)
         preds = outputs.argmax(dim=1)
         all_preds.extend(preds.cpu().numpy())
-        all_labels.extend(y.cpu().numpy())
+        all_labels.extend(y_tensor.cpu().numpy())
 
 print("Classification Report:")
 print(classification_report(all_labels, all_preds))

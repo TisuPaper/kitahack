@@ -20,7 +20,11 @@ class CNN_LSTM(nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, x):
-        x = x.permute(0, 2, 1)  # [batch, channels, seq_len]
+        # x shape: [batch, 1, seq_len] (from dataset)
+        # No need to permute if it already is [batch, channels, seq_len]
+        # But if it is [batch, seq_len, channels], we permute
+        if x.shape[1] > x.shape[2]:
+            x = x.permute(0, 2, 1)
         x = self.relu(self.conv1(x))
         x = self.pool1(x)
         x = self.relu(self.conv2(x))

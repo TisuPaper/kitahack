@@ -11,7 +11,7 @@ from imblearn.over_sampling import SMOTE
 from torch.utils.data import Dataset
 from pydub import AudioSegment  # Handles mp3
 
-from .config import REAL_DIR, FAKE_DIR, SEGMENTS_DIR, CLIP_LENGTH, SAMPLE_RATE, WINDOW_SIZE, RANDOM_STATE
+from .config import REAL_DIR, FAKE_DIR, SEGMENTS_DIR, FEATURES_FILE, CLIP_LENGTH, SAMPLE_RATE, WINDOW_SIZE, RANDOM_STATE
 
 # Create segment folders
 os.makedirs(os.path.join(SEGMENTS_DIR, "REAL"), exist_ok=True)

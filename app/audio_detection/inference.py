@@ -3,9 +3,7 @@
 import torch
 from pydub import AudioSegment
 import numpy as np
-from scipy import signal
-import soundfile as sf
-
+import torchaudio
 from .config import SAMPLE_RATE, CLIP_LENGTH
 from .models import CNN_LSTM, TCN, TCN_LSTM
 
@@ -15,10 +13,43 @@ def predict(file_path, model, device):
     chunk_size = CLIP_LENGTH
     preds = []
     
-    # Read the large file in small streams/blocks without loading fully to RAM
-    for block in sf.blocks(file_path, blocksize=chunk_size, fill_value=0):
-        # block is raw values, convert to target shape
-        x = torch.tensor(block, dtype=torch.float32).unsqueeze(0).unsqueeze(0).to(device)
+    # Check if file exists to prevent hard crash
+    import os
+    if not os.path.exists(file_path):
+        print(f"Warning: Demo file {file_path} not found.")
+        return 0
+
+    info = torchaudio.info(file_path)
+    total_frames = info.num_frames
+    original_sr = info.sample_rate
+    
+    # Calculate native chunk size before resampling
+    native_chunk_size = int(chunk_size * (original_sr / SAMPLE_RATE))
+    
+    for start_frame in range(0, total_frames, native_chunk_size):
+        # Load exactly that chunk from disk
+        waveform, sr = torchaudio.load(
+            file_path, 
+            frame_offset=start_frame, 
+            num_frames=native_chunk_size
+        )
+        
+        # Resample
+        if sr != SAMPLE_RATE:
+            resampler = torchaudio.transforms.Resample(orig_freq=sr, new_freq=SAMPLE_RATE)
+            waveform = resampler(waveform)
+            
+        # Convert to mono
+        if waveform.shape[0] > 1:
+            waveform = torch.mean(waveform, dim=0, keepdim=True)
+            
+        # Pad if short
+        if waveform.shape[1] < chunk_size:
+            waveform = torch.nn.functional.pad(waveform, (0, chunk_size - waveform.shape[1]))
+        elif waveform.shape[1] > chunk_size:
+            waveform = waveform[:, :chunk_size]
+            
+        x = waveform.unsqueeze(0).to(device) # [1, 1, 32000]
         model.eval()
         with torch.no_grad():
             outputs = model(x)
@@ -35,8 +66,6 @@ def predict(file_path, model, device):
 
 # Load model
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-# You may adjust input_dim if using a dataset input_dim
 input_dim = 1  # for raw audio single channel
 if MODEL_NAME == 'cnn-lstm':
     model = CNN_LSTM(input_dim=input_dim, num_classes=2)

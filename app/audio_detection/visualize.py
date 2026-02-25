@@ -26,11 +26,16 @@ all_preds, all_labels = [], []
 
 with torch.no_grad():
     for x, y in loader:
-        x, y = x.to(device), y.to(device)
+        x = x.to(device)
+        if isinstance(y, tuple) or isinstance(y, list):
+            y_tensor = torch.tensor([1 if label == 'FAKE' else 0 for label in y]).to(device)
+        else:
+            y_tensor = y.to(device)
+            
         outputs = model(x)
         preds = outputs.argmax(dim=1)
         all_preds.extend(preds.cpu().numpy())
-        all_labels.extend(y.cpu().numpy())
+        all_labels.extend(y_tensor.cpu().numpy())
 
 cm = confusion_matrix(all_labels, all_preds)
 plt.figure(figsize=(6,5))
@@ -38,4 +43,6 @@ sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=['REAL','FAKE'], 
 plt.xlabel("Predicted")
 plt.ylabel("Actual")
 plt.title("Confusion Matrix")
-plt.show()
+# plt.show() # save instead to avoid blocking script execution
+plt.savefig('./confusion_matrix.png')
+print("Saved confusion matrix to ./confusion_matrix.png")

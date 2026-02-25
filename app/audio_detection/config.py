@@ -3,7 +3,7 @@
 import os
 
 # Local dataset paths
-DATA_DIR = "./app/data/KAGGLE/AUDIO"
+DATA_DIR = "./app/data/DeepVoice/KAGGLE/AUDIO"
 REAL_DIR = os.path.join(DATA_DIR, "REAL")
 FAKE_DIR = os.path.join(DATA_DIR, "FAKE")
 CSV_FILE = os.path.join(DATA_DIR, "DATASET-balanced.csv")
