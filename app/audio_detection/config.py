@@ -23,3 +23,4 @@ RANDOM_STATE = 42
 BATCH_SIZE = 32
 LR = 1e-3
 EPOCHS = 30
+MODEL_NAME = 'tcn-lstm'  # Options: 'cnn-lstm', 'tcn', 'tcn-lstm'
