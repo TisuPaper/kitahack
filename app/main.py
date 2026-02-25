@@ -27,6 +27,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ---- Serve static files (live detection page) ----
+import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+_static_dir = os.path.join(os.path.dirname(__file__), "static")
+app.mount("/static", StaticFiles(directory=_static_dir), name="static")
+
+@app.get("/live")
+async def live_detection_page():
+    return FileResponse(os.path.join(_static_dir, "live.html"))
+
 
 # ---- Face detector (Haar cascade) ----
 face_cascade = cv2.CascadeClassifier(
