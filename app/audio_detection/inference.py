@@ -4,10 +4,8 @@ import torch
 from pydub import AudioSegment
 import numpy as np
 import torchaudio
-from .config import SAMPLE_RATE, CLIP_LENGTH
+from .config import SAMPLE_RATE, CLIP_LENGTH, MODEL_NAME
 from .models import CNN_LSTM, TCN, TCN_LSTM
-
-MODEL_NAME = 'cnn-lstm'  # same options: 'cnn-lstm', 'tcn', 'tcn-lstm'
 
 def predict(file_path, model, device):
     chunk_size = CLIP_LENGTH
