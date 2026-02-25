@@ -95,7 +95,8 @@ class TCN(nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, x):
-        x = x.permute(0, 2, 1)  # [batch, channels, seq_len]
+        if x.shape[1] > x.shape[2]:
+            x = x.permute(0, 2, 1)
         x = self.tcn(x)
         x = self.global_pool(x).squeeze(-1)
         x = self.relu(self.fc1(x))
@@ -128,7 +129,8 @@ class TCN_LSTM(nn.Module):
         self.relu = nn.ReLU()
 
     def forward(self, x):
-        x = x.permute(0, 2, 1)  # [batch, channels, seq_len]
+        if x.shape[1] > x.shape[2]:
+            x = x.permute(0, 2, 1)
         x = self.tcn(x)
         x = x.permute(0, 2, 1)  # [batch, seq_len, features]
         x, (h_n, _) = self.lstm(x)
