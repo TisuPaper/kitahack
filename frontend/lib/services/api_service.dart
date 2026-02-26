@@ -32,8 +32,47 @@ class ApiService {
         return 'video/webm';
       case 'mkv':
         return 'video/x-matroska';
+      case 'wav':
+        return 'audio/wav';
+      case 'mp3':
+        return 'audio/mpeg';
+      case 'm4a':
+        return 'audio/mp4';
+      case 'aac':
+        return 'audio/aac';
+      case 'ogg':
+        return 'audio/ogg';
+      case 'flac':
+        return 'audio/flac';
       default:
         return 'application/octet-stream';
+    }
+  }
+
+  static Future<Map<String, dynamic>> predictAudio(
+    Uint8List bytes,
+    String filename,
+  ) async {
+    final uri = Uri.parse('$baseUrl/predict/audio');
+    final request = http.MultipartRequest('POST', uri);
+    final contentType = _getMimeType(filename);
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'file',
+        bytes,
+        filename: filename,
+        contentType: MediaType.parse(contentType),
+      ),
+    );
+
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      final error = jsonDecode(response.body);
+      throw Exception(error['detail'] ?? 'Failed to analyze audio');
     }
   }
 
