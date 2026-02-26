@@ -14,49 +14,51 @@ class ConfidenceChart extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Bar chart ─────────────────────────────────────────
-        SizedBox(
-          height: 200,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Y-axis labels
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text('100%', style: _axisStyle),
-                  Text(' 75%', style: _axisStyle),
-                  Text(' 50%', style: _axisStyle),
-                  Text(' 25%', style: _axisStyle),
-                  Text('  0%', style: _axisStyle),
-                ],
-              ),
-              const SizedBox(width: 8),
-              // Grid + bars
-              Expanded(
-                child: CustomPaint(
-                  painter: _GridPainter(),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      _AnimatedBar(
-                        label: 'REAL',
-                        value: realProb,
-                        color: const Color(0xFF22C55E),
-                        isHighlighted: dominant == 'REAL',
-                      ),
-                      _AnimatedBar(
-                        label: 'FAKE',
-                        value: fakeProb,
-                        color: const Color(0xFFEF4444),
-                        isHighlighted: dominant == 'FAKE',
-                      ),
-                    ],
+        // ── Bar chart (ClipRect prevents any overflow stripe) ──
+        ClipRect(
+          child: SizedBox(
+            height: 200,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Y-axis labels
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Text('100%', style: _axisStyle),
+                    Text(' 75%', style: _axisStyle),
+                    Text(' 50%', style: _axisStyle),
+                    Text(' 25%', style: _axisStyle),
+                    Text('  0%', style: _axisStyle),
+                  ],
+                ),
+                const SizedBox(width: 8),
+                // Grid + bars
+                Expanded(
+                  child: CustomPaint(
+                    painter: _GridPainter(),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        _AnimatedBar(
+                          label: 'REAL',
+                          value: realProb,
+                          color: const Color(0xFF22C55E),
+                          isHighlighted: dominant == 'REAL',
+                        ),
+                        _AnimatedBar(
+                          label: 'FAKE',
+                          value: fakeProb,
+                          color: const Color(0xFFEF4444),
+                          isHighlighted: dominant == 'FAKE',
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 20),
@@ -117,7 +119,7 @@ class _GridPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter old) => false;
 }
 
-// ── Single animated bar with value label ──────────────────────
+// ── Single animated bar ───────────────────────────────────────
 class _AnimatedBar extends StatelessWidget {
   final String label;
   final double value;
@@ -134,15 +136,14 @@ class _AnimatedBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pct = (value * 100).toStringAsFixed(1);
-    // 200px total height. Reserve ~38px for pct text(13) + gap(4) + label(11) + gap(6)
-    const reservedPx = 38.0;
-    const maxBarH = 200.0 - reservedPx;
+    // Container is 200px. Subtract: pct text (~18px) + gap(4) + label text (~14px) + gap(6) = 42px
+    // Then add a safety margin of 10px → maxBarH = 148px
+    const maxBarH = 148.0;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       mainAxisSize: MainAxisSize.max,
       children: [
-        // Percentage label above bar
         Text(
           '$pct%',
           style: TextStyle(
@@ -152,7 +153,6 @@ class _AnimatedBar extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        // Bar
         TweenAnimationBuilder<double>(
           tween: Tween(begin: 0.0, end: value),
           duration: const Duration(milliseconds: 1000),
@@ -172,7 +172,6 @@ class _AnimatedBar extends StatelessWidget {
           },
         ),
         const SizedBox(height: 6),
-        // X-axis label
         Text(
           label,
           style: TextStyle(
@@ -187,7 +186,6 @@ class _AnimatedBar extends StatelessWidget {
   }
 }
 
-// Keep for legacy compatibility
 class DashedLinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
