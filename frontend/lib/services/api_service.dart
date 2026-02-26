@@ -53,7 +53,7 @@ class ApiService {
     Uint8List bytes,
     String filename,
   ) async {
-    final uri = Uri.parse('$baseUrl/predict/audio');
+    final uri = Uri.parse('$baseUrl/predict-audio');
     final request = http.MultipartRequest('POST', uri);
     final contentType = _getMimeType(filename);
     request.files.add(
@@ -71,8 +71,10 @@ class ApiService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
-      final error = jsonDecode(response.body);
-      throw Exception(error['detail'] ?? 'Failed to analyze audio');
+      final body = response.body.isNotEmpty ? jsonDecode(response.body) : null;
+      final detail = body is Map ? body['detail'] : null;
+      final msg = detail is String ? detail : (detail is List && detail.isNotEmpty && detail[0] is Map ? (detail[0] as Map)['msg']?.toString() : null);
+      throw Exception(msg ?? 'Failed to analyze audio');
     }
   }
 
@@ -98,8 +100,10 @@ class ApiService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
-      final error = jsonDecode(response.body);
-      throw Exception(error['detail'] ?? 'Failed to analyze image');
+      final body = response.body.isNotEmpty ? jsonDecode(response.body) : null;
+      final detail = body is Map ? body['detail'] : null;
+      final msg = detail is String ? detail : (detail is List && detail.isNotEmpty && detail[0] is Map ? (detail[0] as Map)['msg']?.toString() : null);
+      throw Exception(msg ?? 'Failed to analyze image');
     }
   }
 
@@ -125,8 +129,10 @@ class ApiService {
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
-      final error = jsonDecode(response.body);
-      throw Exception(error['detail'] ?? 'Failed to analyze video');
+      final body = response.body.isNotEmpty ? jsonDecode(response.body) : null;
+      final detail = body is Map ? body['detail'] : null;
+      final msg = detail is String ? detail : (detail is List && detail.isNotEmpty && detail[0] is Map ? (detail[0] as Map)['msg']?.toString() : null);
+      throw Exception(msg ?? 'Failed to analyze video');
     }
   }
 }

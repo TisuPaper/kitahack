@@ -863,9 +863,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildResultStep() {
-    final prediction = _apiResult?['prediction'] ?? 'Unknown';
-    final isFake = prediction.toString().toLowerCase() == 'fake';
-    final probabilities = _apiResult?['probabilities'] as Map<String, dynamic>? ?? {};
+    // Backend returns verdict (REAL/FAKE/UNCERTAIN); fallback to legacy 'prediction'
+    final verdict = (_apiResult?['verdict'] ?? _apiResult?['prediction'])?.toString() ?? 'Unknown';
+    final isFake = verdict.toUpperCase() == 'FAKE';
+    final isUncertain = verdict.toUpperCase() == 'UNCERTAIN';
+    // Backend returns final_p_fake; build probabilities for chart
+    final pFake = (_apiResult?['final_p_fake'] as num?)?.toDouble();
+    final Map<String, dynamic> probabilities = pFake != null
+        ? {'real': 1.0 - pFake, 'fake': pFake}
+        : _apiResult?['probabilities'] as Map<String, dynamic>? ?? {};
 
     return KeyedSubtree(
       key: const ValueKey('result'),
@@ -879,18 +885,18 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               children: [
                 Icon(
-                  isFake ? Icons.warning_rounded : Icons.verified_rounded,
+                  isFake ? Icons.warning_rounded : (isUncertain ? Icons.help_outline_rounded : Icons.verified_rounded),
                   size: 48,
-                  color: isFake ? const Color(0xFFEF4444) : const Color(0xFF22C55E),
+                  color: isFake ? const Color(0xFFEF4444) : (isUncertain ? const Color(0xFFF59E0B) : const Color(0xFF22C55E)),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  isFake ? 'MANIPULATED' : 'AUTHENTIC',
+                  isFake ? 'MANIPULATED' : (isUncertain ? 'UNCERTAIN' : 'AUTHENTIC'),
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 4,
-                    color: isFake ? const Color(0xFFEF4444) : const Color(0xFF22C55E),
+                    color: isFake ? const Color(0xFFEF4444) : (isUncertain ? const Color(0xFFF59E0B) : const Color(0xFF22C55E)),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -899,6 +905,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 14, color: Colors.black54),
                 ),
+                if (_apiResult?['confidence_band'] != null || _apiResult?['advice'] != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    [
+                      if (_apiResult?['confidence_band'] != null) '${_apiResult!['confidence_band']} confidence',
+                      if (_apiResult?['advice'] is Map && (_apiResult!['advice'] as Map)['why'] != null)
+                        (_apiResult!['advice'] as Map)['why'].toString(),
+                    ].join(' · '),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: Colors.black45),
+                  ),
+                ],
                 const SizedBox(height: 32),
                 
                 const Align(
