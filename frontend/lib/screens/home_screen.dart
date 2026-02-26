@@ -7,7 +7,9 @@ import '../widgets/glass_card.dart';
 import '../widgets/confidence_chart.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final bool isEmbedded;
+
+  const HomeScreen({super.key, this.isEmbedded = false});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -133,12 +135,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      body: AnimatedGradientBackground(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-          child: Column(
+    // If embedded inside MainLayout, just return the content padding and scroll area without the Scaffold/Background
+    if (widget.isEmbedded) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+        child: Column(
             children: [
               // Header Navigation / Tabs mimicking Image 2 "Extract Train Convert Tools"
               Center(
@@ -150,6 +151,40 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 32),
               
               // Main Content Area — scrollable
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 400),
+                        transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                        child: _buildCurrentStep(),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+      );
+    }
+    
+    // Standalone fallback
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      body: AnimatedGradientBackground(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+          child: Column(
+            children: [
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: _buildTopNav(),
+                ),
+              ),
+              const SizedBox(height: 32),
               Expanded(
                 child: SingleChildScrollView(
                   child: Center(

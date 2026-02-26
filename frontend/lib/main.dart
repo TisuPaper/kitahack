@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
+import 'screens/main_layout.dart';
 
 void main() {
   runApp(const DeepfakeDetectorApp());
@@ -22,7 +22,7 @@ class DeepfakeDetectorApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Inter',
       ),
-      home: const HomeScreen(),
+      home: const MainLayout(),
     );
   }
 }
