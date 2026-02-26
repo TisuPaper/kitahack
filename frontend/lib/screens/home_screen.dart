@@ -141,7 +141,12 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             children: [
               // Header Navigation / Tabs mimicking Image 2 "Extract Train Convert Tools"
-              _buildTopNav(),
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: _buildTopNav(),
+                ),
+              ),
               const SizedBox(height: 32),
               
               // Main Content Area — scrollable
@@ -167,35 +172,95 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTopNav() {
-    return GlassCard(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      borderRadius: 100, // Pill shape
+    final steps = [
+      (label: 'Data', step: AppStep.upload),
+      (label: 'Analysis', step: AppStep.analysis),
+      (label: 'Results', step: AppStep.result),
+    ];
+    final currentIndex = AppStep.values.indexOf(_currentStep);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildNavItem('Data', AppStep.upload),
-          const SizedBox(width: 24),
-          _buildNavItem('Analysis', AppStep.analysis),
-          const SizedBox(width: 24),
-          _buildNavItem('Results', AppStep.result),
+          for (int i = 0; i < steps.length; i++) ...[
+            // Step node
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Circle
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: i < currentIndex
+                        ? const Color(0xFF22C55E)   // completed = green
+                        : i == currentIndex
+                            ? Colors.black87         // active = black
+                            : Colors.white.withValues(alpha: 0.6), // future = ghost
+                    border: Border.all(
+                      color: i <= currentIndex ? Colors.transparent : Colors.black.withValues(alpha: 0.15),
+                      width: 1.5,
+                    ),
+                    boxShadow: i == currentIndex
+                        ? [BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 8, offset: const Offset(0, 2))]
+                        : null,
+                  ),
+                  child: Center(
+                    child: i < currentIndex
+                        ? const Icon(Icons.check_rounded, size: 16, color: Colors.white)
+                        : Text(
+                            '${i + 1}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: i == currentIndex ? Colors.white : Colors.black45,
+                            ),
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                // Label
+                Text(
+                  steps[i].label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: i == currentIndex ? FontWeight.w700 : FontWeight.w500,
+                    color: i == currentIndex
+                        ? Colors.black87
+                        : i < currentIndex
+                            ? const Color(0xFF22C55E)
+                            : Colors.black38,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+            // Connector line between steps
+            if (i < steps.length - 1)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 18),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 400),
+                    height: 2,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(2),
+                      color: i < currentIndex
+                          ? const Color(0xFF22C55E)
+                          : Colors.black.withValues(alpha: 0.1),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(String label, AppStep step) {
-    final isActive = _currentStep == step;
-    return Text(
-      label,
-      style: TextStyle(
-        fontSize: 14,
-        fontWeight: isActive ? FontWeight.w800 : FontWeight.w500,
-        color: isActive ? Colors.black87 : Colors.black54,
-        letterSpacing: 1.2,
-      ),
-    );
-  }
 
   Widget _buildCurrentStep() {
     switch (_currentStep) {
