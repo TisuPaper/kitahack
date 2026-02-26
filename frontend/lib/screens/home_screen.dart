@@ -292,30 +292,34 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         child: _selectedFile == null
-                            ? Column(
-                                children: [
-                                  Icon(Icons.cloud_upload_outlined, size: 48, color: _isHovering ? Colors.blue : Colors.black54),
-                                  const SizedBox(height: 16),
-                                  Text(
-                                     _isHovering ? 'Drop file to upload' : 'Choose a file or drag & drop it here.', 
-                                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: _isHovering ? Colors.blue : Colors.black87)
-                                  ),
-                                  const SizedBox(height: 8),
-                                  const Text('JPEG, PNG, MP4, and WAV formats, up to 50 MB.', style: TextStyle(fontSize: 12, color: Colors.black54)),
-                                  const SizedBox(height: 24),
-                                  Container(
-                                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                     decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(color: Colors.black.withValues(alpha: 0.1)),
-                                        boxShadow: [
-                                           BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
-                                        ],
-                                     ),
-                                     child: const Text('Browse File', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
-                                  ),
-                                ],
+                            ? SizedBox(
+                                width: double.infinity,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.cloud_upload_outlined, size: 48, color: _isHovering ? Colors.blue : Colors.black54),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                       _isHovering ? 'Drop file to upload' : 'Choose a file or drag & drop it here.', 
+                                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: _isHovering ? Colors.blue : Colors.black87)
+                                    ),
+                                    const SizedBox(height: 8),
+                                    const Text('JPEG, PNG, MP4, and WAV formats, up to 50 MB.', style: TextStyle(fontSize: 12, color: Colors.black54)),
+                                    const SizedBox(height: 24),
+                                    Container(
+                                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                       decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: Colors.black.withValues(alpha: 0.1)),
+                                          boxShadow: [
+                                             BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
+                                          ],
+                                       ),
+                                       child: const Text('Browse File', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
+                                    ),
+                                  ],
+                                ),
                               )
                             : (['wav', 'mp3', 'm4a', 'aac'].contains(_selectedFile!.extension?.toLowerCase())
                                 ? Stack(
@@ -381,41 +385,52 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ],
                                   )
                                 : Container(
-                                     padding: const EdgeInsets.all(16),
+                                     width: double.infinity,
+                                     padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
                                      decoration: BoxDecoration(
-                                        color: Colors.white.withValues(alpha: 0.6),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(color: Colors.white),
+                                        color: Colors.white.withValues(alpha: 0.8),
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(color: Colors.white, width: 2),
                                      ),
                                      child: Row(
                                         children: [
                                            Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                              decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(6)),
+                                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                              decoration: BoxDecoration(
+                                                color: Colors.blue.withValues(alpha: 0.1), 
+                                                borderRadius: BorderRadius.circular(8)
+                                              ),
                                               child: Text(
                                                  _selectedFile!.extension?.toUpperCase() ?? 'FILE',
-                                                 style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: Colors.black54),
+                                                 style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Colors.blue),
                                               ),
                                            ),
-                                           const SizedBox(width: 16),
+                                           const SizedBox(width: 20),
                                            Expanded(
                                               child: Column(
                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                  children: [
-                                                    Text(_selectedFile!.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.black87)),
-                                                    const SizedBox(height: 4),
+                                                    Text(_selectedFile!.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Colors.black87)),
+                                                    const SizedBox(height: 6),
                                                     Text(
-                                                       '${(_selectedFile!.size / 1024).toStringAsFixed(1)} KB • Ready',
-                                                       style: const TextStyle(fontSize: 12, color: Color(0xFF22C55E), fontWeight: FontWeight.w500),
+                                                       '${(_selectedFile!.size / 1024).toStringAsFixed(1)} KB • Ready for Analysis',
+                                                       style: const TextStyle(fontSize: 13, color: Color(0xFF22C55E), fontWeight: FontWeight.w600),
                                                     ),
                                                  ],
                                               ),
                                            ),
-                                           const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF22C55E), size: 20),
-                                           const SizedBox(width: 16),
+                                           const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF22C55E), size: 28),
+                                           const SizedBox(width: 20),
                                            GestureDetector(
                                               onTap: () => setState(() => _selectedFile = null),
-                                              child: const Icon(Icons.delete_outline_rounded, color: Colors.black54, size: 20),
+                                              child: Container(
+                                                padding: const EdgeInsets.all(8),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black.withValues(alpha: 0.05),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: const Icon(Icons.close, color: Colors.black54, size: 20),
+                                              ),
                                            ),
                                         ],
                                      ),
