@@ -7,7 +7,6 @@ from app.model_loader import (
     fallback_model, fallback_processor,
     device,
 )
-from app.forensic_features import compute_all_features
 
 from PIL import Image
 import io
@@ -123,29 +122,6 @@ def _stacking_blend(champ_fake: float, chall_fake: float, fall_fake: float) -> f
     return _sigmoid(z)
 
 
-# ---- Reference statistics for forensic z-scores ----
-REAL_REFERENCE = {
-    "high_freq_ratio": 0.0052, "mean_magnitude": 6.2670,
-    "noise_std": 5.0216, "noise_uniformity": 0.5855,
-    "ela_mean": 1.4007, "ela_std": 0.9984,
-    "ela_max_deviation": 0.5969, "laplacian_variance": 256.4983,
-}
-REAL_STD = {
-    "high_freq_ratio": 0.0034, "mean_magnitude": 0.2965,
-    "noise_std": 2.6479, "noise_uniformity": 0.0960,
-    "ela_mean": 0.2844, "ela_std": 0.2191,
-    "ela_max_deviation": 0.2706, "laplacian_variance": 283.5662,
-}
-
-
-def compute_deviations(features: dict) -> dict:
-    deviations = {}
-    for key in REAL_REFERENCE:
-        if key in features:
-            std = REAL_STD[key]
-            deviations[key] = round((features[key] - REAL_REFERENCE[key]) / std, 3) if std > 0 else 0.0
-    return deviations
-
 
 def _run_champion(img: Image.Image) -> tuple[float, float]:
     """Returns (real_prob, fake_prob) from FaceForge."""
@@ -241,26 +217,11 @@ async def predict(file: UploadFile = File(...)):
     label = "Fake" if final_fake > 0.5 else "Real"
     confidence = round(max(final_real, final_fake), 4)
 
-    decision_path = "logit_stacking_ensemble"
     if not quality_ok:
         warnings.append("Input quality too low for reliable detection.")
         label = "Uncertain"
-        decision_path = "low_quality_ensemble"
 
-    # ====== FORENSIC FEATURES ======
-    features = compute_all_features(img)
-    deviations = compute_deviations(features)
-    anomaly_flags = sum(1 for v in deviations.values() if abs(v) > 1.5)
-
-    # ====== BUILD RESPONSE ======
-    stacking_weights = {
-        "champion": STACKING_WEIGHT_CHAMPION,
-        "challenger": STACKING_WEIGHT_CHALLENGER,
-        "fallback": STACKING_WEIGHT_FALLBACK,
-        "bias": STACKING_BIAS,
-    }
-
-    response = {
+    return {
         "prediction": label,
         "confidence": confidence,
         "probabilities": {
@@ -268,37 +229,8 @@ async def predict(file: UploadFile = File(...)):
             "fake": round(final_fake, 4),
         },
         "face_found": face_found,
-        "decision": {
-            "path": decision_path,
-            "stacking_weights": stacking_weights,
-            "formula": "sigmoid(a*logit(champ) + b*logit(chall) + c*logit(fall) + bias)",
-            "champion": {
-                "model": "FaceForge-XceptionNet",
-                "real": round(champ_real, 4),
-                "fake": round(champ_fake, 4),
-            },
-            "challenger": {
-                "model": "ViT-TwoStage",
-                "real": round(chall_real, 4),
-                "fake": round(chall_fake, 4),
-            },
-        },
-        "forensic_analysis": {
-            "features": features,
-            "deviations_from_real": deviations,
-            "anomaly_flags": f"{anomaly_flags}/{len(deviations)}",
-        },
         "warnings": warnings,
     }
-
-    if fallback_model is not None:
-        response["decision"]["fallback"] = {
-            "model": "EfficientNet-B4",
-            "real": round(fall_real, 4),
-            "fake": round(fall_fake, 4),
-        }
-
-    return response
 
 
 # =========================================================================
@@ -376,24 +308,12 @@ def _analyze_single_frame(img: Image.Image) -> dict:
     else:
         label = "Fake" if final_fake > 0.5 else "Real"
 
-    # Forensics
-    features = compute_all_features(analysis_img)
-    deviations = compute_deviations(features)
-    anomaly_flags = sum(1 for v in deviations.values() if abs(v) > 1.5)
-
-    result = {
+    return {
         "prediction": label,
         "confidence": round(max(final_real, final_fake), 4),
         "p_fake": round(final_fake, 4),
         "face_found": face_found,
-        "champion_fake": round(champ_fake, 4),
-        "challenger_fake": round(chall_fake, 4),
-        "anomaly_flags": anomaly_flags,
     }
-    if fallback_model is not None:
-        result["fallback_fake"] = round(fall_fake, 4)
-
-    return result
 
 
 @app.post("/predict-video")
@@ -473,23 +393,6 @@ async def predict_video(file: UploadFile = File(...)):
             "fake": round(avg_p_fake, 4),
         },
         "frames_analyzed": total,
-        "vote": {
-            "fake": fake_count,
-            "real": real_count,
-            "uncertain": uncertain_count,
-        },
-        "temporal_consistency": {
-            "p_fake_mean": round(avg_p_fake, 4),
-            "p_fake_std": round(p_fake_std, 4),
-        },
-        "per_frame": frame_results,
-        "calibration": {
-            "method": "logit_stacking",
-            "eval_videos": 80,
-            "balanced_accuracy": "68.8%",
-            "real_accuracy": "65.0%",
-            "fake_accuracy": "72.5%",
-        },
         "warnings": warnings,
     }
 
