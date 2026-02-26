@@ -384,64 +384,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                     ],
                                   )
-                                : Container(
-                                     width: double.infinity,
-                                     padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
-                                     decoration: BoxDecoration(
-                                        color: Colors.white.withValues(alpha: 0.8),
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(color: Colors.white, width: 2),
-                                     ),
-                                     child: Row(
-                                        children: [
-                                           Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                              decoration: BoxDecoration(
-                                                color: Colors.blue.withValues(alpha: 0.1), 
-                                                borderRadius: BorderRadius.circular(8)
-                                              ),
-                                              child: Text(
-                                                 _selectedFile!.extension?.toUpperCase() ?? 'FILE',
-                                                 style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Colors.blue),
-                                              ),
-                                           ),
-                                           const SizedBox(width: 20),
-                                           Expanded(
-                                              child: Column(
-                                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                                 children: [
-                                                    Text(_selectedFile!.name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: Colors.black87)),
-                                                    const SizedBox(height: 6),
-                                                    Text(
-                                                       '${(_selectedFile!.size / 1024).toStringAsFixed(1)} KB • Ready for Analysis',
-                                                       style: const TextStyle(fontSize: 13, color: Color(0xFF22C55E), fontWeight: FontWeight.w600),
-                                                    ),
-                                                 ],
-                                              ),
-                                           ),
-                                           const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF22C55E), size: 28),
-                                           const SizedBox(width: 20),
-                                           GestureDetector(
-                                              onTap: () => setState(() => _selectedFile = null),
-                                              child: Container(
-                                                padding: const EdgeInsets.all(8),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black.withValues(alpha: 0.05),
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: const Icon(Icons.close, color: Colors.black54, size: 20),
-                                              ),
-                                           ),
-                                        ],
-                                     ),
-                                  )),
-                     ),
-                   ),
-                 ],
-               ),
-             ],
-           ),
-         ),
+                                : _buildMediaPreviewCard()
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
          const SizedBox(height: 48),
           
           if (_selectedFile != null)
@@ -519,6 +470,178 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMediaPreviewCard() {
+    final file = _selectedFile!;
+    final ext = file.extension?.toLowerCase() ?? '';
+    final isImage = ['jpg', 'jpeg', 'png', 'webp', 'bmp'].contains(ext);
+    final sizeLabel = '${(file.size / 1024).toStringAsFixed(1)} KB';
+    final name = file.name.length > 28 ? '${file.name.substring(0, 24)}...${file.name.split('.').last}' : file.name;
+
+    if (isImage && file.bytes != null) {
+      // ---- IMAGE PREVIEW ----
+      return Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Stack(
+              fit: StackFit.passthrough,
+              children: [
+                Image.memory(
+                  file.bytes!,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+                // Gradient overlay at bottom for text readability
+                Positioned(
+                  bottom: 0, left: 0, right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(16, 40, 16, 16),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        colors: [Colors.black.withValues(alpha: 0.7), Colors.transparent],
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14)),
+                              const SizedBox(height: 2),
+                              Text('$sizeLabel • Ready for Analysis', style: const TextStyle(color: Color(0xFF86EFAC), fontSize: 12, fontWeight: FontWeight.w500)),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.check_circle_rounded, color: Color(0xFF4ADE80), size: 22),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Dismiss button
+          Positioned(
+            top: 10, right: 10,
+            child: GestureDetector(
+              onTap: () => setState(() => _selectedFile = null),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close, size: 14, color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // ---- VIDEO PREVIEW (cinematic placeholder) ----
+    return Stack(
+      children: [
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF1E1B4B), Color(0xFF312E81), Color(0xFF4C1D95)],
+            ),
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Cinematic scan-line overlay
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.white.withValues(alpha: 0.03),
+                      Colors.transparent,
+                      Colors.white.withValues(alpha: 0.03),
+                    ],
+                  ),
+                ),
+              ),
+              // Center play button
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white.withValues(alpha: 0.15),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 2),
+                    ),
+                    child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 32),
+                  ),
+                  const SizedBox(height: 16),
+                  // File info chip
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.purple.shade300.withValues(alpha: 0.4),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(ext.toUpperCase(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Colors.white)),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(name, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text('$sizeLabel • Ready for Analysis', style: const TextStyle(color: Color(0xFF86EFAC), fontSize: 12, fontWeight: FontWeight.w500)),
+                ],
+              ),
+            ],
+          ),
+        ),
+        // Dismiss button
+        Positioned(
+          top: 10, right: 10,
+          child: GestureDetector(
+            onTap: () => setState(() => _selectedFile = null),
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, size: 14, color: Colors.white),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
