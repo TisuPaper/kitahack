@@ -1,4 +1,14 @@
-<!DOCTYPE html>
+// Live detection screen — embeds the full live detection UI inline.
+// This is a snapshot of app/static/live.html with API_BASE injected at runtime.
+// Web-only: uses dart:html for Blob URL + iframe rendering.
+
+import 'dart:convert';
+import 'dart:html' as html;
+import 'dart:ui_web' as ui_web;
+import 'package:flutter/material.dart';
+import '../services/api_service.dart';
+
+const String _liveHtmlTemplate = r'''<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -118,12 +128,11 @@
       background: #000;
     }
 
-    /* Face-box overlay — sits directly on top of the video */
     #faceOverlay {
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      pointer-events: none;   /* clicks pass through to video */
+      pointer-events: none;
     }
 
     .placeholder {
@@ -138,7 +147,6 @@
     .placeholder .big-icon { font-size: 64px; margin-bottom: 16px; }
     .placeholder p { font-size: 16px; }
 
-    /* Floating verdict overlay */
     .verdict-overlay {
       position: absolute; top: 16px; right: 16px;
       padding: 14px 22px; border-radius: 14px;
@@ -173,7 +181,6 @@
       50% { box-shadow: 0 0 20px 4px rgba(239,68,68,0.2); }
     }
 
-    /* Side panel */
     .side-panel { width: 370px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
     .card {
       background: #1E293B; border-radius: 14px; padding: 20px;
@@ -184,7 +191,6 @@
       letter-spacing: 1px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
     }
 
-    /* Verdict card */
     .vc-icon     { font-size: 36px; line-height: 1; }
     .vc-verdict  { font-size: 28px; font-weight: 800; letter-spacing: 3px; }
     .vc-band     { font-size: 13px; font-weight: 600; opacity: 0.75; margin-top: 2px; }
@@ -199,7 +205,6 @@
       width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.25);
     }
 
-    /* Audio card */
     .audio-indicator {
       display: flex; align-items: center; gap: 8px; padding: 8px 12px;
       border-radius: 8px; background: rgba(129,140,248,0.1); font-size: 13px; color: #818CF8;
@@ -217,7 +222,6 @@
     @keyframes audio-bar { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.4); } }
     #audioCanvas { width: 100%; height: 32px; border-radius: 8px; background: rgba(0,0,0,0.2); margin-top: 8px; }
 
-    /* Details toggle */
     .details-toggle {
       display: flex; align-items: center; justify-content: space-between;
       cursor: pointer; user-select: none;
@@ -235,7 +239,6 @@
     .detail-row .dl { color: rgba(255,255,255,0.4); }
     .detail-row .dv { font-weight: 600; color: rgba(255,255,255,0.7); }
 
-    /* Log */
     .log-entry {
       padding: 6px 10px; border-radius: 8px; margin-bottom: 4px;
       font-size: 11px; display: flex; align-items: center; gap: 6px;
@@ -254,7 +257,6 @@
   </style>
 </head>
 <body>
-  <!-- Header -->
   <div class="header">
     <h1>
       <span class="icon">🛡️</span>
@@ -270,7 +272,7 @@
           <option value="10000">10s</option>
         </select>
       </label>
-      <button id="btnPip" class="btn btn-pip" onclick="toggleWidget()" title="Float results in a mini window — stays visible on other tabs">
+      <button id="btnPip" class="btn btn-pip" onclick="toggleWidget()" title="Float results in a mini window">
         ⧉ Pop Out
       </button>
       <button id="btnStart" class="btn btn-start" onclick="startCapture()">
@@ -282,9 +284,7 @@
     </div>
   </div>
 
-  <!-- Main layout -->
   <div class="main">
-    <!-- Video panel -->
     <div class="video-panel">
       <video id="screenVideo" autoplay muted></video>
       <canvas id="faceOverlay"></canvas>
@@ -298,10 +298,7 @@
       <div id="verdictOverlay" class="verdict-overlay"></div>
     </div>
 
-    <!-- Side panel -->
     <div class="side-panel">
-
-      <!-- Card 1: Video Verdict -->
       <div class="card" id="videoVerdictCard">
         <h3>🖥 Video Analysis</h3>
         <div id="videoVerdictArea" style="text-align:center; padding:10px 0">
@@ -311,7 +308,6 @@
         </div>
       </div>
 
-      <!-- Card 2: Audio Verdict -->
       <div class="card" id="audioVerdictCard">
         <h3>🎙 Audio Analysis</h3>
         <div id="audioStatus">
@@ -322,7 +318,6 @@
         <canvas id="audioCanvas"></canvas>
       </div>
 
-      <!-- Card 3: Technical Details (collapsed) -->
       <div class="card">
         <h3 class="details-toggle" id="detailsToggle" onclick="toggleDetails()">
           🔬 Technical Details
@@ -337,7 +332,6 @@
         </div>
       </div>
 
-      <!-- Card 4: Detection Log -->
       <div class="card" style="flex:1;">
         <h3>📋 Detection Log</h3>
         <div id="logContainer" class="log-container">
@@ -347,15 +341,12 @@
     </div>
   </div>
 
-  <!-- Hidden canvas for frame extraction -->
   <canvas id="frameCanvas" style="display:none;"></canvas>
 
   <script>
-    // ---- Face overlay canvas ----
     const faceOverlay = document.getElementById('faceOverlay');
     const faceCtx = faceOverlay.getContext('2d');
 
-    // Colour per verdict
     const VERDICT_COLOR = {
       real:      '#22C55E',
       fake:      '#EF4444',
@@ -363,14 +354,12 @@
     };
 
     function drawFaceBox(bbox, prediction) {
-      // Sync canvas size to its CSS display size
       faceOverlay.width  = faceOverlay.clientWidth;
       faceOverlay.height = faceOverlay.clientHeight;
       faceCtx.clearRect(0, 0, faceOverlay.width, faceOverlay.height);
 
       if (!bbox) return;
 
-      // The video uses object-fit:contain, so we need the actual rendered rect
       const videoEl  = document.getElementById('screenVideo');
       const vw       = videoEl.videoWidth;
       const vh       = videoEl.videoHeight;
@@ -379,12 +368,10 @@
 
       if (!vw || !vh) return;
 
-      // Letterbox / pillarbox offsets
       const scale    = Math.min(cw / vw, ch / vh);
       const offsetX  = (cw - vw * scale) / 2;
       const offsetY  = (ch - vh * scale) / 2;
 
-      // Convert normalised bbox → canvas pixels
       const rx = offsetX + bbox.x * vw * scale;
       const ry = offsetY + bbox.y * vh * scale;
       const rw = bbox.w * vw * scale;
@@ -392,7 +379,6 @@
 
       const color = VERDICT_COLOR[prediction.toLowerCase()] || '#818CF8';
 
-      // Outer glow
       faceCtx.shadowColor  = color;
       faceCtx.shadowBlur   = 12;
       faceCtx.strokeStyle  = color;
@@ -400,16 +386,15 @@
       faceCtx.strokeRect(rx, ry, rw, rh);
       faceCtx.shadowBlur   = 0;
 
-      // Corner accents (L-shaped brackets)
-      const cs = Math.min(rw, rh) * 0.18;  // corner segment length
+      const cs = Math.min(rw, rh) * 0.18;
       faceCtx.lineWidth = 3.5;
       faceCtx.strokeStyle = color;
 
       const corners = [
-        [rx,      ry,      cs,  0,  0, cs],   // top-left
-        [rx + rw, ry,     -cs,  0,  0, cs],   // top-right
-        [rx,      ry + rh, cs,  0,  0,-cs],   // bottom-left
-        [rx + rw, ry + rh,-cs,  0,  0,-cs],   // bottom-right
+        [rx,      ry,      cs,  0,  0, cs],
+        [rx + rw, ry,     -cs,  0,  0, cs],
+        [rx,      ry + rh, cs,  0,  0,-cs],
+        [rx + rw, ry + rh,-cs,  0,  0,-cs],
       ];
       for (const [x, y, dx1, dy1, dx2, dy2] of corners) {
         faceCtx.beginPath();
@@ -419,7 +404,6 @@
         faceCtx.stroke();
       }
 
-      // Label pill above the box
       const label  = prediction.toUpperCase();
       const font   = 'bold 13px Inter, -apple-system, sans-serif';
       faceCtx.font = font;
@@ -429,7 +413,7 @@
       const px     = rx + (rw - pw) / 2;
       const py     = ry - ph - 6;
 
-      faceCtx.fillStyle = color + 'CC';   // semi-transparent fill
+      faceCtx.fillStyle = color + 'CC';
       roundRect(faceCtx, px, py, pw, ph, 6);
       faceCtx.fill();
 
@@ -460,14 +444,13 @@
       faceCtx.clearRect(0, 0, faceOverlay.width, faceOverlay.height);
     }
 
-    // ---- State ----
     let stream = null;
     let audioStream = null;
     let mediaRecorder = null;
     let audioChunks = [];
-    let audioAnalysisBuffer = [];   // rolling window for live audio detection
-    let audioHeaderChunk = null;    // first chunk contains the WebM/EBML header — must prefix every blob
-    const AUDIO_BUFFER_MAX = 5;     // ~5 s at 1 s/chunk — enough for the models
+    let audioAnalysisBuffer = [];
+    let audioHeaderChunk = null;
+    const AUDIO_BUFFER_MAX = 5;
     let isAnalyzingAudio = false;
     let scanInterval = null;
     let frameCount = 0;
@@ -480,9 +463,8 @@
     let animFrameId = null;
     let audioChunkWatchdog = null;
 
-    const API_BASE = window.location.origin; // same server
+    const API_BASE = '__API_BASE__';
 
-    // ---- Elements ----
     const video = document.getElementById('screenVideo');
     const placeholder = document.getElementById('placeholder');
     const verdictOverlay = document.getElementById('verdictOverlay');
@@ -492,13 +474,11 @@
     const audioCanvas = document.getElementById('audioCanvas');
     const audioCtx2d = audioCanvas.getContext('2d');
 
-    // ---- Start capture ----
     async function startCapture() {
       try {
-        // Request screen + audio
         stream = await navigator.mediaDevices.getDisplayMedia({
           video: { cursor: 'always' },
-          audio: true  // capture tab/system audio
+          audio: true
         });
 
         video.srcObject = stream;
@@ -508,42 +488,35 @@
         document.getElementById('btnStop').disabled = false;
         document.getElementById('statState').textContent = '🟢 Capturing';
 
-        // Audio source: prefer screen-share audio, fall back to microphone
         let audioSourceStream = null;
         const screenAudioTracks = stream.getAudioTracks();
+        const surface = stream.getVideoTracks()[0]?.getSettings?.().displaySurface || '';
+        const isBrowserTabCapture = surface === 'browser';
 
-        if (screenAudioTracks.length > 0) {
+        if (screenAudioTracks.length > 0 && isBrowserTabCapture) {
           audioSourceStream = stream;
-          document.getElementById('audioStatus').innerHTML = `
-            <div class="audio-indicator">
-              <div class="audio-bars">
-                <span></span><span></span><span></span><span></span><span></span>
-              </div>
-              Recording tab audio...
-            </div>
-          `;
+          document.getElementById('audioStatus').innerHTML =
+            '<div class="audio-indicator"><div class="audio-bars">' +
+            '<span></span><span></span><span></span><span></span><span></span>' +
+            '</div>Recording tab audio...</div>';
         } else {
-          // No audio from screen share (window/screen mode) — request microphone
           try {
             const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
             audioSourceStream = micStream;
-            // Keep a reference so we can stop mic tracks later
             audioStream = micStream;
-            document.getElementById('audioStatus').innerHTML = `
-              <div class="audio-indicator">
-                <div class="audio-bars">
-                  <span></span><span></span><span></span><span></span><span></span>
-                </div>
-                🎤 Recording via microphone...
-              </div>
-            `;
+            document.getElementById('audioStatus').innerHTML =
+              '<div class="audio-indicator"><div class="audio-bars">' +
+              '<span></span><span></span><span></span><span></span><span></span>' +
+              '</div>🎤 Recording via microphone...' +
+              (!isBrowserTabCapture && screenAudioTracks.length > 0
+                ? ' (screen/window audio not supported reliably)'
+                : '') +
+              '</div>';
           } catch (micErr) {
             console.warn('Microphone access denied:', micErr);
-            document.getElementById('audioStatus').innerHTML = `
-              <div style="font-size:13px; color:#F59E0B">
-                ⚠️ No audio source — share a browser tab or allow mic access
-              </div>
-            `;
+            document.getElementById('audioStatus').innerHTML =
+              '<div style="font-size:13px; color:#F59E0B">' +
+              '⚠️ No audio source — share a browser tab (not screen/window) or allow mic access</div>';
           }
         }
 
@@ -552,14 +525,12 @@
           startAudioRecording(audioSourceStream);
         }
 
-        // Start scanning frames + audio in parallel
         const interval = parseInt(document.getElementById('intervalSelect').value);
         scanInterval = setInterval(() => {
           analyzeFrame();
           analyzeAudio();
         }, interval);
 
-        // Handle stream ending (user clicks "Stop sharing")
         stream.getVideoTracks()[0].onended = () => stopCapture();
 
         addLog('analyzing', '🟢 Capture started — scanning every ' +
@@ -570,7 +541,6 @@
       }
     }
 
-    // ---- Stop capture ----
     function stopCapture() {
       if (stream) {
         stream.getTracks().forEach(t => t.stop());
@@ -620,29 +590,24 @@
       addLog('analyzing', '⏹ Capture stopped');
       resetTabTitle();
 
-      // If we have audio, offer download
       if (audioChunks.length > 0) {
         const blob = new Blob(audioChunks, { type: 'audio/webm' });
         const url = URL.createObjectURL(blob);
         addLog('analyzing',
-          `🎙️ Audio recorded — <a href="${url}" download="captured_audio.webm" style="color:#818CF8">Download</a>`
-        );
+          '🎙️ Audio recorded — <a href="' + url + '" download="captured_audio.webm" style="color:#818CF8">Download</a>');
         audioChunks = [];
       }
     }
 
-    // ---- Analyze a single frame ----
     async function analyzeFrame() {
       if (isAnalyzing || !stream) return;
       isAnalyzing = true;
 
       try {
-        // Extract frame from video
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0);
 
-        // Convert to blob
         const blob = await new Promise(resolve =>
           canvas.toBlob(resolve, 'image/jpeg', 0.85)
         );
@@ -652,15 +617,13 @@
           return;
         }
 
-        // Show analyzing state
         verdictOverlay.className = 'verdict-overlay analyzing';
         verdictOverlay.textContent = '🔍 Analyzing...';
 
-        // Send to API
         const formData = new FormData();
         formData.append('file', blob, 'frame.jpg');
 
-        const response = await fetch(`${API_BASE}/predict`, {
+        const response = await fetch(API_BASE + '/predict', {
           method: 'POST',
           body: formData
         });
@@ -680,23 +643,18 @@
         const bandLabel = BAND_LABELS[band] || '';
         const why   = result.advice ? result.advice.why : '';
 
-        // ── Verdict overlay on video (user-friendly) ──
-        verdictOverlay.className = `verdict-overlay ${vl}`;
-        verdictOverlay.innerHTML = `
-          <div class="vo-main">${getEmoji(vl)} ${v}</div>
-          <div class="vo-band">${bandLabel}</div>
-          ${why ? `<div class="vo-why">${why}</div>` : ''}
-        `;
+        verdictOverlay.className = 'verdict-overlay ' + vl;
+        verdictOverlay.innerHTML =
+          '<div class="vo-main">' + getEmoji(vl) + ' ' + v + '</div>' +
+          '<div class="vo-band">' + bandLabel + '</div>' +
+          (why ? '<div class="vo-why">' + why + '</div>' : '');
 
-        // ── Face bounding box ──
         const bbox = result.signals ? result.signals.face_bbox : null;
         const faceFound = result.signals ? result.signals.face_found : false;
         drawFaceBox(bbox, v);
 
-        // ── Side panel: video verdict card ──
         renderVerdictCard(document.getElementById('videoVerdictArea'), result, 'video');
 
-        // ── Stats (in collapsed details) ──
         if (vl === 'fake') fakeCount++;
         else if (vl === 'real') realCount++;
         totalConfidence += Math.max(pFake, 1 - pFake) * 100;
@@ -707,20 +665,17 @@
         document.getElementById('statConfidence').textContent =
           (totalConfidence / frameCount).toFixed(1) + '%';
 
-        // Technical details (models, timing, etc.)
         const detExtra = document.getElementById('detailsExtra');
         if (detExtra && result.models) {
           detExtra.innerHTML = result.models.map(m =>
-            `<div class="detail-row"><span class="dl">${m.name}</span><span class="dv">${(m.p_fake*100).toFixed(1)}%${m.used ? '' : ' (unused)'}</span></div>`
+            '<div class="detail-row"><span class="dl">' + m.name + '</span><span class="dv">' + (m.p_fake*100).toFixed(1) + '%' + (m.used ? '' : ' (unused)') + '</span></div>'
           ).join('') +
-          (result.timing_ms ? `<div class="detail-row"><span class="dl">Timing</span><span class="dv">${result.timing_ms.total}ms</span></div>` : '');
+          (result.timing_ms ? '<div class="detail-row"><span class="dl">Timing</span><span class="dv">' + result.timing_ms.total + 'ms</span></div>' : '');
         }
 
-        // ── Simplified log entry ──
         const time = new Date().toLocaleTimeString();
-        addLog(vl, `${getEmoji(vl)} ${time} — ${v} &middot; ${bandLabel}`);
+        addLog(vl, getEmoji(vl) + ' ' + time + ' — ' + v + ' &middot; ' + bandLabel);
 
-        // ── Always-visible feedback (tab title, favicon, floating widget) ──
         updateTabTitle(v, bandLabel);
         updateFavicon(v);
         const thumbDataUrl = createFaceThumbnail(bbox, v);
@@ -728,23 +683,21 @@
 
       } catch (err) {
         console.error('Analysis error:', err);
-        addLog('uncertain', `⚠️ Error: ${err.message}`);
+        addLog('uncertain', '⚠️ Error: ' + err.message);
       }
 
       isAnalyzing = false;
     }
 
-    // ---- Audio recording ----
     async function startAudioRecording(mediaStream) {
       try {
         const audioTracks = mediaStream.getAudioTracks();
         if (audioTracks.length === 0) {
-          console.warn('startAudioRecording: no audio tracks in stream');
           _showAudioError('No audio tracks found in stream');
           return;
         }
 
-        // Route through AudioContext to produce a fresh MediaStream.
+        // Route through AudioContext to create a fresh MediaStream.
         // Chrome blocks MediaRecorder on raw getDisplayMedia audio
         // tracks inside iframes; piping via AudioContext bypasses this.
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -805,11 +758,7 @@
         }, 4500);
       } catch (err) {
         console.error('Audio recording failed:', err);
-        const inIframe = window.self !== window.top;
-        const hint = inIframe
-          ? ' — <a href="' + window.location.origin + '/live" target="_blank" style="color:#818CF8;text-decoration:underline">Open in new tab</a> for full audio support'
-          : '';
-        _showAudioError('Audio recording failed' + hint);
+        _showAudioError('Audio recording failed: ' + (err.message || err));
       }
     }
 
@@ -830,19 +779,16 @@
       }
     }
 
-    // Show a transient error in the audio side-panel card
     function _showAudioError(msg) {
       const el = document.getElementById('audioStatus');
-      if (el) el.innerHTML = `<div style="font-size:12px;color:#F59E0B">⚠️ ${msg}</div>`;
+      if (el) el.innerHTML = '<div style="font-size:12px;color:#F59E0B">⚠️ ' + msg + '</div>';
     }
 
-    // ---- Real-time audio deepfake analysis ----
     async function analyzeAudio() {
       if (isAnalyzingAudio || audioAnalysisBuffer.length < 3 || !stream) return;
       isAnalyzingAudio = true;
 
       try {
-        // Prepend the header chunk so the blob is always a valid WebM file
         const parts = audioHeaderChunk && audioAnalysisBuffer[0] !== audioHeaderChunk
           ? [audioHeaderChunk, ...audioAnalysisBuffer]
           : [...audioAnalysisBuffer];
@@ -852,10 +798,10 @@
         const fd = new FormData();
         fd.append('file', blob, 'live_audio.webm');
 
-        const resp = await fetch(`${API_BASE}/predict-audio`, { method: 'POST', body: fd });
+        const resp = await fetch(API_BASE + '/predict-audio', { method: 'POST', body: fd });
         if (!resp.ok) {
           const errBody = await resp.json().catch(() => ({}));
-          const detail  = errBody.detail || `HTTP ${resp.status}`;
+          const detail  = errBody.detail || ('HTTP ' + resp.status);
           console.warn('Audio API error:', detail);
           _showAudioError(detail);
           isAnalyzingAudio = false;
@@ -864,18 +810,14 @@
 
         const result = await resp.json();
 
-        // ── Side panel update ──
         updateAudioDisplay(result);
-
-        // ── Floating widget ──
         updateWidgetAudio(result);
 
-        // ── Log entry ──
         const v    = result.verdict || 'UNCERTAIN';
         const vl2  = v.toLowerCase();
         const bandLabel2 = BAND_LABELS[result.confidence_band] || '';
         const time = new Date().toLocaleTimeString();
-        addLog(vl2, `🎙 ${time} — Audio ${v} &middot; ${bandLabel2}`);
+        addLog(vl2, '🎙 ' + time + ' — Audio ' + v + ' &middot; ' + bandLabel2);
 
       } catch (err) {
         console.error('Audio analysis error:', err);
@@ -885,14 +827,12 @@
       isAnalyzingAudio = false;
     }
 
-    // Update the audio card in the side panel with live result
     function updateAudioDisplay(result) {
       const statusEl = document.getElementById('audioStatus');
       if (!statusEl) return;
       renderVerdictCard(statusEl, result, 'audio');
     }
 
-    // ---- Audio visualization ----
     function startAudioVisualization(mediaStream) {
       try {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -903,7 +843,6 @@
         analyserNode = audioContext.createAnalyser();
         analyserNode.fftSize = 256;
         source.connect(analyserNode);
-
         drawAudioWaveform();
       } catch (err) {
         console.error('Audio viz failed:', err);
@@ -912,7 +851,6 @@
 
     function drawAudioWaveform() {
       if (!analyserNode) return;
-
       const bufferLength = analyserNode.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
 
@@ -929,17 +867,15 @@
 
         for (let i = 0; i < bufferLength; i++) {
           const barHeight = (dataArray[i] / 255) * h;
-          const hue = 240 + (dataArray[i] / 255) * 60; // blue to purple
-          audioCtx2d.fillStyle = `hsla(${hue}, 70%, 60%, 0.8)`;
+          const hue = 240 + (dataArray[i] / 255) * 60;
+          audioCtx2d.fillStyle = 'hsla(' + hue + ', 70%, 60%, 0.8)';
           audioCtx2d.fillRect(x, h - barHeight, barWidth - 1, barHeight);
           x += barWidth;
         }
       }
-
       draw();
     }
 
-    // ---- Helpers ----
     const BAND_LABELS = { HIGH: 'High confidence', MEDIUM: 'Medium confidence', LOW: 'Low confidence' };
 
     function getEmoji(pred) {
@@ -952,7 +888,7 @@
 
     function addLog(type, message) {
       const entry = document.createElement('div');
-      entry.className = `log-entry ${type}`;
+      entry.className = 'log-entry ' + type;
       entry.innerHTML = message;
       logContainer.prepend(entry);
       while (logContainer.children.length > 50) {
@@ -967,7 +903,6 @@
       body.classList.toggle('open');
     }
 
-    // Render a user-friendly verdict card into a container element
     function renderVerdictCard(container, result, mediaLabel) {
       const v     = result.verdict || 'UNCERTAIN';
       const vl    = v.toLowerCase();
@@ -979,86 +914,47 @@
       const color  = colors[vl] || '#818CF8';
 
       const showSteps = mediaLabel === 'video' && v === 'UNCERTAIN';
-      const stepsHtml = showSteps ? steps.map(s => `<li>${s}</li>`).join('') : '';
+      const stepsHtml = showSteps ? steps.map(s => '<li>' + s + '</li>').join('') : '';
 
-      container.innerHTML = `
-        <div style="text-align:center; padding:8px 0">
-          <div class="vc-icon">${emoji}</div>
-          <div class="vc-verdict" style="color:${color}">${v}</div>
-          <div class="vc-band" style="color:${color}">${band}</div>
-        </div>
-        <div class="vc-why">${why}</div>
-        ${stepsHtml ? `<ul class="vc-steps">${stepsHtml}</ul>` : ''}
-      `;
+      container.innerHTML =
+        '<div style="text-align:center; padding:8px 0">' +
+          '<div class="vc-icon">' + emoji + '</div>' +
+          '<div class="vc-verdict" style="color:' + color + '">' + v + '</div>' +
+          '<div class="vc-band" style="color:' + color + '">' + band + '</div>' +
+        '</div>' +
+        '<div class="vc-why">' + why + '</div>' +
+        (stepsHtml ? '<ul class="vc-steps">' + stepsHtml + '</ul>' : '');
     }
 
+    let widgetWindow = null;
 
-    // =========================================================================
-    // FLOATING WIDGET  (Document PiP → popup fallback)
-    // Stays visible on top of all other windows / tabs while you browse.
-    // =========================================================================
+    const WIDGET_CSS =
+      '* { margin:0; padding:0; box-sizing:border-box; }' +
+      'body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #0F172A; color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; user-select: none; }' +
+      '.w-header { background: #1E293B; padding: 7px 12px; font-size: 10px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1.2px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }' +
+      '.w-header .dot { width: 7px; height: 7px; border-radius: 50%; background: #818CF8; flex-shrink:0; }' +
+      '.w-thumb-wrap { flex-shrink: 0; overflow: hidden; background: #000; border-bottom: 1px solid rgba(255,255,255,0.05); display: none; }' +
+      '.w-thumb-wrap img { width: 100%; height: auto; display: block; }' +
+      '.w-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 16px; gap: 4px; transition: background 0.4s; text-align: center; }' +
+      '.w-verdict { font-size: 26px; font-weight: 800; letter-spacing: 3px; transition: color 0.3s; }' +
+      '.w-band { font-size: 11px; font-weight: 600; opacity: 0.75; }' +
+      '.w-why { font-size: 10px; color: rgba(255,255,255,0.45); margin-top: 4px; line-height: 1.3; }' +
+      '.w-divider { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 6px 0; width: 100%; display: none; }' +
+      '.w-audio-row { display: none; align-items: center; gap: 6px; font-size: 11px; }' +
+      '.w-audio-row .wa-icon { font-size: 14px; }' +
+      '.w-audio-row .wa-verdict { font-weight: 700; letter-spacing: 1px; }' +
+      '.w-audio-row .wa-band { font-size: 10px; opacity: 0.6; }';
 
-    let widgetWindow = null;   // reference to PiP or popup window
-
-    // CSS injected into both Document PiP and popup
-    const WIDGET_CSS = `
-      * { margin:0; padding:0; box-sizing:border-box; }
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        background: #0F172A; color: #fff;
-        height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-        user-select: none;
-      }
-      .w-header {
-        background: #1E293B; padding: 7px 12px;
-        font-size: 10px; color: rgba(255,255,255,0.35);
-        text-transform: uppercase; letter-spacing: 1.2px;
-        display: flex; align-items: center; justify-content: space-between;
-        border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;
-      }
-      .w-header .dot { width: 7px; height: 7px; border-radius: 50%; background: #818CF8; flex-shrink:0; }
-      .w-thumb-wrap {
-        flex-shrink: 0; overflow: hidden; background: #000;
-        border-bottom: 1px solid rgba(255,255,255,0.05); display: none;
-      }
-      .w-thumb-wrap img { width: 100%; height: auto; display: block; }
-      .w-main {
-        flex: 1; display: flex; flex-direction: column;
-        align-items: center; justify-content: center;
-        padding: 12px 16px; gap: 4px; transition: background 0.4s;
-        text-align: center;
-      }
-      .w-verdict { font-size: 26px; font-weight: 800; letter-spacing: 3px; transition: color 0.3s; }
-      .w-band { font-size: 11px; font-weight: 600; opacity: 0.75; }
-      .w-why { font-size: 10px; color: rgba(255,255,255,0.45); margin-top: 4px; line-height: 1.3; }
-      .w-divider { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 6px 0; width: 100%; display: none; }
-      .w-audio-row { display: none; align-items: center; gap: 6px; font-size: 11px; }
-      .w-audio-row .wa-icon { font-size: 14px; }
-      .w-audio-row .wa-verdict { font-weight: 700; letter-spacing: 1px; }
-      .w-audio-row .wa-band { font-size: 10px; opacity: 0.6; }
-    `;
-
-    // HTML injected into widget document
-    const WIDGET_HTML = `
-      <div class="w-header">
-        <span>🛡 Deepfake Detector</span>
-        <div class="dot" id="wDot"></div>
-      </div>
-      <div class="w-thumb-wrap" id="wThumbWrap">
-        <img id="wThumb" alt="">
-      </div>
-      <div class="w-main" id="wMain">
-        <div class="w-verdict" id="wVerdict" style="color:#818CF8">⏳ Waiting</div>
-        <div class="w-band" id="wBand" style="color:#818CF8">—</div>
-        <div class="w-why" id="wWhy"></div>
-        <hr class="w-divider" id="wAudioDivider">
-        <div class="w-audio-row" id="wAudioRow">
-          <span class="wa-icon">🎙</span>
-          <span class="wa-verdict" id="wAudioVerdict">—</span>
-          <span class="wa-band" id="wAudioBand"></span>
-        </div>
-      </div>
-    `;
+    const WIDGET_HTML =
+      '<div class="w-header"><span>🛡 Deepfake Detector</span><div class="dot" id="wDot"></div></div>' +
+      '<div class="w-thumb-wrap" id="wThumbWrap"><img id="wThumb" alt=""></div>' +
+      '<div class="w-main" id="wMain">' +
+        '<div class="w-verdict" id="wVerdict" style="color:#818CF8">⏳ Waiting</div>' +
+        '<div class="w-band" id="wBand" style="color:#818CF8">—</div>' +
+        '<div class="w-why" id="wWhy"></div>' +
+        '<hr class="w-divider" id="wAudioDivider">' +
+        '<div class="w-audio-row" id="wAudioRow"><span class="wa-icon">🎙</span><span class="wa-verdict" id="wAudioVerdict">—</span><span class="wa-band" id="wAudioBand"></span></div>' +
+      '</div>';
 
     function _setupWidgetDoc(doc) {
       const style = doc.createElement('style');
@@ -1075,7 +971,6 @@
         return;
       }
 
-      // ── Document Picture-in-Picture (Chrome 116+) ─────────────────────
       if ('documentPictureInPicture' in window) {
         try {
           const pip = await window.documentPictureInPicture.requestWindow({
@@ -1086,12 +981,9 @@
           pip.addEventListener('pagehide', () => { widgetWindow = null; _refreshPipBtn(); });
           _refreshPipBtn();
           return;
-        } catch (e) {
-          // user dismissed or browser rejected — fall through to popup
-        }
+        } catch (e) {}
       }
 
-      // ── Popup fallback ────────────────────────────────────────────────
       const popup = window.open(
         '', 'deepfake-widget',
         'width=290,height=340,toolbar=no,menubar=no,location=no,status=no,resizable=yes'
@@ -1101,9 +993,9 @@
         return;
       }
       popup.document.open();
-      popup.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-        <title>Deepfake Widget</title>
-        <style>${WIDGET_CSS}</style></head><body>${WIDGET_HTML}</body></html>`);
+      popup.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+        '<title>Deepfake Widget</title>' +
+        '<style>' + WIDGET_CSS + '</style></head><body>' + WIDGET_HTML + '</body></html>');
       popup.document.close();
       widgetWindow = popup;
       popup.addEventListener('beforeunload', () => { widgetWindow = null; _refreshPipBtn(); });
@@ -1118,17 +1010,11 @@
       btn.classList.toggle('active', open);
     }
 
-    // Update the floating widget after each scan
     function updateWidget(verdict, pFake, band, time, thumbDataUrl, why) {
       if (!widgetWindow || widgetWindow.closed) return;
-
       const doc = widgetWindow.document;
       const colors = { REAL: '#22C55E', FAKE: '#EF4444', UNCERTAIN: '#F59E0B' };
-      const bgTints = {
-        REAL:      'rgba(34,197,94,0.07)',
-        FAKE:      'rgba(239,68,68,0.10)',
-        UNCERTAIN: 'rgba(245,158,11,0.08)',
-      };
+      const bgTints = { REAL: 'rgba(34,197,94,0.07)', FAKE: 'rgba(239,68,68,0.10)', UNCERTAIN: 'rgba(245,158,11,0.08)' };
       const emojis = { REAL: '✅', FAKE: '🚨', UNCERTAIN: '❓' };
       const color  = colors[verdict]  || '#818CF8';
       const bgTint = bgTints[verdict] || 'transparent';
@@ -1138,7 +1024,6 @@
       const $ = id => doc.getElementById(id);
       if (!$('wVerdict')) return;
 
-      // Thumbnail
       const thumbWrap = $('wThumbWrap');
       const thumbImg  = $('wThumb');
       if (thumbWrap && thumbImg) {
@@ -1150,7 +1035,6 @@
         }
       }
 
-      // Verdict section
       $('wMain').style.background = bgTint;
       $('wVerdict').textContent   = emoji + ' ' + verdict;
       $('wVerdict').style.color   = color;
@@ -1159,16 +1043,14 @@
       const whyEl = $('wWhy');
       if (whyEl) whyEl.textContent = why || '';
 
-      // Pulse the dot
       const dot = $('wDot');
       if (dot) {
         dot.style.background = color;
-        dot.style.boxShadow  = `0 0 6px ${color}`;
+        dot.style.boxShadow  = '0 0 6px ' + color;
         setTimeout(() => { if (dot) dot.style.boxShadow = 'none'; }, 600);
       }
     }
 
-    // Push audio analysis result into the widget's audio section
     function updateWidgetAudio(result) {
       if (!widgetWindow || widgetWindow.closed) return;
       const doc = widgetWindow.document;
@@ -1193,8 +1075,6 @@
       $('wAudioBand').style.color    = color;
     }
 
-    // Build a thumbnail (data URL) of the current frame with the face box drawn on it.
-    // Uses the already-captured `canvas` (frameCanvas) as the source.
     function createFaceThumbnail(faceBox, verdict) {
       if (!canvas.width || !canvas.height) return null;
 
@@ -1203,7 +1083,6 @@
       tc.width = tw; tc.height = th;
       const tx = tc.getContext('2d');
 
-      // Draw the captured frame
       tx.drawImage(canvas, 0, 0, tw, th);
 
       if (!faceBox) return tc.toDataURL('image/jpeg', 0.8);
@@ -1211,13 +1090,11 @@
       const colors = { REAL: '#22C55E', FAKE: '#EF4444', UNCERTAIN: '#F59E0B' };
       const color  = colors[verdict] || '#818CF8';
 
-      // bbox is normalised (0-1) relative to original video — map to thumbnail pixels
       const rx = faceBox.x * tw;
       const ry = faceBox.y * th;
       const rw = faceBox.w * tw;
       const rh = faceBox.h * th;
 
-      // Glow rect
       tx.shadowColor  = color;
       tx.shadowBlur   = 10;
       tx.strokeStyle  = color;
@@ -1225,7 +1102,6 @@
       tx.strokeRect(rx, ry, rw, rh);
       tx.shadowBlur   = 0;
 
-      // Corner L-brackets
       const cs = Math.min(rw, rh) * 0.20;
       tx.lineWidth   = 3;
       const corners  = [
@@ -1245,15 +1121,12 @@
       return tc.toDataURL('image/jpeg', 0.80);
     }
 
-    // =========================================================================
-    // TAB TITLE + FAVICON  (always-on, visible in any tab strip)
-    // =========================================================================
     const _faviconCanvas = document.createElement('canvas');
     _faviconCanvas.width = _faviconCanvas.height = 32;
 
     function updateTabTitle(verdict, bandLabel) {
       const e = { REAL: '✅', FAKE: '🚨', UNCERTAIN: '❓' }[verdict] || '🔍';
-      document.title = `${e} ${verdict} — ${bandLabel || 'Checking'} — Deepfake Detector`;
+      document.title = e + ' ' + verdict + ' — ' + (bandLabel || 'Checking') + ' — Deepfake Detector';
     }
 
     function updateFavicon(verdict) {
@@ -1266,16 +1139,13 @@
       const x = c.getContext('2d');
       x.clearRect(0, 0, 32, 32);
 
-      // Circle background
       x.fillStyle = color;
       x.beginPath(); x.arc(16, 16, 15, 0, Math.PI * 2); x.fill();
 
-      // Inner ring
       x.strokeStyle = 'rgba(255,255,255,0.25)';
       x.lineWidth = 1.5;
       x.beginPath(); x.arc(16, 16, 13, 0, Math.PI * 2); x.stroke();
 
-      // Character
       x.fillStyle = '#fff';
       x.font = 'bold 16px sans-serif';
       x.textAlign = 'center';
@@ -1293,4 +1163,46 @@
     }
   </script>
 </body>
-</html>
+</html>''';
+
+class LiveScreen extends StatefulWidget {
+  const LiveScreen({super.key});
+
+  @override
+  State<LiveScreen> createState() => _LiveScreenState();
+}
+
+class _LiveScreenState extends State<LiveScreen> {
+  static const _viewType = 'live-detection-blob';
+  static bool _registered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!_registered) {
+      final htmlContent = _liveHtmlTemplate.replaceAll(
+        '__API_BASE__',
+        ApiService.baseUrl,
+      );
+
+      ui_web.platformViewRegistry.registerViewFactory(_viewType, (int viewId) {
+        return html.IFrameElement()
+          ..srcdoc = htmlContent
+          ..style.border = 'none'
+          ..style.width = '100%'
+          ..style.height = '100%'
+          ..allow = 'camera *; microphone *; display-capture *; picture-in-picture *; autoplay *'
+          ..setAttribute('allowfullscreen', 'true');
+      });
+      _registered = true;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0F172A),
+      body: const HtmlElementView(viewType: _viewType),
+    );
+  }
+}

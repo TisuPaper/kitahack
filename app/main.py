@@ -29,6 +29,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ---- Permissions-Policy header (needed when /live is embedded in an iframe) ----
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+
+class _PermissionsPolicyMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["Permissions-Policy"] = (
+            "camera=*, microphone=*, display-capture=*, picture-in-picture=*"
+        )
+        return response
+
+app.add_middleware(_PermissionsPolicyMiddleware)
+
 # ---- Serve static files (live detection page) ----
 import os
 from fastapi.staticfiles import StaticFiles

@@ -5,6 +5,7 @@ import '../services/api_service.dart';
 import '../widgets/background.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/confidence_chart.dart';
+import 'live_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -470,6 +471,64 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            // ── Or: Live Detection ──
+            Row(
+              children: [
+                Expanded(child: Divider(color: Colors.black.withValues(alpha: 0.12))),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text('or', style: TextStyle(fontSize: 12, color: Colors.black38, fontWeight: FontWeight.w500)),
+                ),
+                Expanded(child: Divider(color: Colors.black.withValues(alpha: 0.12))),
+              ],
+            ),
+            const SizedBox(height: 16),
+            GlassCard(
+              animate: true,
+              padding: const EdgeInsets.all(20),
+              child: InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LiveScreen()),
+                  );
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF818CF8).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.videocam_rounded, color: Color(0xFF818CF8), size: 26),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Live Detection',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.black87),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Screen capture with real-time analysis',
+                            style: TextStyle(fontSize: 12, color: Colors.black.withValues(alpha: 0.5)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.black26),
+                  ],
+                ),
               ),
             ),
         ],
