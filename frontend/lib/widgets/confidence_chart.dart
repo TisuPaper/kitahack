@@ -10,45 +10,10 @@ class ConfidenceChart extends StatelessWidget {
     final realProb = (probabilities['real'] as num?)?.toDouble() ?? 0.0;
     final fakeProb = (probabilities['fake'] as num?)?.toDouble() ?? 0.0;
     final dominant = fakeProb >= realProb ? 'FAKE' : 'REAL';
-    final dominantColor = dominant == 'FAKE' ? const Color(0xFFEF4444) : const Color(0xFF22C55E);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Verdict pill ──────────────────────────────────────
-        Align(
-          alignment: Alignment.center,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            decoration: BoxDecoration(
-              color: dominantColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(100),
-              border: Border.all(color: dominantColor.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  dominant == 'FAKE' ? Icons.warning_amber_rounded : Icons.verified_rounded,
-                  color: dominantColor,
-                  size: 16,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  dominant == 'FAKE' ? 'Likely Deepfake' : 'Likely Authentic',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: dominantColor,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 24),
-
         // ── Bar chart ─────────────────────────────────────────
         SizedBox(
           height: 200,
@@ -94,42 +59,45 @@ class ConfidenceChart extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 20),
 
         // ── Spectrum bar ──────────────────────────────────────
-        const SizedBox(height: 20),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Gradient bar
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: Container(
-                height: 10,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF22C55E), Color(0xFF3B82F6), Color(0xFF8B5CF6), Color(0xFFEF4444)],
-                  ),
-                ),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Container(
+            height: 10,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF22C55E), Color(0xFF3B82F6), Color(0xFF8B5CF6), Color(0xFFEF4444)],
               ),
             ),
-            const SizedBox(height: 6),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Real (1.0)', style: _spectrumLabel),
-                Text('Uncertain (0.5)', style: _spectrumLabel),
-                Text('Fake (0.0)', style: _spectrumLabel),
-              ],
-            ),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Real (1.0)', style: _spectrumLabel),
+            Text('Uncertain (0.5)', style: _spectrumLabel),
+            Text('Fake (0.0)', style: _spectrumLabel),
           ],
         ),
       ],
     );
   }
 
-  static const _axisStyle = TextStyle(fontSize: 10, color: Colors.black38, fontWeight: FontWeight.w500, fontFeatures: [FontFeature.tabularFigures()]);
-  static final _spectrumLabel = TextStyle(fontSize: 10, color: Colors.black.withValues(alpha: 0.45), fontWeight: FontWeight.w500);
+  static const _axisStyle = TextStyle(
+    fontSize: 10,
+    color: Colors.black38,
+    fontWeight: FontWeight.w500,
+    fontFeatures: [FontFeature.tabularFigures()],
+  );
+
+  static final _spectrumLabel = TextStyle(
+    fontSize: 10,
+    color: Colors.black.withValues(alpha: 0.45),
+    fontWeight: FontWeight.w500,
+  );
 }
 
 // ── Horizontal grid lines ─────────────────────────────────────
@@ -166,34 +134,33 @@ class _AnimatedBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pct = (value * 100).toStringAsFixed(1);
+    // 200px total height. Reserve ~38px for pct text(13) + gap(4) + label(11) + gap(6)
+    const reservedPx = 38.0;
+    const maxBarH = 200.0 - reservedPx;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.max,
       children: [
         // Percentage label above bar
-        AnimatedOpacity(
-          opacity: 1.0,
-          duration: const Duration(milliseconds: 600),
-          child: Text(
-            '$pct%',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-              color: isHighlighted ? color : Colors.black45,
-            ),
+        Text(
+          '$pct%',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            color: isHighlighted ? color : Colors.black45,
           ),
         ),
         const SizedBox(height: 4),
-        // Bar itself
+        // Bar
         TweenAnimationBuilder<double>(
           tween: Tween(begin: 0.0, end: value),
           duration: const Duration(milliseconds: 1000),
           curve: Curves.easeOutCubic,
           builder: (context, v, _) {
-            final height = v * 160; // max 160px for 100%
             return Container(
               width: 64,
-              height: height.clamp(4.0, 160.0),
+              height: (v * maxBarH).clamp(4.0, maxBarH),
               decoration: BoxDecoration(
                 color: isHighlighted ? color : color.withValues(alpha: 0.35),
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
@@ -204,7 +171,7 @@ class _AnimatedBar extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         // X-axis label
         Text(
           label,
