@@ -294,27 +294,12 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
+                const Column(
+                   crossAxisAlignment: CrossAxisAlignment.center,
                    children: [
-                      Container(
-                         padding: const EdgeInsets.all(10),
-                         decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.6),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white),
-                         ),
-                         child: const Icon(Icons.cloud_upload_outlined, color: Colors.black54, size: 24),
-                      ),
-                      const SizedBox(width: 16),
-                      const Expanded(
-                         child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                               Text('Upload files', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.black87)),
-                               Text('Select and upload the files of your choice', style: TextStyle(fontSize: 13, color: Colors.black54)),
-                            ],
-                         ),
-                      ),
+                      Text('Upload files', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.black87)),
+                      SizedBox(height: 4),
+                      Text('Select and upload the files of your choice', style: TextStyle(fontSize: 13, color: Colors.black54)),
                    ],
                 ),
                 const SizedBox(height: 24),
@@ -348,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         if (_selectedFile == null) _pickFile();
                       },
                       child: Container(
-                        padding: EdgeInsets.symmetric(vertical: _selectedFile == null ? 40 : 20, horizontal: 20),
+                        padding: EdgeInsets.symmetric(vertical: _selectedFile == null ? 32 : 20, horizontal: 20),
                         decoration: BoxDecoration(
                           color: _isHovering ? Colors.blue.withValues(alpha: 0.1) : Colors.white.withValues(alpha: 0.4),
                           borderRadius: BorderRadius.circular(16),
@@ -362,6 +347,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ? SizedBox(
                                 width: double.infinity,
                                 child: Column(
+                                  mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(Icons.cloud_upload_outlined, size: 48, color: _isHovering ? Colors.blue : Colors.black54),
@@ -372,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     const SizedBox(height: 8),
                                     const Text('JPEG, PNG, MP4, and WAV formats, up to 50 MB.', style: TextStyle(fontSize: 12, color: Colors.black54)),
-                                    const SizedBox(height: 24),
+                                    const SizedBox(height: 16),
                                     Container(
                                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                                        decoration: BoxDecoration(
@@ -457,28 +443,31 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  AnimatedOpacity(
-                    opacity: _selectedFile != null ? 1.0 : 0.0,
-                    duration: const Duration(milliseconds: 250),
-                    child: IgnorePointer(
-                      ignoring: _selectedFile == null,
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _startAnalysis,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black87,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            elevation: 6,
-                            shadowColor: Colors.black26,
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOutCubic,
+                    child: _selectedFile == null
+                        ? const SizedBox(width: double.infinity, height: 0)
+                        : Column(
+                            children: [
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: _startAnalysis,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.black87,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                    elevation: 6,
+                                    shadowColor: Colors.black26,
+                                  ),
+                                  child: const Text('Analyze', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                                ),
+                              ),
+                            ],
                           ),
-                          child: const Text('Analyze', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 1)),
-                        ),
-                      ),
-                    ),
                   ),
                 ],
               ),
