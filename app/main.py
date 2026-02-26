@@ -247,6 +247,67 @@ def _build_reasons_video(
 
 
 
+_REASON_TO_WHY = {
+    "no_face_detected":   "No face was detected clearly",
+    "low_resolution":     "Image quality is too low for reliable detection",
+    "small_face":         "The face in the image is too small",
+    "models_disagree":    "Our detection models gave conflicting results",
+    "borderline_score":   "The score is right on the boundary",
+    "high_variance":      "Predictions varied a lot across video frames",
+    "low_face_rate":      "A face could not be found in most frames",
+    "tiebreaker_used":    "An extra model was called in to break a tie",
+}
+
+_NEXT_STEPS = {
+    "FAKE": [
+        "Don't share OTP or bank info",
+        "Verify identity via an official channel",
+        "Report or block if suspicious",
+    ],
+    "REAL": [
+        "No strong manipulation detected",
+        "Still verify the source if it's sensitive",
+    ],
+    "UNCERTAIN": [
+        "Try again with better lighting or a closer face",
+        "Upload a short video (5-10 s) for more data",
+        "Avoid screenshots with overlays or heavy text",
+    ],
+}
+
+
+def _build_advice(verdict: str, reasons: list[str]) -> dict:
+    """Return a user-friendly advice dict from verdict + reason tags."""
+    # Pick the first applicable human-readable "why" line
+    why_parts: list[str] = []
+    for r in reasons:
+        if r in _REASON_TO_WHY:
+            why_parts.append(_REASON_TO_WHY[r])
+    if not why_parts:
+        if verdict == "FAKE":
+            why_parts.append("Strong signs of manipulation detected")
+        elif verdict == "REAL":
+            why_parts.append("No signs of manipulation detected")
+        else:
+            why_parts.append("The result is inconclusive")
+
+    # Append agreement / confidence qualifier
+    if "models_agree" in reasons and "high_confidence" in reasons:
+        why_parts.append("all models agree with high confidence")
+    elif "models_agree" in reasons:
+        why_parts.append("all models agree on this result")
+    elif "high_confidence" in reasons:
+        why_parts.append("detection confidence is high")
+    elif "consistent_prediction" in reasons:
+        why_parts.append("predictions are consistent across frames")
+
+    why = " — ".join(why_parts[:2])
+    return {
+        "why": why,
+        "next_steps": _NEXT_STEPS.get(verdict, _NEXT_STEPS["UNCERTAIN"]),
+    }
+
+
 def _run_champion(img: Image.Image) -> tuple[float, float]:
     """Returns (real_prob, fake_prob) from FaceForge."""
     x = champion_preprocess(img).unsqueeze(0).to(device)
@@ -394,6 +455,7 @@ async def predict(file: UploadFile = File(...)):
 
         "decision_path": decision_path,
         "reasons": reasons,
+        "advice": _build_advice(verdict, reasons),
 
         "signals": {
             "face_found": face_found,
@@ -609,6 +671,7 @@ async def predict_video(file: UploadFile = File(...)):
 
         "decision_path": decision_path,
         "reasons": reasons,
+        "advice": _build_advice(verdict, reasons),
 
         "models_summary": {
             "champion_avg": champ_avg,
@@ -636,13 +699,19 @@ from app.audio_inference import predict_ensemble
 AUDIO_EXTENSIONS = {".wav", ".mp3", ".ogg", ".flac", ".m4a", ".webm", ".aac"}
 
 
+_AUDIO_MODEL_NAMES = {"cnn-lstm": "CNN-LSTM", "tcn": "TCN", "tcn-lstm": "TCN-LSTM"}
+
+
 @app.post("/predict-audio")
 async def predict_audio(file: UploadFile = File(...)):
+    """Analyze an audio clip for deepfake voice detection.
+
+    Runs three models (CNN-LSTM, TCN, TCN-LSTM) as a majority-vote ensemble
+    and returns a structured response consistent with /predict and /predict-video.
     """
-    Analyze an audio file for deepfake voice detection.
-    Uses 3 models (CNN-LSTM, TCN, TCN-LSTM) as an ensemble.
-    """
-    # Validate file type
+    t_start = time.monotonic()
+    request_id = str(uuid.uuid4())
+
     ext = os.path.splitext(file.filename or "")[1].lower()
     if ext not in AUDIO_EXTENSIONS:
         raise HTTPException(
@@ -657,8 +726,6 @@ async def predict_audio(file: UploadFile = File(...)):
             detail="No audio models loaded. Check models/ directory.",
         )
 
-    # Save to temp file
-    import tempfile
     suffix = ext or ".wav"
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
         content = await file.read()
@@ -666,7 +733,7 @@ async def predict_audio(file: UploadFile = File(...)):
         tmp_path = tmp.name
 
     try:
-        result = predict_ensemble(tmp_path, audio_models)
+        raw = predict_ensemble(tmp_path, audio_models)
     except Exception as e:
         os.unlink(tmp_path)
         raise HTTPException(status_code=500, detail=f"Audio analysis failed: {str(e)}")
@@ -674,8 +741,60 @@ async def predict_audio(file: UploadFile = File(...)):
         if os.path.exists(tmp_path):
             os.unlink(tmp_path)
 
+    # ── Build structured response ──────────────────────────────────────────
+    avg_p_fake   = raw["probabilities"]["fake"]
+    verdict, uncertain = _verdict(avg_p_fake, True)
+    confidence_band    = _confidence_band(avg_p_fake)
+
+    ens = raw.get("ensemble", {})
+    models_voted_fake  = ens.get("models_voted_fake", 0)
+    total_models       = ens.get("total_models", 0)
+    models_voted_real  = total_models - models_voted_fake
+
+    reasons: list[str] = []
+    if models_voted_fake == total_models or models_voted_real == total_models:
+        reasons.append("models_agree")
+    else:
+        reasons.append("models_disagree")
+    if avg_p_fake < 0.20 or avg_p_fake > 0.80:
+        reasons.append("high_confidence")
+    if 0.35 <= avg_p_fake <= 0.65:
+        reasons.append("borderline_score")
+
+    models_list = []
+    for key, detail in raw.get("model_details", {}).items():
+        if "error" not in detail:
+            mv = detail.get("prediction", "").upper()
+            models_list.append({
+                "name":    _AUDIO_MODEL_NAMES.get(key, key),
+                "p_fake":  detail.get("fake_probability", 0.5),
+                "verdict": mv if mv in ("REAL", "FAKE") else "UNCERTAIN",
+                "chunks":  detail.get("chunks_analyzed", 0),
+            })
+
+    t_total = int((time.monotonic() - t_start) * 1000)
+
     return {
-        "filename": file.filename,
-        "type": "audio",
-        **result,
+        "request_id":      request_id,
+        "media_type":      "audio",
+
+        "verdict":         verdict,
+        "confidence_band": confidence_band,
+        "final_p_fake":    round(avg_p_fake, 4),
+        "uncertain":       uncertain,
+
+        "decision_path":   "majority_vote",
+        "reasons":         reasons,
+        "advice":          _build_advice(verdict, reasons),
+
+        "models": models_list,
+
+        "ensemble_summary": {
+            "voted_fake": models_voted_fake,
+            "voted_real": models_voted_real,
+            "total":      total_models,
+        },
+
+        "privacy":    {"stored_media": False},
+        "timing_ms":  {"total": t_total},
     }

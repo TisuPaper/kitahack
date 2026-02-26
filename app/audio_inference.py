@@ -17,21 +17,54 @@ CLIP_LENGTH = SAMPLE_RATE * CLIP_DURATION  # 32000 samples
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def _load_audio(file_path: str):
-    """Load audio file and resample to 16kHz mono."""
-    audio, sr = sf.read(file_path)
+def _resample(audio: np.ndarray, src_sr: int) -> np.ndarray:
+    """Linear-interpolation resample to SAMPLE_RATE."""
+    if src_sr == SAMPLE_RATE:
+        return audio
+    new_len = int(round(len(audio) * SAMPLE_RATE / src_sr))
+    indices = np.linspace(0, len(audio) - 1, new_len)
+    return np.interp(indices, np.arange(len(audio)), audio)
 
-    # Convert to mono
-    if audio.ndim > 1:
-        audio = np.mean(audio, axis=1)
 
-    # Resample to 16kHz if needed (linear interpolation)
-    if sr != SAMPLE_RATE:
-        new_len = int(round(len(audio) * SAMPLE_RATE / sr))
-        indices = np.linspace(0, len(audio) - 1, new_len)
-        audio = np.interp(indices, np.arange(len(audio)), audio)
+def _load_with_av(file_path: str) -> np.ndarray:
+    """Decode any format soundfile can't handle (WebM, Opus, MP3 …) using PyAV."""
+    import av as _av
+    samples: list[np.ndarray] = []
+    sr: int = SAMPLE_RATE
+    with _av.open(file_path) as container:
+        stream = next(s for s in container.streams if s.type == "audio")
+        sr = stream.sample_rate or SAMPLE_RATE
+        resampler = _av.audio.resampler.AudioResampler(
+            format="fltp", layout="mono", rate=SAMPLE_RATE
+        )
+        for frame in container.decode(stream):
+            for resampled in resampler.resample(frame):
+                arr = resampled.to_ndarray()     # shape (1, N) float32
+                samples.append(arr[0])
+        # Flush resampler
+        for resampled in resampler.resample(None):
+            arr = resampled.to_ndarray()
+            samples.append(arr[0])
+    if not samples:
+        return np.zeros(CLIP_LENGTH, dtype=np.float32)
+    return np.concatenate(samples).astype(np.float32)
 
-    return audio.astype(np.float32)
+
+def _load_audio(file_path: str) -> np.ndarray:
+    """Load audio file and return 16 kHz mono float32 array.
+
+    Tries soundfile first (fast, handles WAV/FLAC/OGG).
+    Falls back to PyAV for formats soundfile cannot read (WebM/Opus, MP3, MP4 …).
+    """
+    try:
+        audio, sr = sf.read(file_path)
+        if audio.ndim > 1:
+            audio = np.mean(audio, axis=1)
+        return _resample(audio.astype(np.float32), sr)
+    except Exception:
+        pass  # soundfile can't decode this format — try PyAV
+
+    return _load_with_av(file_path)
 
 
 def predict_single_model(audio: np.ndarray, model, chunk_size: int = CLIP_LENGTH, max_chunks: int = 10):
