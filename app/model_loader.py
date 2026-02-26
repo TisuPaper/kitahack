@@ -58,32 +58,64 @@ def _load_champion():
 
 # ===================================================================
 # CHALLENGER: ViT
-# Tries to load fine-tuned model from models/vit_finetuned_ffpp/
+# Tries to load fine-tuned model from models/vit_finetuned_ffpp_v2/
 # Falls back to prithivMLmods/Deep-Fake-Detector-v2-Model
 # ===================================================================
 
-import os as _os
-_FINETUNED_PATH = _os.path.join(
-    _os.path.dirname(_os.path.dirname(__file__)), "models", "vit_finetuned_ffpp"
-)
-
+import os
+from transformers import AutoModelForImageClassification, AutoImageProcessor
+MODELS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "models")
+CHALLENGER_MODEL_PATH = os.path.join(MODELS_DIR, "vit_finetuned_twostage")
 
 def _load_challenger():
-    if _os.path.isdir(_FINETUNED_PATH) and _os.path.exists(
-        _os.path.join(_FINETUNED_PATH, "config.json")
-    ):
-        # Use our GPU-fine-tuned model
-        m = ViTForImageClassification.from_pretrained(_FINETUNED_PATH).to(device).eval()
-        p = ViTImageProcessor.from_pretrained(_FINETUNED_PATH)
-        print(f"✅ Challenger loaded: Fine-tuned ViT from {_FINETUNED_PATH}")
-    else:
-        # Fall back to HuggingFace pretrained
-        name = "prithivMLmods/Deep-Fake-Detector-v2-Model"
-        m = ViTForImageClassification.from_pretrained(name).to(device).eval()
-        p = ViTImageProcessor.from_pretrained(name)
-        print("✅ Challenger loaded: prithivMLmods ViT (HuggingFace, 52.5%)")
-        print("   ℹ️  To improve: run colab_finetune_vit.py on GPU, save to models/vit_finetuned_ffpp/")
+    m = None
+    p = None
+    if os.path.exists(CHALLENGER_MODEL_PATH):
+        try:
+            # from transformers import ViTForImageClassification, ViTImageProcessor # Already imported globally
+            m = ViTForImageClassification.from_pretrained(CHALLENGER_MODEL_PATH).to(device)
+            m.eval()
+            p = ViTImageProcessor.from_pretrained(CHALLENGER_MODEL_PATH)
+            print(f"✅ Challenger loaded: Fine-tuned ViT from {CHALLENGER_MODEL_PATH}")
+            return m, p
+        except Exception as e:
+            print(f"⚠️ Could not load fine-tuned ViT from {CHALLENGER_MODEL_PATH}: {e}")
+            print("   Falling back to HuggingFace pretrained model.")
+    
+    # Fall back to HuggingFace pretrained if local load failed or directory doesn't exist
+    # from transformers import ViTForImageClassification, ViTImageProcessor # Already imported globally
+    name = "prithivMLmods/Deep-Fake-Detector-v2-Model"
+    m = ViTForImageClassification.from_pretrained(name).to(device).eval()
+    p = ViTImageProcessor.from_pretrained(name)
+    print("✅ Challenger loaded: prithivMLmods ViT (HuggingFace, 52.5%)")
+    print("   ℹ️  To improve: run colab_finetune_vit.py on GPU, save to models/vit_finetuned_ffpp_v2/")
     return m, p
+
+
+# ===================================================================
+# FALLBACK: EfficientNet
+# Tries to load fine-tuned model from models/efficientnet_finetuned_ffpp/
+# returning None if not found so the API can dynamically omit it.
+# ===================================================================
+
+FALLBACK_MODEL_PATH = os.path.join(MODELS_DIR, "efficientnet_finetuned_ffpp")
+
+def _load_fallback():
+    m = None
+    p = None
+    if os.path.exists(FALLBACK_MODEL_PATH):
+        try:
+            m = AutoModelForImageClassification.from_pretrained(FALLBACK_MODEL_PATH).to(device)
+            m.eval()
+            p = AutoImageProcessor.from_pretrained(FALLBACK_MODEL_PATH)
+            print(f"✅ Fallback loaded: Fine-tuned EfficientNet from {FALLBACK_MODEL_PATH}")
+            return m, p
+        except Exception as e:
+            print(f"⚠️ Could not load fine-tuned EfficientNet from {FALLBACK_MODEL_PATH}: {e}")
+    else:
+        print(f"ℹ️ Fallback model not found at {FALLBACK_MODEL_PATH}. Running 2-model ensemble.")
+    
+    return None, None
 
 
 # Preprocessing for champion
@@ -99,3 +131,4 @@ champion_preprocess = transforms.Compose([
 # Load at startup
 champion = _load_champion()
 challenger_model, challenger_processor = _load_challenger()
+fallback_model, fallback_processor = _load_fallback()

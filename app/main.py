@@ -4,6 +4,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from app.model_loader import (
     champion, champion_preprocess,
     challenger_model, challenger_processor,
+    fallback_model, fallback_processor,
     device,
 )
 from app.forensic_features import compute_all_features
@@ -76,38 +77,50 @@ def crop_largest_face(pil_img: Image.Image) -> tuple[Image.Image, bool, dict]:
 
 
 # =========================================================================
-# Thresholds — TUNED on 40 FF++ C23 samples (20 real + 20 fake)
+# Ensemble parameters — TUNED via grid search on 80 FF++ C23 videos
+# (40 real + 10 each of Deepfakes/Face2Face/FaceSwap/NeuralTextures)
 #
-# Grid search result:
-#   t_real=0.20, t_fake=0.55 → 90% accuracy, 100% coverage, 0 FP
+# Strategy: Logit stacking — each model's logit(p_fake) is weighted
+# and a learned bias corrects for miscalibration across models.
 #
-# FaceForge p_fake on reals: all ≤ 0.153  (no overlap with threshold)
-# FaceForge p_fake on fakes: 13/20 ≥ 0.638 (4 complete misses at ~0.00)
+# Best config (68.8% balanced video accuracy, 65% real / 72.5% fake):
+#   sigmoid(0.25*logit(champ) + 1.0*logit(chall) + 0.0*logit(fall) + 2.5)
+#
+# Individual model profiles:
+#   Champion (XceptionNet): Excellent at reals (97%), good at Deepfakes,
+#                           weak on Face2Face/FaceSwap/NeuralTextures
+#   Challenger (ViT):       Most balanced across all forgery types
+#   Fallback (EfficientNet): Currently not contributing (weight=0)
 # =========================================================================
-CONFIDENT_REAL = 0.20   # p_fake ≤ this → Real (champion only)
-CONFIDENT_FAKE = 0.55   # p_fake ≥ this → Fake (champion only)
-# Scale-aware disagreement: only flag uncertain in the true midrange
-UNCERTAIN_LOW = 0.20    # only consider uncertain if p_fake > this
-UNCERTAIN_HIGH = 0.55   # only consider uncertain if p_fake < this
-DISAGREE_THRESH = 0.20  # |champ - challenger| > this AND in midrange → Uncertain
-# Quality gate
-MIN_FACE_SIZE = 80      # pixels
+STACKING_WEIGHT_CHAMPION = 0.25
+STACKING_WEIGHT_CHALLENGER = 1.0
+STACKING_WEIGHT_FALLBACK = 0.0
+STACKING_BIAS = 2.5
+
+MIN_FACE_SIZE = 80  # pixels
 
 
-# ---- Logit-domain blending ----
+# ---- Logit-domain stacking ----
 def _logit(p: float) -> float:
     p = max(1e-7, min(1 - 1e-7, p))
     return math.log(p / (1 - p))
 
 
 def _sigmoid(x: float) -> float:
+    if x > 500:
+        return 1.0
+    if x < -500:
+        return 0.0
     return 1 / (1 + math.exp(-x))
 
 
-def _blend_logits(p1: float, p2: float, w1: float = 0.85, w2: float = 0.15) -> float:
-    """Blend two probabilities in logit space, then convert back."""
-    blended = w1 * _logit(p1) + w2 * _logit(p2)
-    return _sigmoid(blended)
+def _stacking_blend(champ_fake: float, chall_fake: float, fall_fake: float) -> float:
+    """Compute final p_fake via learned logit stacking."""
+    z = (STACKING_WEIGHT_CHAMPION * _logit(champ_fake)
+         + STACKING_WEIGHT_CHALLENGER * _logit(chall_fake)
+         + STACKING_WEIGHT_FALLBACK * _logit(fall_fake)
+         + STACKING_BIAS)
+    return _sigmoid(z)
 
 
 # ---- Reference statistics for forensic z-scores ----
@@ -159,6 +172,23 @@ def _run_challenger(img: Image.Image) -> tuple[float, float]:
     return rp, fp
 
 
+def _run_fallback(img: Image.Image) -> tuple[float, float]:
+    """Returns (real_prob, fake_prob) from EfficientNet fallback."""
+    inputs = fallback_processor(images=img, return_tensors="pt").to(device)
+    with torch.no_grad():
+        probs = torch.softmax(fallback_model(**inputs).logits, dim=1)
+
+    id2label = fallback_model.config.id2label
+    label_map = {"Realism": "real", "Deepfake": "fake", "Real": "real", "Fake": "fake"}
+    rp, fp = 0.0, 0.0
+    for idx, ln in id2label.items():
+        c = label_map.get(ln, ln.lower())
+        pv = float(probs[0][int(idx)])
+        if c == "real": rp = pv
+        elif c == "fake": fp = pv
+    return rp, fp
+
+
 @app.get("/")
 def root():
     return {"message": "Deepfake Detector API is running. Go to /docs to test."}
@@ -198,65 +228,24 @@ async def predict(file: UploadFile = File(...)):
             "Results may be less reliable."
         )
 
-    # ====== STEP 1: Champion (FaceForge XceptionNet) ======
+    # ====== MULTI-MODEL ENSEMBLE (Logit Stacking) ======
     champ_real, champ_fake = _run_champion(img)
+    chall_real, chall_fake = _run_challenger(img)
 
-    # ====== STEP 2: Decision logic ======
-    challenger_used = False
-    chall_real, chall_fake = None, None
-    decision_path = "champion_confident"
+    fall_real, fall_fake = 0.0, 0.0
+    if fallback_model is not None:
+        fall_real, fall_fake = _run_fallback(img)
 
-    if not quality_ok:
-        # Quality gate failed → always uncertain unless champion is very confident
-        if champ_fake >= 0.95:
-            label = "Fake"
-            final_real, final_fake = champ_real, champ_fake
-            decision_path = "low_quality_but_confident"
-        elif champ_fake <= 0.05:
-            label = "Real"
-            final_real, final_fake = champ_real, champ_fake
-            decision_path = "low_quality_but_confident"
-        else:
-            label = "Uncertain"
-            final_real, final_fake = champ_real, champ_fake
-            decision_path = "low_quality_uncertain"
-            warnings.append("Input quality too low for reliable detection.")
-
-    elif champ_fake >= CONFIDENT_FAKE:
-        label = "Fake"
-        final_real, final_fake = champ_real, champ_fake
-
-    elif champ_fake <= CONFIDENT_REAL:
-        label = "Real"
-        final_real, final_fake = champ_real, champ_fake
-
-    else:
-        # ====== Uncertain zone → call challenger ======
-        challenger_used = True
-        chall_real, chall_fake = _run_challenger(img)
-        disagreement = abs(champ_fake - chall_fake)
-
-        # Scale-aware: only go Uncertain if truly in midrange AND models disagree
-        in_midrange = UNCERTAIN_LOW < champ_fake < UNCERTAIN_HIGH
-
-        if in_midrange and disagreement > DISAGREE_THRESH:
-            label = "Uncertain"
-            # Logit blend for the reported probability
-            final_fake = _blend_logits(champ_fake, chall_fake)
-            final_real = 1 - final_fake
-            decision_path = "models_disagree"
-            warnings.append(
-                f"Models disagree in uncertain zone "
-                f"(FaceForge={champ_fake:.1%} fake, ViT={chall_fake:.1%} fake)."
-            )
-        else:
-            # Models agree (or champion is leaning one way) → logit blend
-            final_fake = _blend_logits(champ_fake, chall_fake)
-            final_real = 1 - final_fake
-            label = "Fake" if final_fake > 0.5 else "Real"
-            decision_path = "challenger_consulted"
-
+    final_fake = _stacking_blend(champ_fake, chall_fake, fall_fake)
+    final_real = 1.0 - final_fake
+    label = "Fake" if final_fake > 0.5 else "Real"
     confidence = round(max(final_real, final_fake), 4)
+
+    decision_path = "logit_stacking_ensemble"
+    if not quality_ok:
+        warnings.append("Input quality too low for reliable detection.")
+        label = "Uncertain"
+        decision_path = "low_quality_ensemble"
 
     # ====== FORENSIC FEATURES ======
     features = compute_all_features(img)
@@ -264,6 +253,13 @@ async def predict(file: UploadFile = File(...)):
     anomaly_flags = sum(1 for v in deviations.values() if abs(v) > 1.5)
 
     # ====== BUILD RESPONSE ======
+    stacking_weights = {
+        "champion": STACKING_WEIGHT_CHAMPION,
+        "challenger": STACKING_WEIGHT_CHALLENGER,
+        "fallback": STACKING_WEIGHT_FALLBACK,
+        "bias": STACKING_BIAS,
+    }
+
     response = {
         "prediction": label,
         "confidence": confidence,
@@ -274,20 +270,17 @@ async def predict(file: UploadFile = File(...)):
         "face_found": face_found,
         "decision": {
             "path": decision_path,
+            "stacking_weights": stacking_weights,
+            "formula": "sigmoid(a*logit(champ) + b*logit(chall) + c*logit(fall) + bias)",
             "champion": {
                 "model": "FaceForge-XceptionNet",
                 "real": round(champ_real, 4),
                 "fake": round(champ_fake, 4),
             },
-            "thresholds": {
-                "confident_real": CONFIDENT_REAL,
-                "confident_fake": CONFIDENT_FAKE,
-            },
-            "calibration": {
-                "samples": 40,
-                "accuracy": "90.0%",
-                "false_positive_rate": "0.0%",
-                "coverage": "100%",
+            "challenger": {
+                "model": "ViT-TwoStage",
+                "real": round(chall_real, 4),
+                "fake": round(chall_fake, 4),
             },
         },
         "forensic_analysis": {
@@ -298,11 +291,11 @@ async def predict(file: UploadFile = File(...)):
         "warnings": warnings,
     }
 
-    if challenger_used:
-        response["decision"]["challenger"] = {
-            "model": "prithivMLmods-ViT",
-            "real": round(chall_real, 4),
-            "fake": round(chall_fake, 4),
+    if fallback_model is not None:
+        response["decision"]["fallback"] = {
+            "model": "EfficientNet-B4",
+            "real": round(fall_real, 4),
+            "fake": round(fall_fake, 4),
         }
 
     return response
@@ -367,38 +360,21 @@ def _analyze_single_frame(img: Image.Image) -> dict:
 
     analysis_img = img_cropped
 
-    # Champion
+    # MULTI-MODEL ENSEMBLE (Logit Stacking)
     champ_real, champ_fake = _run_champion(analysis_img)
+    chall_real, chall_fake = _run_challenger(analysis_img)
 
-    # Decision
-    challenger_used = False
-    chall_real, chall_fake = None, None
+    fall_fake = 0.0
+    if fallback_model is not None:
+        _fr, fall_fake = _run_fallback(analysis_img)
+
+    final_fake = _stacking_blend(champ_fake, chall_fake, fall_fake)
+    final_real = 1.0 - final_fake
 
     if not quality_ok:
-        if champ_fake >= 0.95:
-            label, final_real, final_fake = "Fake", champ_real, champ_fake
-        elif champ_fake <= 0.05:
-            label, final_real, final_fake = "Real", champ_real, champ_fake
-        else:
-            label, final_real, final_fake = "Uncertain", champ_real, champ_fake
-    elif champ_fake >= CONFIDENT_FAKE:
-        label, final_real, final_fake = "Fake", champ_real, champ_fake
-    elif champ_fake <= CONFIDENT_REAL:
-        label, final_real, final_fake = "Real", champ_real, champ_fake
+        label = "Uncertain"
     else:
-        challenger_used = True
-        chall_real, chall_fake = _run_challenger(analysis_img)
-        disagreement = abs(champ_fake - chall_fake)
-        in_midrange = UNCERTAIN_LOW < champ_fake < UNCERTAIN_HIGH
-
-        if in_midrange and disagreement > DISAGREE_THRESH:
-            label = "Uncertain"
-            final_fake = _blend_logits(champ_fake, chall_fake)
-            final_real = 1 - final_fake
-        else:
-            final_fake = _blend_logits(champ_fake, chall_fake)
-            final_real = 1 - final_fake
-            label = "Fake" if final_fake > 0.5 else "Real"
+        label = "Fake" if final_fake > 0.5 else "Real"
 
     # Forensics
     features = compute_all_features(analysis_img)
@@ -411,11 +387,11 @@ def _analyze_single_frame(img: Image.Image) -> dict:
         "p_fake": round(final_fake, 4),
         "face_found": face_found,
         "champion_fake": round(champ_fake, 4),
+        "challenger_fake": round(chall_fake, 4),
         "anomaly_flags": anomaly_flags,
     }
-
-    if challenger_used:
-        result["challenger_fake"] = round(chall_fake, 4)
+    if fallback_model is not None:
+        result["fallback_fake"] = round(fall_fake, 4)
 
     return result
 
@@ -452,7 +428,7 @@ async def predict_video(file: UploadFile = File(...)):
         result["frame_index"] = i
         frame_results.append(result)
 
-    # ---- Aggregate ----
+    # ---- Aggregate (average p_fake across frames, better than majority vote) ----
     predictions = [r["prediction"] for r in frame_results]
     p_fakes = [r["p_fake"] for r in frame_results]
     confidences = [r["confidence"] for r in frame_results]
@@ -462,16 +438,16 @@ async def predict_video(file: UploadFile = File(...)):
     uncertain_count = predictions.count("Uncertain")
     total = len(predictions)
 
-    # Majority vote
-    if fake_count > real_count and fake_count > uncertain_count:
-        overall_label = "Fake"
-    elif real_count > fake_count and real_count > uncertain_count:
-        overall_label = "Real"
-    else:
-        overall_label = "Uncertain"
-
     avg_p_fake = sum(p_fakes) / len(p_fakes)
     avg_confidence = sum(confidences) / len(confidences)
+
+    # Use average p_fake for final decision (outperforms majority vote)
+    if uncertain_count > total * 0.5:
+        overall_label = "Uncertain"
+    elif avg_p_fake > 0.5:
+        overall_label = "Fake"
+    else:
+        overall_label = "Real"
 
     # Temporal consistency: high variance in p_fake across frames is suspicious
     p_fake_std = float(np.std(p_fakes))
@@ -508,9 +484,66 @@ async def predict_video(file: UploadFile = File(...)):
         },
         "per_frame": frame_results,
         "calibration": {
-            "samples": 40,
-            "accuracy": "90.0%",
-            "false_positive_rate": "0.0%",
+            "method": "logit_stacking",
+            "eval_videos": 80,
+            "balanced_accuracy": "68.8%",
+            "real_accuracy": "65.0%",
+            "fake_accuracy": "72.5%",
         },
         "warnings": warnings,
+    }
+
+
+# =========================================================================
+# AUDIO DETECTION (Multi-Model Ensemble)
+# =========================================================================
+
+from app.audio_model_loader import audio_models
+from app.audio_inference import predict_ensemble
+
+AUDIO_EXTENSIONS = {".wav", ".mp3", ".ogg", ".flac", ".m4a", ".webm", ".aac"}
+
+
+@app.post("/predict-audio")
+async def predict_audio(file: UploadFile = File(...)):
+    """
+    Analyze an audio file for deepfake voice detection.
+    Uses 3 models (CNN-LSTM, TCN, TCN-LSTM) as an ensemble.
+    """
+    # Validate file type
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    if ext not in AUDIO_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported audio format '{ext}'. "
+                   f"Supported: {', '.join(sorted(AUDIO_EXTENSIONS))}",
+        )
+
+    if not audio_models:
+        raise HTTPException(
+            status_code=503,
+            detail="No audio models loaded. Check models/ directory.",
+        )
+
+    # Save to temp file
+    import tempfile
+    suffix = ext or ".wav"
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+        content = await file.read()
+        tmp.write(content)
+        tmp_path = tmp.name
+
+    try:
+        result = predict_ensemble(tmp_path, audio_models)
+    except Exception as e:
+        os.unlink(tmp_path)
+        raise HTTPException(status_code=500, detail=f"Audio analysis failed: {str(e)}")
+    finally:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+
+    return {
+        "filename": file.filename,
+        "type": "audio",
+        **result,
     }

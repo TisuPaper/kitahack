@@ -1,0 +1,3584 @@
+[
+  {
+    "video": "000.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 0.014635927975177765,
+    "challenger": 0.2890947759151459,
+    "fallback": 0.03052348643541336
+  },
+  {
+    "video": "000.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 0.001989301759749651,
+    "challenger": 0.17686988413333893,
+    "fallback": 0.04388941451907158
+  },
+  {
+    "video": "000.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 0.0018417079700157046,
+    "challenger": 0.3426389992237091,
+    "fallback": 0.041805900633335114
+  },
+  {
+    "video": "000.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 0.001620195689611137,
+    "challenger": 0.37763646245002747,
+    "fallback": 0.022644486278295517
+  },
+  {
+    "video": "000.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 0.029664792120456696,
+    "challenger": 0.18559588491916656,
+    "fallback": 0.045776139944791794
+  },
+  {
+    "video": "001.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 4.4458761117027734e-09,
+    "challenger": 0.3447546064853668,
+    "fallback": 0.06432029604911804
+  },
+  {
+    "video": "001.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 2.8111880823189495e-08,
+    "challenger": 0.16805972158908844,
+    "fallback": 0.0568850003182888
+  },
+  {
+    "video": "001.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 5.7258283447936265e-08,
+    "challenger": 0.4501785933971405,
+    "fallback": 0.07279441505670547
+  },
+  {
+    "video": "001.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 8.287158514974635e-09,
+    "challenger": 0.2431962490081787,
+    "fallback": 0.027422258630394936
+  },
+  {
+    "video": "001.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 2.064277415669835e-09,
+    "challenger": 0.19293253123760223,
+    "fallback": 0.016260983422398567
+  },
+  {
+    "video": "002.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 1.3544834473577794e-05,
+    "challenger": 0.34601765871047974,
+    "fallback": 0.03093634732067585
+  },
+  {
+    "video": "002.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 8.106985478661954e-05,
+    "challenger": 0.12349026650190353,
+    "fallback": 0.04546041786670685
+  },
+  {
+    "video": "002.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 8.034655911615118e-05,
+    "challenger": 0.29953575134277344,
+    "fallback": 0.032663919031620026
+  },
+  {
+    "video": "002.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 8.411530870944262e-05,
+    "challenger": 0.30888235569000244,
+    "fallback": 0.0565948486328125
+  },
+  {
+    "video": "002.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 0.0002858622174244374,
+    "challenger": 0.3427766263484955,
+    "fallback": 0.1316109448671341
+  },
+  {
+    "video": "003.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 0.002951999893411994,
+    "challenger": 0.36398088932037354,
+    "fallback": 0.0247490257024765
+  },
+  {
+    "video": "003.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 0.0002340938663110137,
+    "challenger": 0.6233795881271362,
+    "fallback": 0.04410204291343689
+  },
+  {
+    "video": "003.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 0.0002862639375962317,
+    "challenger": 0.6887261271476746,
+    "fallback": 0.04820253700017929
+  },
+  {
+    "video": "003.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 0.8479131460189819,
+    "challenger": 0.2766473889350891,
+    "fallback": 0.044985879212617874
+  },
+  {
+    "video": "003.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 0.015426579862833023,
+    "challenger": 0.24594727158546448,
+    "fallback": 0.02592010609805584
+  },
+  {
+    "video": "004.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 8.321028872160241e-05,
+    "challenger": 0.28640541434288025,
+    "fallback": 0.09625744819641113
+  },
+  {
+    "video": "004.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 3.8836664316477254e-05,
+    "challenger": 0.09841549396514893,
+    "fallback": 0.0352422259747982
+  },
+  {
+    "video": "004.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 9.589223918737844e-05,
+    "challenger": 0.28430822491645813,
+    "fallback": 0.04672251641750336
+  },
+  {
+    "video": "004.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 0.0005777599290013313,
+    "challenger": 0.2356100082397461,
+    "fallback": 0.04330947622656822
+  },
+  {
+    "video": "004.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 1.2606778000190388e-05,
+    "challenger": 0.24951407313346863,
+    "fallback": 0.022176828235387802
+  },
+  {
+    "video": "005.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 5.5428081680020114e-08,
+    "challenger": 0.8749063014984131,
+    "fallback": 0.05595853552222252
+  },
+  {
+    "video": "005.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 9.951858004342284e-09,
+    "challenger": 0.792377233505249,
+    "fallback": 0.02348828688263893
+  },
+  {
+    "video": "005.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 4.278667375956502e-08,
+    "challenger": 0.4040011465549469,
+    "fallback": 0.05893601104617119
+  },
+  {
+    "video": "005.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 3.57737328648966e-09,
+    "challenger": 0.6521860957145691,
+    "fallback": 0.07790829986333847
+  },
+  {
+    "video": "005.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 6.371463001642041e-08,
+    "challenger": 0.7876716256141663,
+    "fallback": 0.09386295825242996
+  },
+  {
+    "video": "006.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 8.485531566293503e-08,
+    "challenger": 0.29320192337036133,
+    "fallback": 0.10741059482097626
+  },
+  {
+    "video": "006.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 7.4474428402027115e-06,
+    "challenger": 0.23551277816295624,
+    "fallback": 0.06669650226831436
+  },
+  {
+    "video": "006.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 0.00014406617265194654,
+    "challenger": 0.1469021886587143,
+    "fallback": 0.050840381532907486
+  },
+  {
+    "video": "006.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 2.3536442768090637e-06,
+    "challenger": 0.2529396712779999,
+    "fallback": 0.07259011268615723
+  },
+  {
+    "video": "006.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 2.6837939003598876e-05,
+    "challenger": 0.3211950957775116,
+    "fallback": 0.058204397559165955
+  },
+  {
+    "video": "007.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 1.6712272554286756e-05,
+    "challenger": 0.33848854899406433,
+    "fallback": 0.12115605175495148
+  },
+  {
+    "video": "007.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 2.3744416921545053e-07,
+    "challenger": 0.24595537781715393,
+    "fallback": 0.0991186872124672
+  },
+  {
+    "video": "007.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 1.523177274975751e-06,
+    "challenger": 0.539480984210968,
+    "fallback": 0.07131330668926239
+  },
+  {
+    "video": "007.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 1.478478338867717e-06,
+    "challenger": 0.39419907331466675,
+    "fallback": 0.06140242516994476
+  },
+  {
+    "video": "007.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 1.0911210665653925e-05,
+    "challenger": 0.15700282156467438,
+    "fallback": 0.06741952151060104
+  },
+  {
+    "video": "008.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 0.9674322605133057,
+    "challenger": 0.3936208188533783,
+    "fallback": 0.04586053639650345
+  },
+  {
+    "video": "008.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 0.8959910869598389,
+    "challenger": 0.46660253405570984,
+    "fallback": 0.03264683112502098
+  },
+  {
+    "video": "008.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 1.675566272751894e-05,
+    "challenger": 0.8305045366287231,
+    "fallback": 0.0301227867603302
+  },
+  {
+    "video": "008.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 3.1477888114750385e-05,
+    "challenger": 0.8841801881790161,
+    "fallback": 0.02762230485677719
+  },
+  {
+    "video": "008.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 2.3924303604871966e-07,
+    "challenger": 0.6752740144729614,
+    "fallback": 0.013475132174789906
+  },
+  {
+    "video": "009.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 0.16451475024223328,
+    "challenger": 0.8775168061256409,
+    "fallback": 0.05350784957408905
+  },
+  {
+    "video": "009.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 0.6831488013267517,
+    "challenger": 0.8933894634246826,
+    "fallback": 0.16303445398807526
+  },
+  {
+    "video": "009.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 0.06617601960897446,
+    "challenger": 0.8830928206443787,
+    "fallback": 0.10962414741516113
+  },
+  {
+    "video": "009.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 0.03611705079674721,
+    "challenger": 0.8503142595291138,
+    "fallback": 0.13214921951293945
+  },
+  {
+    "video": "009.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 0.09178422391414642,
+    "challenger": 0.8862527012825012,
+    "fallback": 0.04289999604225159
+  },
+  {
+    "video": "010.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 7.073202468177442e-09,
+    "challenger": 0.6948126554489136,
+    "fallback": 0.04792611300945282
+  },
+  {
+    "video": "010.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 2.2613086514411407e-07,
+    "challenger": 0.8875189423561096,
+    "fallback": 0.11989303678274155
+  },
+  {
+    "video": "010.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 3.846886613700917e-07,
+    "challenger": 0.8639333844184875,
+    "fallback": 0.04883885756134987
+  },
+  {
+    "video": "010.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 1.2327884633123176e-06,
+    "challenger": 0.6375259757041931,
+    "fallback": 0.07642212510108948
+  },
+  {
+    "video": "010.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 7.213303376829572e-08,
+    "challenger": 0.8779630661010742,
+    "fallback": 0.035125844180583954
+  },
+  {
+    "video": "011.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 4.8912873751305597e-08,
+    "challenger": 0.517488420009613,
+    "fallback": 0.04448987543582916
+  },
+  {
+    "video": "011.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 1.2827815254468078e-08,
+    "challenger": 0.28439900279045105,
+    "fallback": 0.032190952450037
+  },
+  {
+    "video": "011.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 4.349089977040421e-08,
+    "challenger": 0.494494765996933,
+    "fallback": 0.02143118530511856
+  },
+  {
+    "video": "011.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 1.5544292963909356e-08,
+    "challenger": 0.38181552290916443,
+    "fallback": 0.02001677080988884
+  },
+  {
+    "video": "011.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 3.2878144793357933e-06,
+    "challenger": 0.2983097434043884,
+    "fallback": 0.03509364277124405
+  },
+  {
+    "video": "012.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 0.0002221109753008932,
+    "challenger": 0.19987422227859497,
+    "fallback": 0.06995614618062973
+  },
+  {
+    "video": "012.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 0.0006256349734030664,
+    "challenger": 0.1347436159849167,
+    "fallback": 0.34846845269203186
+  },
+  {
+    "video": "012.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 0.0005762013606727123,
+    "challenger": 0.29568079113960266,
+    "fallback": 0.12126735597848892
+  },
+  {
+    "video": "012.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 7.710905265412293e-06,
+    "challenger": 0.16770580410957336,
+    "fallback": 0.03040778636932373
+  },
+  {
+    "video": "012.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 4.614891076926142e-05,
+    "challenger": 0.590951144695282,
+    "fallback": 0.11926067620515823
+  },
+  {
+    "video": "013.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 4.342815174140924e-08,
+    "challenger": 0.23464952409267426,
+    "fallback": 0.26453542709350586
+  },
+  {
+    "video": "013.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 2.7913315534533467e-06,
+    "challenger": 0.3756047785282135,
+    "fallback": 0.16432976722717285
+  },
+  {
+    "video": "013.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 1.509826397239067e-08,
+    "challenger": 0.8720475435256958,
+    "fallback": 0.07094353437423706
+  },
+  {
+    "video": "013.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 1.8107311205994847e-08,
+    "challenger": 0.9075680375099182,
+    "fallback": 0.15998148918151855
+  },
+  {
+    "video": "013.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 2.556977278800332e-06,
+    "challenger": 0.8724992871284485,
+    "fallback": 0.19165050983428955
+  },
+  {
+    "video": "014.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 8.38716277939966e-06,
+    "challenger": 0.1232137605547905,
+    "fallback": 0.03258003294467926
+  },
+  {
+    "video": "014.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 1.9886029178906028e-07,
+    "challenger": 0.14076675474643707,
+    "fallback": 0.026055868715047836
+  },
+  {
+    "video": "014.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 1.1913314665434882e-05,
+    "challenger": 0.08469198644161224,
+    "fallback": 0.0313345305621624
+  },
+  {
+    "video": "014.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 7.508659564336995e-06,
+    "challenger": 0.299063116312027,
+    "fallback": 0.09705639630556107
+  },
+  {
+    "video": "014.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 0.0001527740096207708,
+    "challenger": 0.11357472836971283,
+    "fallback": 0.02586156316101551
+  },
+  {
+    "video": "015.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 0.00566030852496624,
+    "challenger": 0.7484350800514221,
+    "fallback": 0.01349854376167059
+  },
+  {
+    "video": "015.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 0.00015418684051837772,
+    "challenger": 0.8664849400520325,
+    "fallback": 0.02597607485949993
+  },
+  {
+    "video": "015.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 7.036577153485268e-05,
+    "challenger": 0.2855958044528961,
+    "fallback": 0.050677184015512466
+  },
+  {
+    "video": "015.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 2.1792810002807528e-05,
+    "challenger": 0.6736361980438232,
+    "fallback": 0.0429946668446064
+  },
+  {
+    "video": "015.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 3.583846046240069e-05,
+    "challenger": 0.6958586573600769,
+    "fallback": 0.1141253337264061
+  },
+  {
+    "video": "016.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 6.274088809732348e-05,
+    "challenger": 0.8777021765708923,
+    "fallback": 0.055369310081005096
+  },
+  {
+    "video": "016.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 1.904910823213868e-05,
+    "challenger": 0.9111775755882263,
+    "fallback": 0.025911882519721985
+  },
+  {
+    "video": "016.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 0.00023126798623707145,
+    "challenger": 0.9205322861671448,
+    "fallback": 0.0696365013718605
+  },
+  {
+    "video": "016.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 6.220056093297899e-05,
+    "challenger": 0.9294705986976624,
+    "fallback": 0.024509578943252563
+  },
+  {
+    "video": "016.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 3.1707979360362515e-05,
+    "challenger": 0.9060690999031067,
+    "fallback": 0.07752621918916702
+  },
+  {
+    "video": "017.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 0.01804603450000286,
+    "challenger": 0.1840706765651703,
+    "fallback": 0.14173386991024017
+  },
+  {
+    "video": "017.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 0.006797479931265116,
+    "challenger": 0.27064692974090576,
+    "fallback": 0.11408872157335281
+  },
+  {
+    "video": "017.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 0.08568506687879562,
+    "challenger": 0.4177286624908447,
+    "fallback": 0.12507042288780212
+  },
+  {
+    "video": "017.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 0.0009002793813124299,
+    "challenger": 0.27082908153533936,
+    "fallback": 0.09984742850065231
+  },
+  {
+    "video": "017.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 2.864058842533268e-05,
+    "challenger": 0.13810884952545166,
+    "fallback": 0.04073629528284073
+  },
+  {
+    "video": "018.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 0.0038407009560614824,
+    "challenger": 0.7379923462867737,
+    "fallback": 0.07343971729278564
+  },
+  {
+    "video": "018.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 0.00048429914750158787,
+    "challenger": 0.9041687250137329,
+    "fallback": 0.024906469509005547
+  },
+  {
+    "video": "018.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 9.128988313023001e-05,
+    "challenger": 0.8372687101364136,
+    "fallback": 0.03908860310912132
+  },
+  {
+    "video": "018.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 0.44263479113578796,
+    "challenger": 0.7832383513450623,
+    "fallback": 0.05068472400307655
+  },
+  {
+    "video": "018.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 0.07747954875230789,
+    "challenger": 0.8928617835044861,
+    "fallback": 0.38564714789390564
+  },
+  {
+    "video": "019.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 4.780877134180628e-05,
+    "challenger": 0.22572219371795654,
+    "fallback": 0.01817150227725506
+  },
+  {
+    "video": "019.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 0.0002687079249881208,
+    "challenger": 0.1125655248761177,
+    "fallback": 0.02455897256731987
+  },
+  {
+    "video": "019.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 9.721827154862694e-06,
+    "challenger": 0.1085372120141983,
+    "fallback": 0.017712082713842392
+  },
+  {
+    "video": "019.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 0.0016312648076564074,
+    "challenger": 0.2941036522388458,
+    "fallback": 0.0324132926762104
+  },
+  {
+    "video": "019.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 0.011407810263335705,
+    "challenger": 0.12695220112800598,
+    "fallback": 0.1377604603767395
+  },
+  {
+    "video": "020.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 1.9965271658151096e-09,
+    "challenger": 0.6955742239952087,
+    "fallback": 0.021319638937711716
+  },
+  {
+    "video": "020.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 7.280212432902999e-09,
+    "challenger": 0.6628232002258301,
+    "fallback": 0.02897779829800129
+  },
+  {
+    "video": "020.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 4.923842666926248e-08,
+    "challenger": 0.2901882231235504,
+    "fallback": 0.05146113410592079
+  },
+  {
+    "video": "020.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 1.1447659709062918e-08,
+    "challenger": 0.6630124449729919,
+    "fallback": 0.07394923269748688
+  },
+  {
+    "video": "020.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 3.360220990344942e-09,
+    "challenger": 0.590378999710083,
+    "fallback": 0.08514360338449478
+  },
+  {
+    "video": "021.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 0.0012678715866059065,
+    "challenger": 0.5866463780403137,
+    "fallback": 0.031693797558546066
+  },
+  {
+    "video": "021.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 0.9517107605934143,
+    "challenger": 0.43968528509140015,
+    "fallback": 0.04540111869573593
+  },
+  {
+    "video": "021.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 0.0004122447862755507,
+    "challenger": 0.6053376197814941,
+    "fallback": 0.02933497726917267
+  },
+  {
+    "video": "021.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 0.014827991835772991,
+    "challenger": 0.873857319355011,
+    "fallback": 0.12936995923519135
+  },
+  {
+    "video": "021.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 0.07877462357282639,
+    "challenger": 0.9116409420967102,
+    "fallback": 0.04724084585905075
+  },
+  {
+    "video": "022.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 4.616281876224093e-05,
+    "challenger": 0.5066815614700317,
+    "fallback": 0.5122140049934387
+  },
+  {
+    "video": "022.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 2.3503896500187693e-06,
+    "challenger": 0.22897319495677948,
+    "fallback": 0.24643629789352417
+  },
+  {
+    "video": "022.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 1.216085729538463e-05,
+    "challenger": 0.5029494166374207,
+    "fallback": 0.42838534712791443
+  },
+  {
+    "video": "022.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 2.03486001737474e-06,
+    "challenger": 0.44036874175071716,
+    "fallback": 0.23292836546897888
+  },
+  {
+    "video": "022.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 1.7938649534698925e-06,
+    "challenger": 0.48207592964172363,
+    "fallback": 0.1267937272787094
+  },
+  {
+    "video": "023.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 0.00013239422696642578,
+    "challenger": 0.7564584612846375,
+    "fallback": 0.08098304271697998
+  },
+  {
+    "video": "023.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 0.0037900747265666723,
+    "challenger": 0.21435263752937317,
+    "fallback": 0.09228694438934326
+  },
+  {
+    "video": "023.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 8.943347347667441e-05,
+    "challenger": 0.2233211100101471,
+    "fallback": 0.12089402973651886
+  },
+  {
+    "video": "023.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 5.515406428457936e-06,
+    "challenger": 0.7751057147979736,
+    "fallback": 0.08891130983829498
+  },
+  {
+    "video": "023.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 0.008366932161152363,
+    "challenger": 0.3865806460380554,
+    "fallback": 0.02008989453315735
+  },
+  {
+    "video": "024.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 1.2828310502754903e-07,
+    "challenger": 0.21516671776771545,
+    "fallback": 0.05770889297127724
+  },
+  {
+    "video": "024.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 1.1299673019493639e-07,
+    "challenger": 0.28429627418518066,
+    "fallback": 0.12404737621545792
+  },
+  {
+    "video": "024.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 3.2307110814144835e-05,
+    "challenger": 0.18395191431045532,
+    "fallback": 0.07412966340780258
+  },
+  {
+    "video": "024.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 2.6314853585063247e-06,
+    "challenger": 0.26247984170913696,
+    "fallback": 0.06507958471775055
+  },
+  {
+    "video": "025.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 3.229916273994604e-06,
+    "challenger": 0.6413683891296387,
+    "fallback": 0.20323288440704346
+  },
+  {
+    "video": "025.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 1.1351986358931754e-05,
+    "challenger": 0.6598791480064392,
+    "fallback": 0.06736959517002106
+  },
+  {
+    "video": "025.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 0.00022562190133612603,
+    "challenger": 0.6944824457168579,
+    "fallback": 0.03822622820734978
+  },
+  {
+    "video": "025.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 1.3935748484072974e-06,
+    "challenger": 0.5234792232513428,
+    "fallback": 0.03715554624795914
+  },
+  {
+    "video": "025.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 3.469048169790767e-05,
+    "challenger": 0.5942670106887817,
+    "fallback": 0.08785033226013184
+  },
+  {
+    "video": "026.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 3.7189948898230796e-08,
+    "challenger": 0.6055287718772888,
+    "fallback": 0.028493156656622887
+  },
+  {
+    "video": "026.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 8.813311183075712e-07,
+    "challenger": 0.8190850615501404,
+    "fallback": 0.04580867290496826
+  },
+  {
+    "video": "026.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 1.2569339560286608e-06,
+    "challenger": 0.23055079579353333,
+    "fallback": 0.025182927027344704
+  },
+  {
+    "video": "026.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 2.1934470169071574e-06,
+    "challenger": 0.8081305623054504,
+    "fallback": 0.04782140254974365
+  },
+  {
+    "video": "026.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 1.1442708824915826e-07,
+    "challenger": 0.6977834701538086,
+    "fallback": 0.15255366265773773
+  },
+  {
+    "video": "027.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 6.195270088937832e-06,
+    "challenger": 0.15821023285388947,
+    "fallback": 0.038928061723709106
+  },
+  {
+    "video": "027.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 0.00010081326036015525,
+    "challenger": 0.15415091812610626,
+    "fallback": 0.04406918212771416
+  },
+  {
+    "video": "027.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 4.459073352336418e-06,
+    "challenger": 0.2175517976284027,
+    "fallback": 0.029439765959978104
+  },
+  {
+    "video": "027.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 0.00024075624241959304,
+    "challenger": 0.16702213883399963,
+    "fallback": 0.03326685354113579
+  },
+  {
+    "video": "027.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 6.68461552777444e-06,
+    "challenger": 0.12331338971853256,
+    "fallback": 0.03998013213276863
+  },
+  {
+    "video": "028.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 0.0012417377438396215,
+    "challenger": 0.24609163403511047,
+    "fallback": 0.07891660183668137
+  },
+  {
+    "video": "028.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 4.077545600011945e-05,
+    "challenger": 0.6426130533218384,
+    "fallback": 0.0155536700040102
+  },
+  {
+    "video": "028.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 2.242432856291998e-06,
+    "challenger": 0.5309130549430847,
+    "fallback": 0.009096463210880756
+  },
+  {
+    "video": "028.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 1.1735118278011214e-05,
+    "challenger": 0.28703489899635315,
+    "fallback": 0.020795172080397606
+  },
+  {
+    "video": "028.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 0.0002533379301894456,
+    "challenger": 0.2524663209915161,
+    "fallback": 0.009717847220599651
+  },
+  {
+    "video": "029.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 7.177278149583799e-08,
+    "challenger": 0.6583982110023499,
+    "fallback": 0.20261290669441223
+  },
+  {
+    "video": "029.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 9.576034898373109e-08,
+    "challenger": 0.7157148718833923,
+    "fallback": 0.6261192560195923
+  },
+  {
+    "video": "029.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 2.784888408768893e-08,
+    "challenger": 0.6421505808830261,
+    "fallback": 0.2717893123626709
+  },
+  {
+    "video": "029.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 1.1452086567942388e-07,
+    "challenger": 0.7005248069763184,
+    "fallback": 0.19230487942695618
+  },
+  {
+    "video": "029.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 9.753026688485988e-07,
+    "challenger": 0.7032166719436646,
+    "fallback": 0.11012161523103714
+  },
+  {
+    "video": "030.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 1.5629414917839313e-07,
+    "challenger": 0.3604116141796112,
+    "fallback": 0.02042919583618641
+  },
+  {
+    "video": "030.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 3.7392091201127187e-08,
+    "challenger": 0.49627140164375305,
+    "fallback": 0.019975338131189346
+  },
+  {
+    "video": "030.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 6.254142022044107e-07,
+    "challenger": 0.7261467576026917,
+    "fallback": 0.05941721051931381
+  },
+  {
+    "video": "030.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 2.5485582000328577e-07,
+    "challenger": 0.6542225480079651,
+    "fallback": 0.038298219442367554
+  },
+  {
+    "video": "030.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 1.891990223157336e-06,
+    "challenger": 0.19870615005493164,
+    "fallback": 0.16428819298744202
+  },
+  {
+    "video": "031.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 1.9209184642932087e-07,
+    "challenger": 0.14589571952819824,
+    "fallback": 0.030297815799713135
+  },
+  {
+    "video": "031.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 5.992071237415075e-05,
+    "challenger": 0.1387673318386078,
+    "fallback": 0.17479677498340607
+  },
+  {
+    "video": "031.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 1.091955859067184e-08,
+    "challenger": 0.1262538582086563,
+    "fallback": 0.041360508650541306
+  },
+  {
+    "video": "031.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 6.183076038723812e-05,
+    "challenger": 0.11993928253650665,
+    "fallback": 0.059954509139060974
+  },
+  {
+    "video": "031.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 3.8968531157479447e-07,
+    "challenger": 0.1930888295173645,
+    "fallback": 0.060613587498664856
+  },
+  {
+    "video": "032.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 1.986280473431634e-08,
+    "challenger": 0.2934814691543579,
+    "fallback": 0.006583687383681536
+  },
+  {
+    "video": "032.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 1.3695208167519013e-07,
+    "challenger": 0.2168819010257721,
+    "fallback": 0.004389078356325626
+  },
+  {
+    "video": "032.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 4.456866918189917e-06,
+    "challenger": 0.16217251121997833,
+    "fallback": 0.006019580643624067
+  },
+  {
+    "video": "032.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 3.5216854143982346e-07,
+    "challenger": 0.2010505348443985,
+    "fallback": 0.005206163972616196
+  },
+  {
+    "video": "032.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 1.0585092695691856e-06,
+    "challenger": 0.13806675374507904,
+    "fallback": 0.004182511940598488
+  },
+  {
+    "video": "033.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 0.5627946257591248,
+    "challenger": 0.465823769569397,
+    "fallback": 0.03389318287372589
+  },
+  {
+    "video": "033.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 0.00499434769153595,
+    "challenger": 0.7428052425384521,
+    "fallback": 0.02976694516837597
+  },
+  {
+    "video": "033.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 0.006048809736967087,
+    "challenger": 0.5031898617744446,
+    "fallback": 0.026681652292609215
+  },
+  {
+    "video": "033.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 0.00014726442168466747,
+    "challenger": 0.8222253918647766,
+    "fallback": 0.03300542011857033
+  },
+  {
+    "video": "034.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 1.8782944835038506e-06,
+    "challenger": 0.4667123854160309,
+    "fallback": 0.03653934597969055
+  },
+  {
+    "video": "034.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 3.105976247752551e-06,
+    "challenger": 0.875015139579773,
+    "fallback": 0.03851671889424324
+  },
+  {
+    "video": "034.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 8.432838512817398e-06,
+    "challenger": 0.6405220627784729,
+    "fallback": 0.01553923450410366
+  },
+  {
+    "video": "034.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 3.084279001086543e-07,
+    "challenger": 0.601732611656189,
+    "fallback": 0.014548535458743572
+  },
+  {
+    "video": "034.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 5.843895678481204e-07,
+    "challenger": 0.6400753855705261,
+    "fallback": 0.01409138273447752
+  },
+  {
+    "video": "035.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 5.191712261876091e-06,
+    "challenger": 0.23483693599700928,
+    "fallback": 0.06425254791975021
+  },
+  {
+    "video": "035.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 2.3155510007200064e-06,
+    "challenger": 0.22161783277988434,
+    "fallback": 0.2213267683982849
+  },
+  {
+    "video": "035.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 8.895066457625944e-06,
+    "challenger": 0.2636104226112366,
+    "fallback": 0.2092406451702118
+  },
+  {
+    "video": "035.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 1.3174677633287502e-06,
+    "challenger": 0.31185397505760193,
+    "fallback": 0.25352177023887634
+  },
+  {
+    "video": "035.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 1.4757461030967534e-08,
+    "challenger": 0.1575581282377243,
+    "fallback": 0.823328971862793
+  },
+  {
+    "video": "036.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 1.73243563494907e-07,
+    "challenger": 0.8177969455718994,
+    "fallback": 0.2821548879146576
+  },
+  {
+    "video": "036.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 1.535441515443381e-05,
+    "challenger": 0.8925879001617432,
+    "fallback": 0.27315253019332886
+  },
+  {
+    "video": "036.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 0.00035711051896214485,
+    "challenger": 0.5908613801002502,
+    "fallback": 0.3762796223163605
+  },
+  {
+    "video": "036.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 2.032026714005042e-06,
+    "challenger": 0.9157865047454834,
+    "fallback": 0.11860273778438568
+  },
+  {
+    "video": "036.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 4.174756043084926e-07,
+    "challenger": 0.8432443141937256,
+    "fallback": 0.07048080116510391
+  },
+  {
+    "video": "037.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 0.0011559536214917898,
+    "challenger": 0.3457830846309662,
+    "fallback": 0.02368459291756153
+  },
+  {
+    "video": "037.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 0.0002933806390501559,
+    "challenger": 0.38825058937072754,
+    "fallback": 0.1195915937423706
+  },
+  {
+    "video": "037.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 1.1568542504392099e-05,
+    "challenger": 0.5519265532493591,
+    "fallback": 0.014104771427810192
+  },
+  {
+    "video": "037.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 3.021912561962381e-06,
+    "challenger": 0.4942132532596588,
+    "fallback": 0.035943787544965744
+  },
+  {
+    "video": "037.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 7.5846010076929815e-06,
+    "challenger": 0.5005269646644592,
+    "fallback": 0.022612163797020912
+  },
+  {
+    "video": "038.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 7.134713930767589e-10,
+    "challenger": 0.2148122489452362,
+    "fallback": 0.023060938343405724
+  },
+  {
+    "video": "038.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 2.6421062671033724e-08,
+    "challenger": 0.4354998767375946,
+    "fallback": 0.051047056913375854
+  },
+  {
+    "video": "038.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 6.18332496316043e-10,
+    "challenger": 0.1441655158996582,
+    "fallback": 0.05536411702632904
+  },
+  {
+    "video": "038.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 2.181201663731258e-09,
+    "challenger": 0.11646954715251923,
+    "fallback": 0.05567712336778641
+  },
+  {
+    "video": "038.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 1.7508038352431754e-09,
+    "challenger": 0.33494678139686584,
+    "fallback": 0.05376853421330452
+  },
+  {
+    "video": "039.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 0,
+    "champion": 0.0006443607853725553,
+    "challenger": 0.6043451428413391,
+    "fallback": 0.058893874287605286
+  },
+  {
+    "video": "039.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 1,
+    "champion": 0.027808718383312225,
+    "challenger": 0.27961668372154236,
+    "fallback": 0.03977888077497482
+  },
+  {
+    "video": "039.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 2,
+    "champion": 0.18446004390716553,
+    "challenger": 0.2565028667449951,
+    "fallback": 0.042308468371629715
+  },
+  {
+    "video": "039.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 3,
+    "champion": 0.0020101077388972044,
+    "challenger": 0.6111913323402405,
+    "fallback": 0.0837482288479805
+  },
+  {
+    "video": "039.mp4",
+    "forgery": "original",
+    "label": 0,
+    "frame_idx": 4,
+    "champion": 2.191491876146756e-05,
+    "challenger": 0.22017747163772583,
+    "fallback": 0.03594445437192917
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.7307982444763184,
+    "challenger": 0.5268723964691162,
+    "fallback": 0.09543164074420929
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.7515483498573303,
+    "challenger": 0.36213168501853943,
+    "fallback": 0.16513141989707947
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.17518438398838043,
+    "challenger": 0.3436738848686218,
+    "fallback": 0.18353529274463654
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.83475661277771,
+    "challenger": 0.4556482434272766,
+    "fallback": 0.1882263720035553
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.8184166550636292,
+    "challenger": 0.20807906985282898,
+    "fallback": 0.10237398743629456
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.9947323799133301,
+    "challenger": 0.7222407460212708,
+    "fallback": 0.3196881115436554
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.9995970129966736,
+    "challenger": 0.6798580288887024,
+    "fallback": 0.2709219753742218
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.9999926090240479,
+    "challenger": 0.751352846622467,
+    "fallback": 0.41543838381767273
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.9888845682144165,
+    "challenger": 0.673549473285675,
+    "fallback": 0.2140926569700241
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.999993085861206,
+    "challenger": 0.6895698308944702,
+    "fallback": 0.1873675137758255
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.9746969938278198,
+    "challenger": 0.3149363696575165,
+    "fallback": 0.34171608090400696
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.9817501306533813,
+    "challenger": 0.3159545063972473,
+    "fallback": 0.2522696852684021
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.9896663427352905,
+    "challenger": 0.3304458260536194,
+    "fallback": 0.14946015179157257
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.9907485842704773,
+    "challenger": 0.3570844233036041,
+    "fallback": 0.14115606248378754
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.9896559715270996,
+    "challenger": 0.26521608233451843,
+    "fallback": 0.224064901471138
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.6382462382316589,
+    "challenger": 0.5762786269187927,
+    "fallback": 0.12738633155822754
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.9832114577293396,
+    "challenger": 0.7969692349433899,
+    "fallback": 0.1997266709804535
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.012300954200327396,
+    "challenger": 0.600019633769989,
+    "fallback": 0.08739327639341354
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.9405410885810852,
+    "challenger": 0.24065318703651428,
+    "fallback": 0.03588922321796417
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.9907768964767456,
+    "challenger": 0.69502854347229,
+    "fallback": 0.06626954674720764
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.9994205236434937,
+    "challenger": 0.18843750655651093,
+    "fallback": 0.812822699546814
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.999987006187439,
+    "challenger": 0.15180882811546326,
+    "fallback": 0.24600271880626678
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.9953165054321289,
+    "challenger": 0.21582604944705963,
+    "fallback": 0.24204981327056885
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.9990341663360596,
+    "challenger": 0.28834375739097595,
+    "fallback": 0.1416904777288437
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.9969923496246338,
+    "challenger": 0.1660606414079666,
+    "fallback": 0.06405414640903473
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 6.891184966661967e-06,
+    "challenger": 0.6928123235702515,
+    "fallback": 0.06261269003152847
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.00034156651236116886,
+    "challenger": 0.5242915749549866,
+    "fallback": 0.14480452239513397
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 3.7351121136453e-05,
+    "challenger": 0.3219718039035797,
+    "fallback": 0.07258082181215286
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 5.5570315453223884e-05,
+    "challenger": 0.36541253328323364,
+    "fallback": 0.09719576686620712
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.03662658855319023,
+    "challenger": 0.5156542062759399,
+    "fallback": 0.09621137380599976
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 3.023371027666144e-05,
+    "challenger": 0.4119948148727417,
+    "fallback": 0.04013094678521156
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.0015143653145059943,
+    "challenger": 0.5737509727478027,
+    "fallback": 0.12669219076633453
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.010157376527786255,
+    "challenger": 0.5510512590408325,
+    "fallback": 0.09297334402799606
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 8.060810068855062e-05,
+    "challenger": 0.596671462059021,
+    "fallback": 0.155345156788826
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.0003629130660556257,
+    "challenger": 0.5734399557113647,
+    "fallback": 0.08674302697181702
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.9422471523284912,
+    "challenger": 0.8260321617126465,
+    "fallback": 0.10244257003068924
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.9576115012168884,
+    "challenger": 0.7976234555244446,
+    "fallback": 0.17826639115810394
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.9275839328765869,
+    "challenger": 0.895818829536438,
+    "fallback": 0.24074521660804749
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.9868605732917786,
+    "challenger": 0.7473926544189453,
+    "fallback": 0.16442008316516876
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.9999698400497437,
+    "challenger": 0.607655942440033,
+    "fallback": 0.29757899045944214
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.001314012217335403,
+    "challenger": 0.7958118915557861,
+    "fallback": 0.04425353556871414
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.9474605321884155,
+    "challenger": 0.3993672728538513,
+    "fallback": 0.03526659682393074
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.11423174291849136,
+    "challenger": 0.4901319146156311,
+    "fallback": 0.08098021149635315
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.05795355886220932,
+    "challenger": 0.8283665776252747,
+    "fallback": 0.03699255362153053
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.025092635303735733,
+    "challenger": 0.7291705012321472,
+    "fallback": 0.08369284868240356
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.9974241256713867,
+    "challenger": 0.2289934754371643,
+    "fallback": 0.25282323360443115
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.9913794994354248,
+    "challenger": 0.19045306742191315,
+    "fallback": 0.0577818863093853
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.9994051456451416,
+    "challenger": 0.22998401522636414,
+    "fallback": 0.06401607394218445
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.9890497922897339,
+    "challenger": 0.12376508861780167,
+    "fallback": 0.17664936184883118
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "Deepfakes",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.9979308843612671,
+    "challenger": 0.24692575633525848,
+    "fallback": 0.08336983621120453
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.005547911860048771,
+    "challenger": 0.4857492744922638,
+    "fallback": 0.0411887988448143
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.0038873874582350254,
+    "challenger": 0.5624480843544006,
+    "fallback": 0.060585085302591324
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.03263579308986664,
+    "challenger": 0.4425339996814728,
+    "fallback": 0.05110578611493111
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.013091838918626308,
+    "challenger": 0.4772666096687317,
+    "fallback": 0.052126139402389526
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.0035009090788662434,
+    "challenger": 0.5514411926269531,
+    "fallback": 0.027103977277874947
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 3.0064938982832246e-07,
+    "challenger": 0.2629423141479492,
+    "fallback": 0.06738006323575974
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 4.478346795622201e-07,
+    "challenger": 0.6156406998634338,
+    "fallback": 0.18553252518177032
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 2.5925266982085304e-06,
+    "challenger": 0.7192482948303223,
+    "fallback": 0.022643979638814926
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 6.784017614336335e-08,
+    "challenger": 0.6699455380439758,
+    "fallback": 0.05302320048213005
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 9.974729664463666e-07,
+    "challenger": 0.493257075548172,
+    "fallback": 0.042564962059259415
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 3.019380528712645e-06,
+    "challenger": 0.3381252586841583,
+    "fallback": 0.05434488132596016
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.00043225300032645464,
+    "challenger": 0.2849910855293274,
+    "fallback": 0.046321772038936615
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 1.3935355127614457e-05,
+    "challenger": 0.3388279974460602,
+    "fallback": 0.03422851860523224
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.0009961477480828762,
+    "challenger": 0.2820627987384796,
+    "fallback": 0.038729168474674225
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 4.6414929784077685e-06,
+    "challenger": 0.3273831307888031,
+    "fallback": 0.06064971163868904
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.08587701618671417,
+    "challenger": 0.5677378177642822,
+    "fallback": 0.43438440561294556
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.09241726994514465,
+    "challenger": 0.6037865877151489,
+    "fallback": 0.05858680605888367
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.07410694658756256,
+    "challenger": 0.6511534452438354,
+    "fallback": 0.13759854435920715
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.007441065274178982,
+    "challenger": 0.33138465881347656,
+    "fallback": 0.07491763681173325
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.001970986369997263,
+    "challenger": 0.2139449417591095,
+    "fallback": 0.10269629955291748
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 1.3958459021523595e-05,
+    "challenger": 0.4614201784133911,
+    "fallback": 0.030937207862734795
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 2.058856080111582e-05,
+    "challenger": 0.3454843759536743,
+    "fallback": 0.026212606579065323
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.000588196620810777,
+    "challenger": 0.3921653926372528,
+    "fallback": 0.07430369406938553
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.00025840671150945127,
+    "challenger": 0.33877333998680115,
+    "fallback": 0.03962809592485428
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 3.2786401789053343e-06,
+    "challenger": 0.5440747141838074,
+    "fallback": 0.08048896491527557
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 5.164168214832898e-06,
+    "challenger": 0.8724064826965332,
+    "fallback": 0.08684155344963074
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 3.2971149721561233e-06,
+    "challenger": 0.8480112552642822,
+    "fallback": 0.10311412066221237
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 3.292793167020136e-07,
+    "challenger": 0.8674765825271606,
+    "fallback": 0.07101573050022125
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 4.363649622973753e-06,
+    "challenger": 0.7252361178398132,
+    "fallback": 0.058180272579193115
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 3.755276267725094e-08,
+    "challenger": 0.6500701308250427,
+    "fallback": 0.07382325828075409
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.00017267624207306653,
+    "challenger": 0.47804567217826843,
+    "fallback": 0.1500043123960495
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.0008942129206843674,
+    "challenger": 0.41622623801231384,
+    "fallback": 0.2707521915435791
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.00012952912948094308,
+    "challenger": 0.3839269280433655,
+    "fallback": 0.09066154807806015
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.014439469203352928,
+    "challenger": 0.4032735526561737,
+    "fallback": 0.19250959157943726
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 1.7001768526370142e-07,
+    "challenger": 0.521775484085083,
+    "fallback": 0.1338193416595459
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 7.823179475963116e-05,
+    "challenger": 0.7440024614334106,
+    "fallback": 0.0932888463139534
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 9.76282808551332e-06,
+    "challenger": 0.746844470500946,
+    "fallback": 0.044534917920827866
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 2.0380688511068e-05,
+    "challenger": 0.5155835151672363,
+    "fallback": 0.057759519666433334
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 6.517018391605234e-07,
+    "challenger": 0.33602792024612427,
+    "fallback": 0.05563066154718399
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 6.932341989340784e-07,
+    "challenger": 0.7951816320419312,
+    "fallback": 0.0703924149274826
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 2.777377083873489e-08,
+    "challenger": 0.9154404401779175,
+    "fallback": 0.022140756249427795
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.9890557527542114,
+    "challenger": 0.45322591066360474,
+    "fallback": 0.03367345407605171
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 6.567361054976573e-08,
+    "challenger": 0.8986483216285706,
+    "fallback": 0.0947883203625679
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 4.425809834174288e-07,
+    "challenger": 0.886693000793457,
+    "fallback": 0.05505208298563957
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 2.0552779460558668e-05,
+    "challenger": 0.8967846632003784,
+    "fallback": 0.04492431879043579
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.6037006974220276,
+    "challenger": 0.8822086453437805,
+    "fallback": 0.035278502851724625
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.774162769317627,
+    "challenger": 0.8717110753059387,
+    "fallback": 0.10755440592765808
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.7371215224266052,
+    "challenger": 0.8032240271568298,
+    "fallback": 0.0896780714392662
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.922775387763977,
+    "challenger": 0.8013190031051636,
+    "fallback": 0.0445844940841198
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "Face2Face",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.9648483991622925,
+    "challenger": 0.7760838866233826,
+    "fallback": 0.04024837538599968
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 4.3130905396537855e-05,
+    "challenger": 0.22299432754516602,
+    "fallback": 0.06182482838630676
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 7.085585821187124e-06,
+    "challenger": 0.2932519316673279,
+    "fallback": 0.027553310617804527
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 9.809268703975249e-06,
+    "challenger": 0.3540436625480652,
+    "fallback": 0.03968001902103424
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 6.406622560461983e-06,
+    "challenger": 0.23535382747650146,
+    "fallback": 0.024812370538711548
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 1.686595169303473e-06,
+    "challenger": 0.26054471731185913,
+    "fallback": 0.014946158975362778
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 5.77053560490981e-09,
+    "challenger": 0.3266008198261261,
+    "fallback": 0.02609262615442276
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 1.3250822803456686e-06,
+    "challenger": 0.5860069990158081,
+    "fallback": 0.019356030970811844
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 8.322875166832944e-10,
+    "challenger": 0.37752097845077515,
+    "fallback": 0.023990832269191742
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 8.234369488491211e-07,
+    "challenger": 0.34722259640693665,
+    "fallback": 0.020777389407157898
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 5.998235508286598e-08,
+    "challenger": 0.3471550941467285,
+    "fallback": 0.010739382356405258
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 6.59687357256189e-05,
+    "challenger": 0.35234931111335754,
+    "fallback": 0.08050451427698135
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.002558913081884384,
+    "challenger": 0.5781811475753784,
+    "fallback": 0.039551787078380585
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.00036555895349010825,
+    "challenger": 0.3205999732017517,
+    "fallback": 0.0769551619887352
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.0011587848421186209,
+    "challenger": 0.3497450649738312,
+    "fallback": 0.06851932406425476
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.0005932064377702773,
+    "challenger": 0.23823827505111694,
+    "fallback": 0.05433589592576027
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.0031926091760396957,
+    "challenger": 0.4069155156612396,
+    "fallback": 0.016774114221334457
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.008587758988142014,
+    "challenger": 0.41776543855667114,
+    "fallback": 0.0276179239153862
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.0006994458381086588,
+    "challenger": 0.2943502962589264,
+    "fallback": 0.02020052634179592
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.01927066221833229,
+    "challenger": 0.2413494884967804,
+    "fallback": 0.022559883072972298
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.0012688168790191412,
+    "challenger": 0.5516648888587952,
+    "fallback": 0.03435131534934044
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 8.222691576520447e-06,
+    "challenger": 0.21546059846878052,
+    "fallback": 0.2076687514781952
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.0001701753935776651,
+    "challenger": 0.14525403082370758,
+    "fallback": 0.015028562396764755
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.00014371519500855356,
+    "challenger": 0.23764465749263763,
+    "fallback": 0.21939682960510254
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.0004091694427188486,
+    "challenger": 0.2237275391817093,
+    "fallback": 0.16893866658210754
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.00017427842249162495,
+    "challenger": 0.22024351358413696,
+    "fallback": 0.03861096873879433
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 5.989744117362861e-11,
+    "challenger": 0.8842706680297852,
+    "fallback": 0.03578246384859085
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 3.542750093288305e-09,
+    "challenger": 0.8975026607513428,
+    "fallback": 0.02150176651775837
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 5.560107041446827e-09,
+    "challenger": 0.6501613259315491,
+    "fallback": 0.034280065447092056
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 1.3534169340800872e-09,
+    "challenger": 0.8111797571182251,
+    "fallback": 0.07977323234081268
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 2.5677683937463947e-11,
+    "challenger": 0.8812519311904907,
+    "fallback": 0.01633903943002224
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 1.517766534675502e-08,
+    "challenger": 0.4478819668292999,
+    "fallback": 0.03681127727031708
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 6.743650828866521e-06,
+    "challenger": 0.22607772052288055,
+    "fallback": 0.0301868487149477
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 6.0201036831131205e-06,
+    "challenger": 0.44145888090133667,
+    "fallback": 0.029846642166376114
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 7.224055593724188e-07,
+    "challenger": 0.25665751099586487,
+    "fallback": 0.04143083468079567
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 5.971820655759075e-07,
+    "challenger": 0.3792024552822113,
+    "fallback": 0.017247399315238
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 6.48546006232209e-07,
+    "challenger": 0.736332356929779,
+    "fallback": 0.12081918120384216
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 3.91903449781239e-06,
+    "challenger": 0.8940648436546326,
+    "fallback": 0.1812618225812912
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 3.412589876461425e-06,
+    "challenger": 0.6834605932235718,
+    "fallback": 0.09624898433685303
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 8.625849368115723e-09,
+    "challenger": 0.7572380900382996,
+    "fallback": 0.10345306247472763
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 7.596783291319298e-08,
+    "challenger": 0.8791875243186951,
+    "fallback": 0.09912992268800735
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.00045091265928931534,
+    "challenger": 0.6616948843002319,
+    "fallback": 0.010757691226899624
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.9789912700653076,
+    "challenger": 0.45186319947242737,
+    "fallback": 0.04508977010846138
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 2.73000921424682e-07,
+    "challenger": 0.6933010220527649,
+    "fallback": 0.01033200416713953
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 5.1927172535215504e-06,
+    "challenger": 0.7563724517822266,
+    "fallback": 0.014117932878434658
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 6.195624337124173e-06,
+    "challenger": 0.6901712417602539,
+    "fallback": 0.021087054163217545
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 9.739900997374207e-05,
+    "challenger": 0.3651702105998993,
+    "fallback": 0.08540243655443192
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.0003699842491187155,
+    "challenger": 0.2573488652706146,
+    "fallback": 0.01762242801487446
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.0011978237889707088,
+    "challenger": 0.3943381905555725,
+    "fallback": 0.053456805646419525
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.012995720840990543,
+    "challenger": 0.5526187419891357,
+    "fallback": 0.04343096539378166
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "FaceSwap",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.000972490175627172,
+    "challenger": 0.4436416029930115,
+    "fallback": 0.025317752733826637
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.010365662164986134,
+    "challenger": 0.40039560198783875,
+    "fallback": 0.054094098508358
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.002321168314665556,
+    "challenger": 0.7238061428070068,
+    "fallback": 0.0658673495054245
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.003141953144222498,
+    "challenger": 0.630640983581543,
+    "fallback": 0.08920196443796158
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.002595295663923025,
+    "challenger": 0.41361427307128906,
+    "fallback": 0.04630832374095917
+  },
+  {
+    "video": "000_003.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.0033356144558638334,
+    "challenger": 0.584651529788971,
+    "fallback": 0.02544419839978218
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 2.3030102624943538e-07,
+    "challenger": 0.46729931235313416,
+    "fallback": 0.03544899448752403
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 6.804700802831576e-08,
+    "challenger": 0.21174964308738708,
+    "fallback": 0.05226273089647293
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 3.1815289958103676e-07,
+    "challenger": 0.403253972530365,
+    "fallback": 0.08299525082111359
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 1.2752342115618376e-07,
+    "challenger": 0.5568943023681641,
+    "fallback": 0.025977134704589844
+  },
+  {
+    "video": "001_870.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 2.965206249427865e-07,
+    "challenger": 0.5485960245132446,
+    "fallback": 0.038929443806409836
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 4.402468675834825e-06,
+    "challenger": 0.4177952706813812,
+    "fallback": 0.056114815175533295
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.00018699424981605262,
+    "challenger": 0.2665971517562866,
+    "fallback": 0.08493251353502274
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 1.9654080460895784e-05,
+    "challenger": 0.37626519799232483,
+    "fallback": 0.09520595520734787
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.001032422762364149,
+    "challenger": 0.20493681728839874,
+    "fallback": 0.05974114313721657
+  },
+  {
+    "video": "002_006.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.00015577516751363873,
+    "challenger": 0.5290136337280273,
+    "fallback": 0.05326876789331436
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.9905283451080322,
+    "challenger": 0.5168637037277222,
+    "fallback": 0.05439574271440506
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.004171749111264944,
+    "challenger": 0.5166494250297546,
+    "fallback": 0.08208654075860977
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.0018793948693200946,
+    "challenger": 0.6931165456771851,
+    "fallback": 0.1279153972864151
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.022749347612261772,
+    "challenger": 0.3701346814632416,
+    "fallback": 0.022177623584866524
+  },
+  {
+    "video": "003_000.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.0001351359678665176,
+    "challenger": 0.391723096370697,
+    "fallback": 0.05935109406709671
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.0010687154717743397,
+    "challenger": 0.36906471848487854,
+    "fallback": 0.09104777872562408
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.0001983834954444319,
+    "challenger": 0.2425229251384735,
+    "fallback": 0.09239958971738815
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.0005657427827827632,
+    "challenger": 0.3769250810146332,
+    "fallback": 0.04705800488591194
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.0008245158824138343,
+    "challenger": 0.4653455913066864,
+    "fallback": 0.03510788455605507
+  },
+  {
+    "video": "004_982.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 3.9075948734534904e-05,
+    "challenger": 0.34668219089508057,
+    "fallback": 0.07466745376586914
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 1.924332622138536e-07,
+    "challenger": 0.86604905128479,
+    "fallback": 0.16717751324176788
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 8.930101671467128e-07,
+    "challenger": 0.8818304538726807,
+    "fallback": 0.04577706381678581
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 2.2311070324576576e-07,
+    "challenger": 0.8289268016815186,
+    "fallback": 0.2385348230600357
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 1.8288760372797697e-07,
+    "challenger": 0.7390092015266418,
+    "fallback": 0.4334380328655243
+  },
+  {
+    "video": "005_010.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 1.1250849638599902e-06,
+    "challenger": 0.7896807193756104,
+    "fallback": 0.1818174570798874
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 2.204563315899577e-05,
+    "challenger": 0.5483264327049255,
+    "fallback": 0.07781719416379929
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 1.779704325599596e-05,
+    "challenger": 0.37542933225631714,
+    "fallback": 0.06773334741592407
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 5.549437628360465e-05,
+    "challenger": 0.3954898416996002,
+    "fallback": 0.05013646185398102
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 3.587867468013428e-05,
+    "challenger": 0.3644048869609833,
+    "fallback": 0.054394371807575226
+  },
+  {
+    "video": "006_002.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 3.428427589824423e-05,
+    "challenger": 0.40607744455337524,
+    "fallback": 0.07253613322973251
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.0001229283370776102,
+    "challenger": 0.6469403505325317,
+    "fallback": 0.05239560455083847
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.00013943023805040866,
+    "challenger": 0.5774819850921631,
+    "fallback": 0.05170029401779175
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.00019107481057289988,
+    "challenger": 0.15821473300457,
+    "fallback": 0.07166286557912827
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 1.78428235813044e-05,
+    "challenger": 0.3193630874156952,
+    "fallback": 0.041577909141778946
+  },
+  {
+    "video": "007_132.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 1.2775565664924216e-05,
+    "challenger": 0.8110811114311218,
+    "fallback": 0.09562503546476364
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 2.4325424874405144e-07,
+    "challenger": 0.9193613529205322,
+    "fallback": 0.03566588833928108
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 2.219080442955601e-06,
+    "challenger": 0.7679594159126282,
+    "fallback": 0.009508760645985603
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.9923582673072815,
+    "challenger": 0.4004415273666382,
+    "fallback": 0.017410462722182274
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 2.675077439562301e-06,
+    "challenger": 0.8388910889625549,
+    "fallback": 0.09181611239910126
+  },
+  {
+    "video": "008_990.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 5.039253210270545e-07,
+    "challenger": 0.8551748991012573,
+    "fallback": 0.0193425714969635
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 0,
+    "champion": 0.2892427146434784,
+    "challenger": 0.8988481163978577,
+    "fallback": 0.12261579930782318
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 1,
+    "champion": 0.05707083269953728,
+    "challenger": 0.8859401941299438,
+    "fallback": 0.11670295149087906
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 2,
+    "champion": 0.10853622108697891,
+    "challenger": 0.8558272123336792,
+    "fallback": 0.11326649785041809
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 3,
+    "champion": 0.10326641798019409,
+    "challenger": 0.8826373219490051,
+    "fallback": 0.08486056327819824
+  },
+  {
+    "video": "009_027.mp4",
+    "forgery": "NeuralTextures",
+    "label": 1,
+    "frame_idx": 4,
+    "champion": 0.6723894476890564,
+    "challenger": 0.8020690679550171,
+    "fallback": 0.062054868787527084
+  }
+]
