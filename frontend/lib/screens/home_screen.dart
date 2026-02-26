@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import '../services/api_service.dart';
-import 'result_screen.dart';
+import '../widgets/background.dart';
+import '../widgets/glass_card.dart';
+import '../widgets/confidence_chart.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,303 +12,514 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+enum AppStep { upload, analysis, result }
+
 class _HomeScreenState extends State<HomeScreen> {
-  bool _isLoading = false;
-  String _loadingMessage = '';
+  AppStep _currentStep = AppStep.upload;
+  PlatformFile? _selectedFile;
+  Map<String, dynamic>? _apiResult;
+  String? _mediaType;
+  
+  // For simulated logs
+  final List<String> _logs = [];
 
-  Future<void> _pickImage(ImageSource source) async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: source, imageQuality: 95);
-    if (picked == null) return;
-
+  void _reset() {
     setState(() {
-      _isLoading = true;
-      _loadingMessage = 'Analyzing image...';
+      _currentStep = AppStep.upload;
+      _selectedFile = null;
+      _apiResult = null;
+      _mediaType = null;
+      _logs.clear();
     });
+  }
 
-    try {
-      final bytes = await picked.readAsBytes();
-      final result = await ApiService.predictImage(
-        bytes,
-        picked.name,
-      );
-      if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ResultScreen(result: result),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: const Color(0xFFEF4444),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+  Future<void> _pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: [
+        'jpg', 'jpeg', 'png', 'webp',         
+        'mp4', 'avi', 'mov', 'webm', 'mkv',  
+        'wav', 'mp3', 'm4a', 'aac', 'ogg', 'flac'
+      ],
+      withData: true,
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      setState(() {
+        _selectedFile = result.files.first;
+      });
     }
   }
 
-  Future<void> _pickVideo() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.video,
-      withData: true,
-    );
-    if (result == null || result.files.isEmpty) return;
+  String _determineMediaType(String filename) {
+    final ext = filename.split('.').last.toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'webp', 'bmp'].contains(ext)) return 'image';
+    if (['mp4', 'avi', 'mov', 'webm', 'mkv'].contains(ext)) return 'video';
+    if (['wav', 'mp3', 'm4a', 'aac', 'ogg', 'flac'].contains(ext)) return 'audio';
+    return 'unknown';
+  }
 
-    final file = result.files.first;
-    if (file.bytes == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not read video file'),
-            backgroundColor: Color(0xFFEF4444),
-          ),
-        );
-      }
+  Future<void> _startAnalysis() async {
+    if (_selectedFile == null || _selectedFile!.bytes == null) {
+      _showError('Please select a valid file.');
+      return;
+    }
+
+    final mediaType = _determineMediaType(_selectedFile!.name);
+    if (mediaType == 'unknown') {
+      _showError('Unsupported file format.');
       return;
     }
 
     setState(() {
-      _isLoading = true;
-      _loadingMessage = 'Analyzing video (10 frames)...';
+      _currentStep = AppStep.analysis;
+      _mediaType = mediaType;
+      _logs.clear();
+      _logs.add('[${DateTime.now().toIso8601String().split('T').last.substring(0,8)}] INFO: Initializing extraction pipeline...');
     });
 
     try {
-      final apiResult = await ApiService.predictVideo(
-        file.bytes!,
-        file.name,
-      );
-      if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ResultScreen(result: apiResult, isVideo: true),
-          ),
-        );
+      // Start API call but also simulate logs updating
+      final apiFuture = () async {
+        switch (mediaType) {
+          case 'image':
+            return await ApiService.predictImage(_selectedFile!.bytes!, _selectedFile!.name);
+          case 'video':
+            return await ApiService.predictVideo(_selectedFile!.bytes!, _selectedFile!.name);
+          case 'audio':
+            return await ApiService.predictAudio(_selectedFile!.bytes!, _selectedFile!.name);
+          default:
+            throw Exception('Unknown media type');
+        }
+      }();
+
+      // Simulate some fake log delays while API runs
+      await Future.delayed(const Duration(milliseconds: 800));
+      if (mounted && _currentStep == AppStep.analysis) {
+        setState(() => _logs.add('[${DateTime.now().toIso8601String().split('T').last.substring(0,8)}] INFO: Loading deepfake detector models...'));
+      }
+      
+      await Future.delayed(const Duration(milliseconds: 1200));
+      if (mounted && _currentStep == AppStep.analysis) {
+        setState(() => _logs.add('[${DateTime.now().toIso8601String().split('T').last.substring(0,8)}] INFO: Analyzing $mediaType features...'));
+      }
+
+      final result = await apiFuture;
+
+      if (mounted && _currentStep == AppStep.analysis) {
+        setState(() {
+          _logs.add('[${DateTime.now().toIso8601String().split('T').last.substring(0,8)}] INFO: Inference submission successful.');
+          _apiResult = result;
+          _currentStep = AppStep.result;
+        });
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: const Color(0xFFEF4444),
-          ),
-        );
+        _showError(e.toString());
+        _reset();
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: const Color(0xFFEF4444)),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 500),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // ---- Logo / Header ----
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [
-                          const Color(0xFF818CF8).withValues(alpha: 0.2),
-                          const Color(0xFF6366F1).withValues(alpha: 0.1),
-                        ],
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.shield_rounded,
-                      size: 64,
-                      color: Color(0xFF818CF8),
+      extendBodyBehindAppBar: true,
+      body: AnimatedGradientBackground(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+          child: Column(
+            children: [
+              // Header Navigation / Tabs mimicking Image 2 "Extract Train Convert Tools"
+              _buildTopNav(),
+              const SizedBox(height: 32),
+              
+              // Main Content Area
+              Expanded(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 400),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 400),
+                      transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                      child: _buildCurrentStep(),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Deepfake Detector',
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Upload an image or video to check if it\'s authentic',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  const SizedBox(height: 48),
-
-                  // ---- Loading indicator ----
-                  if (_isLoading) ...[
-                    const CircularProgressIndicator(
-                      color: Color(0xFF818CF8),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      _loadingMessage,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 48),
-                  ],
-
-                  // ---- Upload buttons ----
-                  if (!_isLoading) ...[
-                    // Image from gallery
-                    _buildUploadButton(
-                      icon: Icons.photo_library_rounded,
-                      label: 'Upload Image',
-                      subtitle: 'Choose from gallery',
-                      color: const Color(0xFF22C55E),
-                      onTap: () => _pickImage(ImageSource.gallery),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Image from camera
-                    _buildUploadButton(
-                      icon: Icons.camera_alt_rounded,
-                      label: 'Take Photo',
-                      subtitle: 'Use camera',
-                      color: const Color(0xFF3B82F6),
-                      onTap: () => _pickImage(ImageSource.camera),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Video
-                    _buildUploadButton(
-                      icon: Icons.videocam_rounded,
-                      label: 'Upload Video',
-                      subtitle: 'MP4, AVI, MOV',
-                      color: const Color(0xFFA855F7),
-                      onTap: _pickVideo,
-                    ),
-
-                    const SizedBox(height: 48),
-
-                    // ---- Info footer ----
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF1E293B),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.06),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.info_outline_rounded,
-                            color: Color(0xFF818CF8),
-                            size: 20,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Powered by FaceForge XceptionNet\n90% accuracy on FaceForensics++ C23',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.4),
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildUploadButton({
-    required IconData icon,
-    required String label,
-    required String subtitle,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
-          decoration: BoxDecoration(
-            color: const Color(0xFF1E293B),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: color.withValues(alpha: 0.2)),
+  Widget _buildTopNav() {
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      borderRadius: 100, // Pill shape
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildNavItem('Data', AppStep.upload),
+          const SizedBox(width: 24),
+          _buildNavItem('Analysis', AppStep.analysis),
+          const SizedBox(width: 24),
+          _buildNavItem('Results', AppStep.result),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(String label, AppStep step) {
+    final isActive = _currentStep == step;
+    return Text(
+      label,
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: isActive ? FontWeight.w800 : FontWeight.w500,
+        color: isActive ? Colors.black87 : Colors.black54,
+        letterSpacing: 1.2,
+      ),
+    );
+  }
+
+  Widget _buildCurrentStep() {
+    switch (_currentStep) {
+      case AppStep.upload:
+        return _buildUploadStep();
+      case AppStep.analysis:
+        return _buildAnalysisStep();
+      case AppStep.result:
+        return _buildResultStep();
+    }
+  }
+
+  Widget _buildUploadStep() {
+    return KeyedSubtree(
+      key: const ValueKey('upload'),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Data',
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: Colors.black87, letterSpacing: -1),
+            ),
           ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
+          const SizedBox(height: 24),
+          GlassCard(
+            animate: true,
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                   children: [
+                      Container(
+                         padding: const EdgeInsets.all(10),
+                         decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.6),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white),
+                         ),
+                         child: const Icon(Icons.cloud_upload_outlined, color: Colors.black54, size: 24),
+                      ),
+                      const SizedBox(width: 16),
+                      const Expanded(
+                         child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                               Text('Upload files', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.black87)),
+                               Text('Select and upload the files of your choice', style: TextStyle(fontSize: 13, color: Colors.black54)),
+                            ],
+                         ),
+                      ),
+                   ],
                 ),
-                child: Icon(icon, color: color, size: 28),
-              ),
-              const SizedBox(width: 20),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 24),
+                
+                // Dropzone area
+                GestureDetector(
+                  onTap: _pickFile,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        width: 2,
+                        style: BorderStyle.solid,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.cloud_upload_outlined, size: 48, color: Colors.black54),
+                        const SizedBox(height: 16),
+                        const Text('Choose a file or drag & drop it here.', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.black87)),
+                        const SizedBox(height: 8),
+                        const Text('JPEG, PNG, MP4, and WAV formats, up to 50 MB.', style: TextStyle(fontSize: 12, color: Colors.black54)),
+                        const SizedBox(height: 24),
+                        Container(
+                           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                           decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.black.withValues(alpha: 0.1)),
+                              boxShadow: [
+                                 BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 2)),
+                              ],
+                           ),
+                           child: const Text('Browse File', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                
+                // Selected File Card
+                if (_selectedFile != null) ...[
+                  const SizedBox(height: 24),
+                  const Divider(color: Colors.black12, height: 1),
+                  const SizedBox(height: 24),
+                  Container(
+                     padding: const EdgeInsets.all(16),
+                     decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white),
+                     ),
+                     child: Row(
+                        children: [
+                           Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                              decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(6)),
+                              child: Text(
+                                 _selectedFile!.extension?.toUpperCase() ?? 'FILE',
+                                 style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: Colors.black54),
+                              ),
+                           ),
+                           const SizedBox(width: 16),
+                           Expanded(
+                              child: Column(
+                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                 children: [
+                                    Text(_selectedFile!.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.black87)),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                       '${(_selectedFile!.size / 1024).toStringAsFixed(1)} KB • Ready',
+                                       style: const TextStyle(fontSize: 12, color: Color(0xFF22C55E), fontWeight: FontWeight.w500),
+                                    ),
+                                 ],
+                              ),
+                           ),
+                           const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF22C55E), size: 20),
+                           const SizedBox(width: 16),
+                           GestureDetector(
+                              onTap: () => setState(() => _selectedFile = null),
+                              child: const Icon(Icons.delete_outline_rounded, color: Colors.black54, size: 20),
+                           ),
+                        ],
+                     ),
+                  ),
+                ],
+                const SizedBox(height: 32),
+                
+                // Plugin toggles mimicking the UI
+                const Text('Detector Engine', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black54)),
+                const SizedBox(height: 12),
+                Row(
                   children: [
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.4),
-                        fontSize: 13,
-                      ),
-                    ),
+                    _buildRadio('FaceForge', true),
+                    const SizedBox(width: 16),
+                    _buildRadio('ViT', false),
+                    const SizedBox(width: 16),
+                    _buildRadio('TCN-LSTM', false),
                   ],
                 ),
-              ),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: Colors.white.withValues(alpha: 0.3),
-                size: 18,
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+          const SizedBox(height: 48),
+          
+          if (_selectedFile != null)
+            ElevatedButton(
+              onPressed: _startAnalysis,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black87,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+                elevation: 10,
+                shadowColor: Colors.black26,
+              ),
+              child: const Text('Analyze ->', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 1)),
+            ),
+        ],
+      ),
+      ),
+    );
+  }
+
+  Widget _buildRadio(String label, bool isSelected) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked, size: 16, color: isSelected ? Colors.black87 : Colors.black38),
+        const SizedBox(width: 4),
+        Text(label, style: TextStyle(fontSize: 12, color: isSelected ? Colors.black87 : Colors.black54, fontWeight: FontWeight.w600)),
+      ],
+    );
+  }
+
+  Widget _buildAnalysisStep() {
+    return KeyedSubtree(
+      key: const ValueKey('analysis'),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Analyzing',
+            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: Colors.black87, letterSpacing: -1),
+          ),
+          const SizedBox(height: 16),
+          GlassCard(
+            animate: true,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                   children: [
+                      const SizedBox(
+                         width: 16,
+                         height: 16,
+                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black54),
+                      ),
+                      const SizedBox(width: 12),
+                      Text('$_mediaType pipeline active', style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black87)),
+                   ],
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: _logs.map((log) => Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text(
+                        log,
+                        style: const TextStyle(
+                           fontFamily: 'monospace',
+                           fontSize: 11,
+                           color: Colors.black54,
+                        ),
+                      ),
+                    )).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultStep() {
+    final prediction = _apiResult?['prediction'] ?? 'Unknown';
+    final isFake = prediction.toString().toLowerCase() == 'fake';
+    final probabilities = _apiResult?['probabilities'] as Map<String, dynamic>? ?? {};
+
+    return KeyedSubtree(
+      key: const ValueKey('result'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          GlassCard(
+            animate: true,
+            child: Column(
+              children: [
+                Icon(
+                  isFake ? Icons.warning_rounded : Icons.verified_rounded,
+                  size: 48,
+                  color: isFake ? const Color(0xFFEF4444) : const Color(0xFF22C55E),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  isFake ? 'MANIPULATED' : 'AUTHENTIC',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 4,
+                    color: isFake ? const Color(0xFFEF4444) : const Color(0xFF22C55E),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Inference submission successful.\nRefining results.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                ),
+                const SizedBox(height: 32),
+                
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text('Confidence Score', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.black87)),
+                ),
+                const SizedBox(height: 24),
+                
+                // Use the new custom Chart Widget
+                ConfidenceChart(probabilities: probabilities),
+                
+                const SizedBox(height: 32),
+                 // Gradient bar simulating verdict
+                 Container(
+                   height: 12,
+                   decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(6),
+                      gradient: const LinearGradient(
+                         colors: [Color(0xFF22C55E), Color(0xFF3B82F6), Color(0xFF8B5CF6), Color(0xFFEF4444)],
+                      ),
+                   ),
+                 ),
+                 const SizedBox(height: 8),
+                 Row(
+                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                   children: [
+                     Text('1 - Real', style: TextStyle(fontSize: 10, color: Colors.black54, fontWeight: FontWeight.w600)),
+                     Text('0.5', style: TextStyle(fontSize: 10, color: Colors.black54)),
+                     Text('0 - Uncertain', style: TextStyle(fontSize: 10, color: Colors.black54, fontWeight: FontWeight.w600)),
+                     Text('0.5', style: TextStyle(fontSize: 10, color: Colors.black54)),
+                     Text('1 - Fake', style: TextStyle(fontSize: 10, color: Colors.black54, fontWeight: FontWeight.w600)),
+                   ],
+                 ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          TextButton.icon(
+             onPressed: _reset,
+             icon: const Icon(Icons.refresh_rounded, color: Colors.black87),
+             label: const Text('Start Over', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600)),
+          ),
+        ],
       ),
     );
   }
