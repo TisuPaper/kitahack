@@ -144,15 +144,17 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildTopNav(),
               const SizedBox(height: 32),
               
-              // Main Content Area
+              // Main Content Area — scrollable
               Expanded(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 400),
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 400),
-                      transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                      child: _buildCurrentStep(),
+                child: SingleChildScrollView(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 400),
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 400),
+                        transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                        child: _buildCurrentStep(),
+                      ),
                     ),
                   ),
                 ),
@@ -390,23 +392,31 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 20),
+                  AnimatedOpacity(
+                    opacity: _selectedFile != null ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 250),
+                    child: IgnorePointer(
+                      ignoring: _selectedFile == null,
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: _startAnalysis,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black87,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 6,
+                            shadowColor: Colors.black26,
+                          ),
+                          child: const Text('Analyze', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
-         const SizedBox(height: 48),
-          
-          if (_selectedFile != null)
-            ElevatedButton(
-              onPressed: _startAnalysis,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black87,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                elevation: 10,
-                shadowColor: Colors.black26,
-              ),
-              child: const Text('Analyze ->', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 1)),
             ),
         ],
       ),
@@ -415,59 +425,212 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildAnalysisStep() {
+    final steps = [
+      'Extracting features',
+      'Loading models',
+      'Running inference',
+      'Compiling result',
+    ];
+    final completedSteps = _logs.length.clamp(0, steps.length);
+
     return KeyedSubtree(
       key: const ValueKey('analysis'),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Title
           Text(
             'Analyzing',
             style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800, color: Colors.black87, letterSpacing: -1),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
+          Text(
+            'Running deepfake detection pipeline...',
+            style: TextStyle(fontSize: 13, color: Colors.black45),
+          ),
+          const SizedBox(height: 20),
+
+          // Scanning animation card
           GlassCard(
             animate: true,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(24),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                   children: [
-                      const SizedBox(
-                         width: 16,
-                         height: 16,
-                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black54),
-                      ),
-                      const SizedBox(width: 12),
-                      Text('$_mediaType pipeline active', style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black87)),
-                   ],
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _logs.map((log) => Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
-                      child: Text(
-                        log,
-                        style: const TextStyle(
-                           fontFamily: 'monospace',
-                           fontSize: 11,
-                           color: Colors.black54,
+                // Pulsing scan ring + icon
+                SizedBox(
+                  height: 100,
+                  width: 100,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Outer ring
+                      SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.black.withValues(alpha: 0.08),
+                          value: 1.0,
                         ),
                       ),
-                    )).toList(),
+                      // Spinning progress
+                      const SizedBox(
+                        width: 100,
+                        height: 100,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      // Middle ring
+                      SizedBox(
+                        width: 70,
+                        height: 70,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          color: Colors.black.withValues(alpha: 0.12),
+                          value: 1.0,
+                        ),
+                      ),
+                      // Icon
+                      Container(
+                        width: 46,
+                        height: 46,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 8),
+                          ],
+                        ),
+                        child: Icon(
+                          _mediaType == 'image'
+                              ? Icons.image_search_rounded
+                              : _mediaType == 'video'
+                                  ? Icons.videocam_rounded
+                                  : Icons.graphic_eq_rounded,
+                          size: 24,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
                   ),
+                ),
+                const SizedBox(height: 16),
+                // Media type + pipeline label
+                Text(
+                  '${_mediaType?.toUpperCase() ?? "FILE"} PIPELINE',
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 2, color: Colors.black54),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _selectedFile?.name ?? '',
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87),
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
+          const SizedBox(height: 16),
+
+          // Step progress chips
+          GlassCard(
+            animate: true,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: steps.asMap().entries.map((entry) {
+                final i = entry.key;
+                final label = entry.value;
+                final isDone = i < completedSteps;
+                final isActive = i == completedSteps;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Row(
+                    children: [
+                      // Status icon
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: isDone
+                            ? const Icon(Icons.check_circle_rounded, size: 20, color: Color(0xFF22C55E))
+                            : isActive
+                                ? const CircularProgressIndicator(strokeWidth: 2, color: Colors.black54)
+                                : Icon(Icons.radio_button_unchecked_rounded, size: 20, color: Colors.black.withValues(alpha: 0.2)),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                          color: isDone
+                              ? const Color(0xFF22C55E)
+                              : isActive
+                                  ? Colors.black87
+                                  : Colors.black38,
+                        ),
+                      ),
+                      if (isDone) ...[
+                        const Spacer(),
+                        Text('done', style: TextStyle(fontSize: 10, color: Colors.green.shade400, fontWeight: FontWeight.w600)),
+                      ],
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Log terminal
+          if (_logs.isNotEmpty)
+            GlassCard(
+              animate: true,
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFFEF4444), shape: BoxShape.circle)),
+                      const SizedBox(width: 5),
+                      Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFFF59E0B), shape: BoxShape.circle)),
+                      const SizedBox(width: 5),
+                      Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFF22C55E), shape: BoxShape.circle)),
+                      const SizedBox(width: 10),
+                      Text('terminal', style: TextStyle(fontSize: 10, color: Colors.black.withValues(alpha: 0.3), fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: _logs.map((log) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('\$ ', style: TextStyle(fontFamily: 'monospace', fontSize: 11, color: Colors.green.shade600, fontWeight: FontWeight.w700)),
+                            Expanded(
+                              child: Text(
+                                log,
+                                style: const TextStyle(fontFamily: 'monospace', fontSize: 11, color: Colors.black54),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
@@ -652,9 +815,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return KeyedSubtree(
       key: const ValueKey('result'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 32),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           GlassCard(
             animate: true,
@@ -692,29 +856,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Use the new custom Chart Widget
                 ConfidenceChart(probabilities: probabilities),
                 
-                const SizedBox(height: 32),
-                 // Gradient bar simulating verdict
-                 Container(
-                   height: 12,
-                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6),
-                      gradient: const LinearGradient(
-                         colors: [Color(0xFF22C55E), Color(0xFF3B82F6), Color(0xFF8B5CF6), Color(0xFFEF4444)],
-                      ),
-                   ),
-                 ),
-                 const SizedBox(height: 8),
-                 Row(
-                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                   children: [
-                     Text('1 - Real', style: TextStyle(fontSize: 10, color: Colors.black54, fontWeight: FontWeight.w600)),
-                     Text('0.5', style: TextStyle(fontSize: 10, color: Colors.black54)),
-                     Text('0 - Uncertain', style: TextStyle(fontSize: 10, color: Colors.black54, fontWeight: FontWeight.w600)),
-                     Text('0.5', style: TextStyle(fontSize: 10, color: Colors.black54)),
-                     Text('1 - Fake', style: TextStyle(fontSize: 10, color: Colors.black54, fontWeight: FontWeight.w600)),
-                   ],
-                 ),
-              ],
+               ],
             ),
           ),
           const SizedBox(height: 24),
@@ -724,6 +866,7 @@ class _HomeScreenState extends State<HomeScreen> {
              label: const Text('Start Over', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600)),
           ),
         ],
+        ),
       ),
     );
   }
