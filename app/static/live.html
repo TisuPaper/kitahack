@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Live Deepfake Detection</title>
+  <link rel="icon" id="pageFavicon" type="image/png" href="">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -80,6 +81,18 @@
       cursor: not-allowed;
       transform: none !important;
       box-shadow: none !important;
+    }
+
+    .btn-pip {
+      background: rgba(129,140,248,0.12);
+      border: 1px solid rgba(129,140,248,0.28);
+      color: #818CF8;
+    }
+    .btn-pip:hover { background: rgba(129,140,248,0.22); transform: translateY(-1px); }
+    .btn-pip.active {
+      background: rgba(129,140,248,0.28);
+      border-color: rgba(129,140,248,0.55);
+      box-shadow: 0 0 12px rgba(129,140,248,0.2);
     }
 
     .main {
@@ -303,6 +316,9 @@
           <option value="10000">10s</option>
         </select>
       </label>
+      <button id="btnPip" class="btn btn-pip" onclick="toggleWidget()" title="Float results in a mini window — stays visible on other tabs">
+        ⧉ Pop Out
+      </button>
       <button id="btnStart" class="btn btn-start" onclick="startCapture()">
         ▶ Start Capture
       </button>
@@ -607,6 +623,7 @@
       document.getElementById('statState').textContent = '⏹ Stopped';
 
       addLog('analyzing', '⏹ Capture stopped');
+      resetTabTitle();
 
       // If we have audio, offer download
       if (audioChunks.length > 0) {
@@ -692,6 +709,13 @@
         addLog(verdict,
           `${getEmoji(verdict)} ${time} — ${result.verdict} (${conf}%) ${faceInfo}${reasons ? ' · ' + reasons : ''}`
         );
+
+        // ── Always-visible feedback (tab title, favicon, floating widget) ──
+        updateTabTitle(result.verdict, conf);
+        updateFavicon(result.verdict);
+        // Render face box onto a thumbnail and push to floating widget
+        const thumbDataUrl = createFaceThumbnail(bbox, result.verdict);
+        updateWidget(result.verdict, pFake, band, time, thumbDataUrl);
 
       } catch (err) {
         console.error('Analysis error:', err);
@@ -782,6 +806,326 @@
       while (logContainer.children.length > 50) {
         logContainer.removeChild(logContainer.lastChild);
       }
+    }
+
+    // =========================================================================
+    // FLOATING WIDGET  (Document PiP → popup fallback)
+    // Stays visible on top of all other windows / tabs while you browse.
+    // =========================================================================
+
+    let widgetWindow = null;   // reference to PiP or popup window
+
+    // CSS injected into both Document PiP and popup
+    const WIDGET_CSS = `
+      * { margin:0; padding:0; box-sizing:border-box; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #0F172A; color: #fff;
+        height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+        user-select: none;
+      }
+      .w-header {
+        background: #1E293B; padding: 7px 12px;
+        font-size: 10px; color: rgba(255,255,255,0.35);
+        text-transform: uppercase; letter-spacing: 1.2px;
+        display: flex; align-items: center; justify-content: space-between;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        flex-shrink: 0;
+      }
+      .w-header .dot { width: 7px; height: 7px; border-radius: 50%; background: #818CF8; flex-shrink:0; }
+      /* Thumbnail — hidden until first frame arrives */
+      .w-thumb-wrap {
+        flex-shrink: 0; overflow: hidden; background: #000;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        display: none;
+      }
+      .w-thumb-wrap img { width: 100%; height: auto; display: block; }
+      /* Info section */
+      .w-main {
+        flex: 1; display: flex; flex-direction: column;
+        align-items: stretch; justify-content: center;
+        padding: 10px 14px; gap: 8px; transition: background 0.4s;
+      }
+      /* Row 1: emoji+verdict on left, band badge on right */
+      .w-verdict-row {
+        display: flex; align-items: center; justify-content: space-between; gap: 6px;
+      }
+      .w-verdict {
+        font-size: 24px; font-weight: 800; letter-spacing: 2px;
+        transition: color 0.3s; white-space: nowrap;
+      }
+      .w-badge {
+        font-size: 9px; font-weight: 700; letter-spacing: 0.8px;
+        padding: 3px 9px; border-radius: 20px; text-transform: uppercase;
+        white-space: nowrap; flex-shrink: 0;
+      }
+      /* Row 2: bar + percentage */
+      .w-bar-row {
+        display: flex; align-items: center; gap: 8px;
+      }
+      .w-track {
+        flex: 1; height: 5px; background: rgba(255,255,255,0.08);
+        border-radius: 3px; overflow: hidden;
+      }
+      .w-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease, background-color 0.4s ease; }
+      .w-pct  { font-size: 12px; font-weight: 700; min-width: 38px; text-align: right; }
+      /* Timestamp */
+      .w-time { font-size: 9px; color: rgba(255,255,255,0.25); }
+      /* Footer stats */
+      .w-footer {
+        background: #1E293B; padding: 6px 14px;
+        display: flex; justify-content: space-around;
+        font-size: 10px; color: rgba(255,255,255,0.45);
+        border-top: 1px solid rgba(255,255,255,0.05);
+        flex-shrink: 0;
+      }
+      .w-stat   { display: flex; gap: 4px; align-items: center; }
+      .w-stat b { color: #fff; font-weight: 700; }
+    `;
+
+    // HTML injected into widget document
+    const WIDGET_HTML = `
+      <div class="w-header">
+        <span>🛡 Deepfake Detector</span>
+        <div class="dot" id="wDot"></div>
+      </div>
+      <div class="w-thumb-wrap" id="wThumbWrap">
+        <img id="wThumb" alt="">
+      </div>
+      <div class="w-main" id="wMain">
+        <div class="w-verdict-row">
+          <span class="w-verdict" id="wVerdict" style="color:#818CF8">⏳ Waiting</span>
+          <span class="w-badge" id="wBand"
+                style="background:rgba(129,140,248,.15);color:#818CF8">—</span>
+        </div>
+        <div class="w-bar-row">
+          <div class="w-track">
+            <div class="w-fill" id="wBar" style="width:0%;background:#818CF8"></div>
+          </div>
+          <span class="w-pct" id="wPct" style="color:#818CF8">—</span>
+        </div>
+        <div class="w-time" id="wTime">Waiting for scan…</div>
+      </div>
+      <div class="w-footer">
+        <div class="w-stat">🚨 <b id="wFakes">0</b></div>
+        <div class="w-stat">✅ <b id="wReals">0</b></div>
+        <div class="w-stat">📊 <b id="wFrames">0</b></div>
+      </div>
+    `;
+
+    function _setupWidgetDoc(doc) {
+      const style = doc.createElement('style');
+      style.textContent = WIDGET_CSS;
+      doc.head.appendChild(style);
+      doc.body.innerHTML = WIDGET_HTML;
+    }
+
+    async function toggleWidget() {
+      if (widgetWindow && !widgetWindow.closed) {
+        widgetWindow.close();
+        widgetWindow = null;
+        _refreshPipBtn();
+        return;
+      }
+
+      // ── Document Picture-in-Picture (Chrome 116+) ─────────────────────
+      if ('documentPictureInPicture' in window) {
+        try {
+          const pip = await window.documentPictureInPicture.requestWindow({
+            width: 290, height: 300,
+          });
+          _setupWidgetDoc(pip.document);
+          widgetWindow = pip;
+          pip.addEventListener('pagehide', () => { widgetWindow = null; _refreshPipBtn(); });
+          _refreshPipBtn();
+          return;
+        } catch (e) {
+          // user dismissed or browser rejected — fall through to popup
+        }
+      }
+
+      // ── Popup fallback ────────────────────────────────────────────────
+      const popup = window.open(
+        '', 'deepfake-widget',
+        'width=290,height=300,toolbar=no,menubar=no,location=no,status=no,resizable=yes'
+      );
+      if (!popup) {
+        addLog('uncertain', '⚠️ Popup blocked — allow popups for this site to use the widget.');
+        return;
+      }
+      popup.document.open();
+      popup.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+        <title>Deepfake Widget</title>
+        <style>${WIDGET_CSS}</style></head><body>${WIDGET_HTML}</body></html>`);
+      popup.document.close();
+      widgetWindow = popup;
+      popup.addEventListener('beforeunload', () => { widgetWindow = null; _refreshPipBtn(); });
+      _refreshPipBtn();
+    }
+
+    function _refreshPipBtn() {
+      const btn = document.getElementById('btnPip');
+      if (!btn) return;
+      const open = widgetWindow && !widgetWindow.closed;
+      btn.textContent = open ? '✕ Close Widget' : '⧉ Pop Out';
+      btn.classList.toggle('active', open);
+    }
+
+    // Update the floating widget after each scan
+    function updateWidget(verdict, pFake, band, time, thumbDataUrl) {
+      if (!widgetWindow || widgetWindow.closed) return;
+
+      const doc = widgetWindow.document;
+      const colors = { REAL: '#22C55E', FAKE: '#EF4444', UNCERTAIN: '#F59E0B' };
+      const bgTints = {
+        REAL:      'rgba(34,197,94,0.07)',
+        FAKE:      'rgba(239,68,68,0.10)',
+        UNCERTAIN: 'rgba(245,158,11,0.08)',
+      };
+      const emojis   = { REAL: '✅', FAKE: '🚨', UNCERTAIN: '❓' };
+      const color    = colors[verdict]  || '#818CF8';
+      const bgTint   = bgTints[verdict] || 'transparent';
+      const emoji    = emojis[verdict]  || '⏳';
+      const conf     = (Math.max(pFake, 1 - pFake) * 100).toFixed(1);
+      const barPct   = (pFake * 100).toFixed(1);
+
+      const $ = id => doc.getElementById(id);
+      if (!$('wVerdict')) return;  // doc not ready yet
+
+      // ── Thumbnail (face box drawn on it, no label — verdict shown below) ──
+      const thumbWrap = $('wThumbWrap');
+      const thumbImg  = $('wThumb');
+      if (thumbWrap && thumbImg) {
+        if (thumbDataUrl) {
+          thumbImg.src            = thumbDataUrl;
+          thumbWrap.style.display = 'block';
+        } else {
+          thumbWrap.style.display = 'none';
+        }
+      }
+
+      // ── Info section ─────────────────────────────────────────────────
+      $('wMain').style.background     = bgTint;
+      $('wVerdict').textContent        = emoji + ' ' + verdict;
+      $('wVerdict').style.color        = color;
+      $('wBand').textContent           = band || '—';
+      $('wBand').style.background      = color + '22';
+      $('wBand').style.color           = color;
+      $('wBar').style.width            = barPct + '%';
+      $('wBar').style.backgroundColor  = color;
+      $('wPct').textContent            = conf + '%';
+      $('wPct').style.color            = color;
+      $('wTime').textContent           = 'Updated ' + time;
+      $('wFakes').textContent          = fakeCount;
+      $('wReals').textContent          = realCount;
+      $('wFrames').textContent         = frameCount;
+
+      // Pulse the dot
+      const dot = $('wDot');
+      if (dot) {
+        dot.style.background = color;
+        dot.style.boxShadow  = `0 0 6px ${color}`;
+        setTimeout(() => { if (dot) dot.style.boxShadow = 'none'; }, 600);
+      }
+    }
+
+    // Build a thumbnail (data URL) of the current frame with the face box drawn on it.
+    // Uses the already-captured `canvas` (frameCanvas) as the source.
+    function createFaceThumbnail(faceBox, verdict) {
+      if (!canvas.width || !canvas.height) return null;
+
+      const tw = 290, th = Math.round(290 * canvas.height / canvas.width);
+      const tc = document.createElement('canvas');
+      tc.width = tw; tc.height = th;
+      const tx = tc.getContext('2d');
+
+      // Draw the captured frame
+      tx.drawImage(canvas, 0, 0, tw, th);
+
+      if (!faceBox) return tc.toDataURL('image/jpeg', 0.8);
+
+      const colors = { REAL: '#22C55E', FAKE: '#EF4444', UNCERTAIN: '#F59E0B' };
+      const color  = colors[verdict] || '#818CF8';
+
+      // bbox is normalised (0-1) relative to original video — map to thumbnail pixels
+      const rx = faceBox.x * tw;
+      const ry = faceBox.y * th;
+      const rw = faceBox.w * tw;
+      const rh = faceBox.h * th;
+
+      // Glow rect
+      tx.shadowColor  = color;
+      tx.shadowBlur   = 10;
+      tx.strokeStyle  = color;
+      tx.lineWidth    = 2;
+      tx.strokeRect(rx, ry, rw, rh);
+      tx.shadowBlur   = 0;
+
+      // Corner L-brackets
+      const cs = Math.min(rw, rh) * 0.20;
+      tx.lineWidth   = 3;
+      const corners  = [
+        [rx,      ry,      cs,  0,  0, cs],
+        [rx + rw, ry,     -cs,  0,  0, cs],
+        [rx,      ry + rh, cs,  0,  0,-cs],
+        [rx + rw, ry + rh,-cs,  0,  0,-cs],
+      ];
+      for (const [x, y, dx1, dy1, dx2, dy2] of corners) {
+        tx.beginPath();
+        tx.moveTo(x + dx1, y + dy1);
+        tx.lineTo(x, y);
+        tx.lineTo(x + dx2, y + dy2);
+        tx.stroke();
+      }
+
+      return tc.toDataURL('image/jpeg', 0.80);
+    }
+
+    // =========================================================================
+    // TAB TITLE + FAVICON  (always-on, visible in any tab strip)
+    // =========================================================================
+    const _faviconCanvas = document.createElement('canvas');
+    _faviconCanvas.width = _faviconCanvas.height = 32;
+
+    function updateTabTitle(verdict, conf) {
+      const e = { REAL: '✅', FAKE: '🚨', UNCERTAIN: '❓' }[verdict] || '🔍';
+      document.title = `${e} ${verdict} ${conf}% — Deepfake Detector`;
+    }
+
+    function updateFavicon(verdict) {
+      const colors = { REAL: '#22C55E', FAKE: '#EF4444', UNCERTAIN: '#F59E0B' };
+      const marks  = { REAL: '✓',       FAKE: '!',        UNCERTAIN: '?' };
+      const color  = colors[verdict] || '#818CF8';
+      const mark   = marks[verdict]  || '…';
+
+      const c = _faviconCanvas;
+      const x = c.getContext('2d');
+      x.clearRect(0, 0, 32, 32);
+
+      // Circle background
+      x.fillStyle = color;
+      x.beginPath(); x.arc(16, 16, 15, 0, Math.PI * 2); x.fill();
+
+      // Inner ring
+      x.strokeStyle = 'rgba(255,255,255,0.25)';
+      x.lineWidth = 1.5;
+      x.beginPath(); x.arc(16, 16, 13, 0, Math.PI * 2); x.stroke();
+
+      // Character
+      x.fillStyle = '#fff';
+      x.font = 'bold 16px sans-serif';
+      x.textAlign = 'center';
+      x.textBaseline = 'middle';
+      x.fillText(mark, 16, 17);
+
+      const link = document.getElementById('pageFavicon');
+      if (link) link.href = c.toDataURL('image/png');
+    }
+
+    function resetTabTitle() {
+      document.title = 'Live Deepfake Detection';
+      const link = document.getElementById('pageFavicon');
+      if (link) link.href = '';
     }
   </script>
 </body>
