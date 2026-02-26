@@ -292,62 +292,112 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 24),
                   const Divider(color: Colors.black12, height: 1),
                   const SizedBox(height: 24),
-                  Container(
-                     padding: const EdgeInsets.all(16),
-                     decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.white),
-                     ),
-                     child: Row(
-                        children: [
-                           Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                              decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(6)),
-                              child: Text(
-                                 _selectedFile!.extension?.toUpperCase() ?? 'FILE',
-                                 style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: Colors.black54),
+                  if (['wav', 'mp3', 'm4a', 'aac'].contains(_selectedFile!.extension?.toLowerCase()))
+                    Stack(
+                      children: [
+                        Container(
+                           width: double.infinity,
+                           padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                           decoration: BoxDecoration(
+                              color: const Color(0xFFF6F6F8).withValues(alpha: 0.9), // Soft gray matching the reference
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: Colors.white, width: 2),
+                              boxShadow: [
+                                BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4)),
+                              ],
+                           ),
+                           child: Column(
+                              children: [
+                                 FittedBox(
+                                   fit: BoxFit.scaleDown,
+                                   child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: List.generate(45, (index) {
+                                         // Pseudo-random waveform heights to mimic the static image
+                                         final heights = [14.0, 22.0, 8.0, 20.0, 14.0, 24.0, 10.0, 16.0, 8.0, 30.0, 22.0, 12.0, 18.0, 26.0, 10.0];
+                                         final h = heights[index % heights.length] + (index % 4 == 0 ? 6.0 : 0.0);
+                                         return Container(
+                                            margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                                            width: 4,
+                                            height: h,
+                                            decoration: BoxDecoration(
+                                               color: Colors.black.withValues(alpha: 0.35),
+                                               borderRadius: BorderRadius.circular(2),
+                                            ),
+                                         );
+                                      }),
+                                   ),
+                                 ),
+                                 const SizedBox(height: 28),
+                                 Text(
+                                    _selectedFile!.name,
+                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black87),
+                                    textAlign: TextAlign.center,
+                                 ),
+                              ],
+                           ),
+                        ),
+                        Positioned(
+                          top: 12,
+                          right: 12,
+                          child: GestureDetector(
+                            onTap: () => setState(() => _selectedFile = null),
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                shape: BoxShape.circle,
                               ),
-                           ),
-                           const SizedBox(width: 16),
-                           Expanded(
-                              child: Column(
-                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                 children: [
-                                    Text(_selectedFile!.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.black87)),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                       '${(_selectedFile!.size / 1024).toStringAsFixed(1)} KB • Ready',
-                                       style: const TextStyle(fontSize: 12, color: Color(0xFF22C55E), fontWeight: FontWeight.w500),
-                                    ),
-                                 ],
-                              ),
-                           ),
-                           const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF22C55E), size: 20),
-                           const SizedBox(width: 16),
-                           GestureDetector(
-                              onTap: () => setState(() => _selectedFile = null),
-                              child: const Icon(Icons.delete_outline_rounded, color: Colors.black54, size: 20),
-                           ),
-                        ],
-                     ),
-                  ),
-                ],
-                const SizedBox(height: 32),
-                
-                // Plugin toggles mimicking the UI
-                const Text('Detector Engine', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black54)),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    _buildRadio('FaceForge', true),
-                    const SizedBox(width: 16),
-                    _buildRadio('ViT', false),
-                    const SizedBox(width: 16),
-                    _buildRadio('TCN-LSTM', false),
-                  ],
-                ),
-              ],
+                              child: const Icon(Icons.close, size: 16, color: Colors.black54),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Container(
+                       padding: const EdgeInsets.all(16),
+                       decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.white),
+                       ),
+                       child: Row(
+                          children: [
+                             Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(6)),
+                                child: Text(
+                                   _selectedFile!.extension?.toUpperCase() ?? 'FILE',
+                                   style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: Colors.black54),
+                                ),
+                             ),
+                             const SizedBox(width: 16),
+                             Expanded(
+                                child: Column(
+                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                   children: [
+                                      Text(_selectedFile!.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.black87)),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                         '${(_selectedFile!.size / 1024).toStringAsFixed(1)} KB • Ready',
+                                         style: const TextStyle(fontSize: 12, color: Color(0xFF22C55E), fontWeight: FontWeight.w500),
+                                      ),
+                                   ],
+                                ),
+                             ),
+                             const Icon(Icons.check_circle_outline_rounded, color: Color(0xFF22C55E), size: 20),
+                             const SizedBox(width: 16),
+                             GestureDetector(
+                                onTap: () => setState(() => _selectedFile = null),
+                                child: const Icon(Icons.delete_outline_rounded, color: Colors.black54, size: 20),
+                             ),
+                          ],
+                       ),
+                    ),
+                ], // Closes _selectedFile array
+              ], // Closes Column children
             ),
           ),
           const SizedBox(height: 48),
@@ -368,17 +418,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       ),
-    );
-  }
-
-  Widget _buildRadio(String label, bool isSelected) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked, size: 16, color: isSelected ? Colors.black87 : Colors.black38),
-        const SizedBox(width: 4),
-        Text(label, style: TextStyle(fontSize: 12, color: isSelected ? Colors.black87 : Colors.black54, fontWeight: FontWeight.w600)),
-      ],
     );
   }
 
