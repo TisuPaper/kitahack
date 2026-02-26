@@ -47,11 +47,26 @@ final_p_fake = sigmoid(z)
 
 So: **uncertain → use Fallback as tiebreaker**; otherwise use only Champion + Challenger.
 
-### 3. Video-level decision
+### 3. Confidence band
+
+After computing `final_p_fake`, the system assigns a **confidence band** based on distance from the 0.5 decision boundary (calibrated on FF++ C23 eval data):
+
+| `final_p_fake` | Verdict | Confidence band |
+|---|---|---|
+| < 0.20 | REAL | HIGH |
+| [0.20, 0.35) | REAL | MEDIUM |
+| [0.35, 0.65] | UNCERTAIN | LOW |
+| (0.65, 0.80] | FAKE | MEDIUM |
+| > 0.80 | FAKE | HIGH |
+
+The LOW band coincides exactly with the tiebreaker zone — when confidence is LOW it means the primary ensemble was genuinely split.
+
+### 4. Video-level decision
 
 - We extract up to 10 evenly spaced frames (middle 80% of the video).
-- Each frame gets a `final_p_fake` (with or without tiebreaker as above).
-- **Video label:** compare **mean**(`final_p_fake`) to 0.5: Real if mean ≤ 0.5, Fake otherwise.
+- Each frame gets a `final_p_fake` (with or without tiebreaker as above), a per-frame verdict, and a timestamp.
+- **Video verdict:** `_verdict(mean(final_p_fake))` using the same thresholds as above.
+- If more than 50% of frames have quality issues (no face / small face), the whole video is `UNCERTAIN`.
 
 ---
 
@@ -81,9 +96,96 @@ Path (if Celeb-DF is cached):
 
 ## API
 
-- **`POST /predict`** — image upload → prediction (Real / Fake / Uncertain), confidence, per-model outputs, optional forensic features.
-- **`POST /predict-video`** — video upload → same for video (frame-level + video-level decision, temporal stats).
-- **`POST /predict-audio`** — audio deepfake detection (separate pipeline; not covered in this README).
+### `POST /predict` — image
+
+```json
+{
+  "request_id": "uuid",
+  "media_type": "image",
+
+  "verdict": "FAKE",
+  "confidence_band": "HIGH",
+  "final_p_fake": 0.91,
+  "uncertain": false,
+
+  "decision_path": "primary_ensemble",
+  "reasons": ["models_agree", "high_confidence"],
+
+  "signals": {
+    "face_found": true,
+    "face_bbox": {"x": 0.12, "y": 0.08, "w": 0.45, "h": 0.60},
+    "quality_warning": null,
+    "disagreement": 0.08
+  },
+
+  "models": [
+    {"name": "FaceForge-Xception", "role": "champion",  "p_fake": 0.94, "used": true},
+    {"name": "ViT-FF++TwoStage",   "role": "challenger", "p_fake": 0.86, "used": true},
+    {"name": "EffNetB4-CelebDF",   "role": "fallback",   "p_fake": 0.77, "used": false}
+  ],
+
+  "privacy": {"stored_media": false},
+  "timing_ms": {"total": 620, "champion": 220, "challenger": 260, "fallback": 0}
+}
+```
+
+**`decision_path` values:** `primary_ensemble` · `tiebreaker_used` · `low_quality`
+
+**`reasons` tags:** `no_face_detected` · `low_resolution` · `small_face` · `models_agree` · `models_disagree` · `borderline_score` · `high_confidence` · `tiebreaker_used`
+
+---
+
+### `POST /predict-video` — video
+
+```json
+{
+  "request_id": "uuid",
+  "media_type": "video",
+
+  "verdict": "UNCERTAIN",
+  "confidence_band": "LOW",
+  "final_p_fake": 0.55,
+  "uncertain": true,
+
+  "sampling": {"frames_used": 10, "strategy": "middle_80_even"},
+
+  "video_stats": {
+    "mean_p_fake": 0.55,
+    "median_p_fake": 0.52,
+    "variance": 0.08,
+    "uncertain_frame_rate": 0.40,
+    "confident_fake_frames": 2
+  },
+
+  "decision_path": "tiebreaker_used",
+  "reasons": ["borderline_score", "models_disagree", "tiebreaker_used"],
+
+  "models_summary": {
+    "champion_avg": 0.10,
+    "challenger_avg": 0.48,
+    "fallback_avg": 0.70
+  },
+
+  "top_suspicious_frames": [
+    {"t_sec": 12.4, "p_fake": 0.84},
+    {"t_sec": 18.0, "p_fake": 0.79}
+  ],
+
+  "privacy": {"stored_media": false},
+  "timing_ms": {"total": 4200},
+  "warnings": []
+}
+```
+
+**Additional `reasons` tags for video:** `high_variance` · `low_face_rate` · `consistent_prediction`
+
+---
+
+### `POST /predict-audio`
+
+Audio deepfake detection (separate pipeline; not covered in this README).
+
+---
 
 See `/docs` when the server is running for full OpenAPI spec.
 
@@ -118,9 +220,9 @@ Raw results (e.g. `eval_raw_results.json`, `eval_celebdf_results.json`) can be r
 
 | Idea | Description |
 |------|-------------|
-| **Primary ensemble** | Champion + Challenger combined via logit stacking; no Fallback in the formula by default. |
-| **Uncertain band** | When primary `final_p_fake` is in [0.35, 0.65], the decision is treated as uncertain. |
-| **Fallback tiebreaker** | In the uncertain band, blend in Fallback (EfficientNet) with weight 0.5 to get the final `final_p_fake`. |
-| **Why it helps** | On **FF++ reals**, Fallback often pulls mistaken “Fake” back to Real. On **Celeb-DF fakes**, Fallback (trained on Celeb-DF) often pushes mistaken “Real” to Fake. |
-
-This README describes the **design**: the current codebase may implement only the primary two-model stacking by default; the tiebreaker logic can be added where `final_p_fake` is computed (image and video paths) using the uncertain band and the three-model formula above.
+| **Primary ensemble** | Champion + Challenger combined via logit stacking (weights 0.25 / 1.0, bias 2.5). |
+| **Uncertain band** | When primary `final_p_fake` ∈ [0.35, 0.65] the decision is treated as uncertain. |
+| **Fallback tiebreaker** | In the uncertain band, Fallback (EfficientNet) is blended in with weight 0.5 to break the tie. |
+| **Confidence band** | `HIGH` (p < 0.20 or > 0.80) · `MEDIUM` (0.20–0.35 or 0.65–0.80) · `LOW` (0.35–0.65). |
+| **Reason tags** | Rule-based tags explain *why* a verdict was reached without needing an AI explanation. |
+| **Why tiebreaker helps** | On **FF++ reals**, Fallback pulls mistaken "Fake" back to Real. On **Celeb-DF fakes**, Fallback pushes mistaken "Real" to Fake. |

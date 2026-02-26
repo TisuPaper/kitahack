@@ -105,6 +105,14 @@
       background: #000;
     }
 
+    /* Face-box overlay — sits directly on top of the video */
+    #faceOverlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;   /* clicks pass through to video */
+    }
+
     .placeholder {
       position: absolute;
       top: 50%;
@@ -309,6 +317,7 @@
     <!-- Video panel -->
     <div class="video-panel">
       <video id="screenVideo" autoplay muted></video>
+      <canvas id="faceOverlay"></canvas>
       <div id="placeholder" class="placeholder">
         <div class="big-icon">🖥️</div>
         <p>Click "Start Capture" to share your screen</p>
@@ -373,6 +382,115 @@
   <canvas id="frameCanvas" style="display:none;"></canvas>
 
   <script>
+    // ---- Face overlay canvas ----
+    const faceOverlay = document.getElementById('faceOverlay');
+    const faceCtx = faceOverlay.getContext('2d');
+
+    // Colour per verdict
+    const VERDICT_COLOR = {
+      real:      '#22C55E',
+      fake:      '#EF4444',
+      uncertain: '#F59E0B',
+    };
+
+    function drawFaceBox(bbox, prediction) {
+      // Sync canvas size to its CSS display size
+      faceOverlay.width  = faceOverlay.clientWidth;
+      faceOverlay.height = faceOverlay.clientHeight;
+      faceCtx.clearRect(0, 0, faceOverlay.width, faceOverlay.height);
+
+      if (!bbox) return;
+
+      // The video uses object-fit:contain, so we need the actual rendered rect
+      const videoEl  = document.getElementById('screenVideo');
+      const vw       = videoEl.videoWidth;
+      const vh       = videoEl.videoHeight;
+      const cw       = faceOverlay.clientWidth;
+      const ch       = faceOverlay.clientHeight;
+
+      if (!vw || !vh) return;
+
+      // Letterbox / pillarbox offsets
+      const scale    = Math.min(cw / vw, ch / vh);
+      const offsetX  = (cw - vw * scale) / 2;
+      const offsetY  = (ch - vh * scale) / 2;
+
+      // Convert normalised bbox → canvas pixels
+      const rx = offsetX + bbox.x * vw * scale;
+      const ry = offsetY + bbox.y * vh * scale;
+      const rw = bbox.w * vw * scale;
+      const rh = bbox.h * vh * scale;
+
+      const color = VERDICT_COLOR[prediction.toLowerCase()] || '#818CF8';
+
+      // Outer glow
+      faceCtx.shadowColor  = color;
+      faceCtx.shadowBlur   = 12;
+      faceCtx.strokeStyle  = color;
+      faceCtx.lineWidth    = 2.5;
+      faceCtx.strokeRect(rx, ry, rw, rh);
+      faceCtx.shadowBlur   = 0;
+
+      // Corner accents (L-shaped brackets)
+      const cs = Math.min(rw, rh) * 0.18;  // corner segment length
+      faceCtx.lineWidth = 3.5;
+      faceCtx.strokeStyle = color;
+
+      const corners = [
+        [rx,      ry,      cs,  0,  0, cs],   // top-left
+        [rx + rw, ry,     -cs,  0,  0, cs],   // top-right
+        [rx,      ry + rh, cs,  0,  0,-cs],   // bottom-left
+        [rx + rw, ry + rh,-cs,  0,  0,-cs],   // bottom-right
+      ];
+      for (const [x, y, dx1, dy1, dx2, dy2] of corners) {
+        faceCtx.beginPath();
+        faceCtx.moveTo(x + dx1, y + dy1);
+        faceCtx.lineTo(x, y);
+        faceCtx.lineTo(x + dx2, y + dy2);
+        faceCtx.stroke();
+      }
+
+      // Label pill above the box
+      const label  = prediction.toUpperCase();
+      const font   = 'bold 13px Inter, -apple-system, sans-serif';
+      faceCtx.font = font;
+      const tw     = faceCtx.measureText(label).width;
+      const ph     = 22;
+      const pw     = tw + 18;
+      const px     = rx + (rw - pw) / 2;
+      const py     = ry - ph - 6;
+
+      faceCtx.fillStyle = color + 'CC';   // semi-transparent fill
+      roundRect(faceCtx, px, py, pw, ph, 6);
+      faceCtx.fill();
+
+      faceCtx.fillStyle = '#fff';
+      faceCtx.font      = font;
+      faceCtx.textAlign = 'center';
+      faceCtx.fillText(label, px + pw / 2, py + 15);
+      faceCtx.textAlign = 'left';
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.arcTo(x + w, y, x + w, y + r, r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+      ctx.lineTo(x + r, y + h);
+      ctx.arcTo(x, y + h, x, y + h - r, r);
+      ctx.lineTo(x, y + r);
+      ctx.arcTo(x, y, x + r, y, r);
+      ctx.closePath();
+    }
+
+    function clearFaceBox() {
+      faceOverlay.width  = faceOverlay.clientWidth;
+      faceOverlay.height = faceOverlay.clientHeight;
+      faceCtx.clearRect(0, 0, faceOverlay.width, faceOverlay.height);
+    }
+
     // ---- State ----
     let stream = null;
     let audioStream = null;
@@ -482,6 +600,7 @@
       placeholder.style.display = '';
       verdictOverlay.className = 'verdict-overlay';
       verdictOverlay.style.display = 'none';
+      clearFaceBox();
 
       document.getElementById('btnStart').disabled = false;
       document.getElementById('btnStop').disabled = true;
@@ -542,29 +661,36 @@
         const result = await response.json();
         frameCount++;
 
-        // Update verdict overlay
-        const pred = result.prediction.toLowerCase();
-        const conf = (result.confidence * 100).toFixed(1);
-        verdictOverlay.className = `verdict-overlay ${pred}`;
-        verdictOverlay.innerHTML = `${getEmoji(pred)} ${result.prediction} — ${conf}%`;
+        // Map new response shape — verdict is REAL/FAKE/UNCERTAIN (uppercase)
+        const verdict = (result.verdict || 'UNCERTAIN').toLowerCase();
+        const pFake = result.final_p_fake ?? 0.5;
+        const conf = (Math.max(pFake, 1 - pFake) * 100).toFixed(1);
+        const band = result.confidence_band || '';
+        verdictOverlay.className = `verdict-overlay ${verdict}`;
+        verdictOverlay.innerHTML = `${getEmoji(verdict)} ${result.verdict} — ${conf}% <small>${band}</small>`;
+
+        // Draw face bounding box on the video overlay
+        const bbox = result.signals ? result.signals.face_bbox : null;
+        const faceFound = result.signals ? result.signals.face_found : false;
+        drawFaceBox(bbox, result.verdict);
 
         // Update stats
-        if (pred === 'fake') fakeCount++;
-        else if (pred === 'real') realCount++;
-        totalConfidence += result.confidence;
+        if (verdict === 'fake') fakeCount++;
+        else if (verdict === 'real') realCount++;
+        totalConfidence += parseFloat(conf);
 
         document.getElementById('statFrames').textContent = frameCount;
         document.getElementById('statFakes').textContent = fakeCount;
         document.getElementById('statReals').textContent = realCount;
         document.getElementById('statConfidence').textContent =
-          (totalConfidence / frameCount * 100).toFixed(1) + '%';
+          (totalConfidence / frameCount).toFixed(1) + '%';
 
         // Add log entry
         const time = new Date().toLocaleTimeString();
-        const forensic = result.forensic_analysis;
-        const anomalies = forensic ? forensic.anomaly_flags : 0;
-        addLog(pred,
-          `${getEmoji(pred)} ${time} — ${result.prediction} (${conf}%) — ${anomalies} anomalies`
+        const faceInfo = faceFound ? '✦ face' : '⚬ no face';
+        const reasons = result.reasons ? result.reasons.join(', ') : '';
+        addLog(verdict,
+          `${getEmoji(verdict)} ${time} — ${result.verdict} (${conf}%) ${faceInfo}${reasons ? ' · ' + reasons : ''}`
         );
 
       } catch (err) {
