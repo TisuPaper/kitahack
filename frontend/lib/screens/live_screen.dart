@@ -20,54 +20,42 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: transparent; /* Changed to transparent to let Flutter background show through */
-      color: #1E293B; /* Changed to dark text for light theme */
-      min-height: 100vh;
-    }
-
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 24px;
-      background: rgba(255, 255, 255, 0.6); /* Glassmorphism light */
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-      border-radius: 16px 16px 0 0;
-    }
-
-    .header h1 {
-      font-size: 20px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      background: transparent;
       color: #1E293B;
-      letter-spacing: -0.5px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      overflow-x: hidden;
     }
 
-    .header h1 .icon {
-      width: 32px;
-      height: 32px;
-      background: rgba(0,0,0,0.05);
-      border-radius: 8px;
+    /* Top Controls - Centered above the screen */
+    .controls-container {
       display: flex;
-      align-items: center;
       justify-content: center;
-      font-size: 18px;
+      margin-bottom: 24px;
+      width: 100%;
+      z-index: 10;
     }
 
     .controls {
       display: flex;
       gap: 12px;
       align-items: center;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 12px 24px;
+      border-radius: 100px; /* Pill shape */
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.05);
     }
 
     .btn {
       padding: 10px 20px;
       border: none;
-      border-radius: 10px;
+      border-radius: 100px; /* Pill shape */
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
@@ -78,7 +66,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     }
 
     .btn-start {
-      background: #1E293B; /* Dark button like home screen */
+      background: #1E293B;
       color: white;
     }
 
@@ -110,34 +98,56 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       box-shadow: 0 0 12px rgba(0,0,0,0.05);
     }
 
-    .main {
+    /* Main Layout - Center Video, Left/Right Widgets */
+    .main-layout {
       display: flex;
+      width: 100%;
+      max-width: 1400px;
+      gap: 32px;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    /* Side Panels (Left and Right) */
+    .side-column {
+      display: flex;
+      flex-direction: column;
       gap: 20px;
-      padding: 20px;
-      height: calc(100vh - 68px);
+      width: 300px;
+      flex-shrink: 0;
+    }
+
+    /* Center Video Panel */
+    .center-column {
+      flex: 1;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .video-panel {
-      flex: 1;
+      width: 100%;
       position: relative;
-      background: rgba(255, 255, 255, 0.4); /* Match upload container background */
-      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 24px; /* More rounded like the image */
       overflow: hidden;
-      border: 2px solid rgba(0,0,0,0.15); /* Match upload container border */
-      box-shadow: none; /* Remove heavy shadow to match upload container */
+      border: 2px solid rgba(0,0,0,0.15);
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 300px;
+      aspect-video: 16/9;
+      min-height: 450px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08); /* Floating shadow */
     }
 
     #screenVideo {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      background: #000; /* Keep video background black for contrast */
-      border-radius: 14px;
-      display: none; /* Hide initially */
+      background: #000;
+      border-radius: 22px;
+      display: none;
     }
 
     #faceOverlay {
@@ -145,12 +155,12 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       top: 0; left: 0;
       width: 100%; height: 100%;
       pointer-events: none;
-      display: none; /* Hide initially */
+      display: none;
     }
 
     .placeholder {
       text-align: center;
-      color: rgba(0,0,0,0.54); /* Match upload container text color */
+      color: rgba(0,0,0,0.54);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -161,7 +171,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     }
 
     .placeholder .big-icon { 
-      font-size: 48px; /* Match upload container icon size */
+      font-size: 48px;
       margin-bottom: 16px; 
       color: rgba(0,0,0,0.54);
     }
@@ -177,49 +187,15 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       font-weight: 400;
     }
 
-    .verdict-overlay {
-      position: absolute; top: 16px; right: 16px;
-      padding: 14px 22px; border-radius: 14px;
-      display: none; flex-direction: column; gap: 4px;
-      backdrop-filter: blur(16px); z-index: 10;
-      transition: all 0.3s ease; max-width: 340px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .verdict-overlay .vo-main { font-size: 20px; font-weight: 800; letter-spacing: 2px; }
-    .verdict-overlay .vo-band { font-size: 12px; font-weight: 600; opacity: 0.8; }
-    .verdict-overlay .vo-why  { font-size: 11px; opacity: 0.8; margin-top: 2px; }
-
-    .verdict-overlay.real {
-      display: flex; background: rgba(255,255,255,0.9);
-      border: 1px solid rgba(34,197,94,0.4); color: #22C55E;
-    }
-    .verdict-overlay.fake {
-      display: flex; background: rgba(255,255,255,0.9);
-      border: 1px solid rgba(239,68,68,0.4); color: #EF4444;
-      animation: pulse-red 1.5s infinite;
-    }
-    .verdict-overlay.uncertain {
-      display: flex; background: rgba(255,255,255,0.9);
-      border: 1px solid rgba(245,158,11,0.4); color: #F59E0B;
-    }
-    .verdict-overlay.analyzing {
-      display: flex; background: rgba(255,255,255,0.9);
-      border: 1px solid rgba(0,0,0,0.1); color: #1E293B;
-    }
-
-    @keyframes pulse-red {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
-      50% { box-shadow: 0 0 20px 4px rgba(239,68,68,0.2); }
-    }
-
-    .side-panel { width: 370px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+    /* Floating Cards for Widgets */
     .card {
-      background: rgba(255, 255, 255, 0.6); /* Glassmorphism light */
+      background: rgba(255, 255, 255, 0.6);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border-radius: 16px; padding: 20px;
+      border-radius: 20px;
+      padding: 20px;
       border: 1px solid rgba(255,255,255,0.8);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.06);
     }
     .card h3 {
       font-size: 13px; color: rgba(0,0,0,0.5); text-transform: uppercase;
@@ -295,41 +271,30 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     }
 
     /* Responsive Layout for Mobile/Smaller Screens */
-    @media (max-width: 800px) {
-      .header {
-        padding: 16px;
-        justify-content: center;
+    @media (max-width: 1000px) {
+      .main-layout {
+        flex-direction: column;
+        align-items: center;
       }
-      .header h1 {
-        display: none; /* Hide title to save space, as requested */
+      .side-column {
+        width: 100%;
+        max-width: 800px;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .card {
+        flex: 1;
+        min-width: 300px;
       }
       .controls {
         flex-wrap: wrap;
         justify-content: center;
-        width: 100%;
-      }
-      .main {
-        flex-direction: column;
-        height: auto;
-        padding: 16px;
-        gap: 16px;
-      }
-      .side-panel {
-        width: 100%;
-        overflow-y: visible;
-      }
-      .video-panel {
-        min-height: 350px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>
-      <span class="icon">🛡️</span>
-      Live Deepfake Detection
-    </h1>
+  <div class="controls-container">
     <div class="controls">
       <label style="font-size:13px; color:rgba(0,0,0,0.5); font-weight: 600;">
         Scan every:
@@ -352,25 +317,9 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     </div>
   </div>
 
-  <div class="main">
-    <div class="video-panel" id="videoPanel">
-      <video id="screenVideo" autoplay muted></video>
-      <canvas id="faceOverlay"></canvas>
-      <div id="placeholder" class="placeholder">
-        <div class="big-icon">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-            <line x1="8" y1="21" x2="16" y2="21"></line>
-            <line x1="12" y1="17" x2="12" y2="21"></line>
-          </svg>
-        </div>
-        <p>Click "Start Capture" to share your screen</p>
-        <p class="sub-text">Select a window, tab, or entire screen</p>
-      </div>
-      <div id="verdictOverlay" class="verdict-overlay"></div>
-    </div>
-
-    <div class="side-panel">
+  <div class="main-layout">
+    <!-- Left Side Panel -->
+    <div class="side-column">
       <div class="card" id="videoVerdictCard">
         <h3>🖥 Video Analysis</h3>
         <div id="videoVerdictArea" style="text-align:center; padding:10px 0">
@@ -389,7 +338,30 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
         </div>
         <canvas id="audioCanvas"></canvas>
       </div>
+    </div>
 
+    <!-- Center Video Panel -->
+    <div class="center-column">
+      <div class="video-panel" id="videoPanel">
+        <video id="screenVideo" autoplay muted></video>
+        <canvas id="faceOverlay"></canvas>
+        <div id="placeholder" class="placeholder">
+          <div class="big-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+          </div>
+          <p>Click "Start Capture" to share your screen</p>
+          <p class="sub-text">Select a window, tab, or entire screen</p>
+        </div>
+        <div id="verdictOverlay" class="verdict-overlay"></div>
+      </div>
+    </div>
+
+    <!-- Right Side Panel -->
+    <div class="side-column">
       <div class="card">
         <h3 class="details-toggle" id="detailsToggle" onclick="toggleDetails()">
           🔬 Technical Details
@@ -1291,24 +1263,7 @@ class _LiveScreenState extends State<LiveScreen> {
               top: 80, // Match home_screen top padding
               bottom: 40,
             ),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.4), // Glassmorphism base
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.8), width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: const HtmlElementView(viewType: _viewType),
-              ),
-            ),
+            child: const HtmlElementView(viewType: _viewType),
           ),
         );
       },
