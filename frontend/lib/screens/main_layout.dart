@@ -78,8 +78,8 @@ class _MainLayoutState extends State<MainLayout> {
                 children: [
                   // Logo image from assets
                   Container(
-                    width: 38,
-                    height: 38,
+                    width: 32, // Reduced from 38
+                    height: 32, // Reduced from 38
                     decoration: const BoxDecoration(
                       color: Colors.transparent,
                       shape: BoxShape.circle,
@@ -92,15 +92,15 @@ class _MainLayoutState extends State<MainLayout> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10), // Reduced spacing slightly
                   // Wrap text in Expanded so it truncates instead of overflowing/overlapping
                   const Expanded(
                     child: Text(
                       'REALYTIC',
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 20, // Reduced from 24
                         fontWeight: FontWeight.w900, // Maximum boldness
-                        letterSpacing: -0.8,
+                        letterSpacing: -0.5, // Adjusted letter spacing for smaller size
                         color: Colors.black87,
                       ),
                       overflow: TextOverflow.ellipsis,
