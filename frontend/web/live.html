@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Deepfake Detection</title>
+  <title>Realitic — Live Detection</title>
   <link rel="icon" id="pageFavicon" type="image/png" href="">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -258,7 +258,7 @@
   <div class="header">
     <h1>
       <span class="icon">🛡️</span>
-      Live Deepfake Detection
+      Realitic — Live Detection
     </h1>
     <div class="controls">
       <label style="font-size:13px; color:rgba(255,255,255,0.5);">
@@ -1043,7 +1043,7 @@
     // HTML injected into widget document
     const WIDGET_HTML = `
       <div class="w-header">
-        <span>🛡 Deepfake Detector</span>
+        <span>🛡 Realitic</span>
         <div class="dot" id="wDot"></div>
       </div>
       <div class="w-thumb-wrap" id="wThumbWrap">
@@ -1255,7 +1255,7 @@
 
     function updateTabTitle(verdict, bandLabel) {
       const e = { REAL: '✅', FAKE: '🚨', UNCERTAIN: '❓' }[verdict] || '🔍';
-      document.title = `${e} ${verdict} — ${bandLabel || 'Checking'} — Deepfake Detector`;
+      document.title = `${e} ${verdict} — ${bandLabel || 'Checking'} — Realitic`;
     }
 
     function updateFavicon(verdict) {
@@ -1289,7 +1289,7 @@
     }
 
     function resetTabTitle() {
-      document.title = 'Live Deepfake Detection';
+      document.title = 'Realitic — Live Detection';
       const link = document.getElementById('pageFavicon');
       if (link) link.href = '';
     }

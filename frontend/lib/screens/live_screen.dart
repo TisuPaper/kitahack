@@ -13,7 +13,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Live Deepfake Detection</title>
+  <title>Realitic — Live Detection</title>
   <link rel="icon" id="pageFavicon" type="image/png" href="">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -1052,7 +1052,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       '.w-audio-row .wa-band { font-size: 10px; opacity: 0.6; }';
 
     const WIDGET_HTML =
-      '<div class="w-header"><span>🛡 Deepfake Detector</span><div class="dot" id="wDot"></div></div>' +
+      '<div class="w-header"><span>🛡 Realitic</span><div class="dot" id="wDot"></div></div>' +
       '<div class="w-thumb-wrap" id="wThumbWrap"><img id="wThumb" alt=""></div>' +
       '<div class="w-main" id="wMain">' +
         '<div class="w-verdict" id="wVerdict" style="color:#818CF8">⏳ Waiting</div>' +
@@ -1232,7 +1232,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
 
     function updateTabTitle(verdict, bandLabel) {
       const e = { REAL: '✅', FAKE: '🚨', UNCERTAIN: '❓' }[verdict] || '🔍';
-      document.title = e + ' ' + verdict + ' — ' + (bandLabel || 'Checking') + ' — Deepfake Detector';
+      document.title = e + ' ' + verdict + ' — ' + (bandLabel || 'Checking') + ' — Realitic';
     }
 
     function updateFavicon(verdict) {
@@ -1263,7 +1263,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     }
 
     function resetTabTitle() {
-      document.title = 'Live Deepfake Detection';
+      document.title = 'Realitic — Live Detection';
       const link = document.getElementById('pageFavicon');
       if (link) link.href = '';
     }

@@ -1,5 +1,14 @@
 # app/main.py
 
+from pathlib import Path
+try:
+    from dotenv import load_dotenv
+    app_dir = Path(__file__).resolve().parent
+    load_dotenv(app_dir / ".env")
+    load_dotenv(app_dir / ".env.local")  # overrides .env if present
+except ImportError:
+    pass  # python-dotenv optional; use export GEMINI_API_KEY=... if not installed
+
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from app.model_loader import (
     champion, champion_preprocess,
@@ -18,7 +27,7 @@ import cv2
 import numpy as np
 
 
-app = FastAPI(title="Deepfake Detector API")
+app = FastAPI(title="Realitic API")
 
 # ---- CORS (allow Flutter web app to call API) ----
 from fastapi.middleware.cors import CORSMiddleware
@@ -42,18 +51,6 @@ class _PermissionsPolicyMiddleware(BaseHTTPMiddleware):
         return response
 
 app.add_middleware(_PermissionsPolicyMiddleware)
-
-# ---- Serve static files (live detection page) ----
-import os
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-
-_static_dir = os.path.join(os.path.dirname(__file__), "static")
-app.mount("/static", StaticFiles(directory=_static_dir), name="static")
-
-@app.get("/live")
-async def live_detection_page():
-    return FileResponse(os.path.join(_static_dir, "live.html"))
 
 
 # ---- Face detector (Haar cascade) ----
@@ -283,9 +280,9 @@ _NEXT_STEPS = {
         "Still verify the source if it's sensitive",
     ],
     "UNCERTAIN": [
-        "Try again with better lighting or a closer face",
-        "Upload a short video (5-10 s) for more data",
-        "Avoid screenshots with overlays or heavy text",
+        "Try with better lighting or a closer face",
+        "Upload a short video for more data",
+        "Avoid screenshots with overlays",
     ],
 }
 
@@ -366,7 +363,7 @@ def _run_fallback(img: Image.Image) -> tuple[float, float]:
 
 @app.get("/")
 def root():
-    return {"message": "Deepfake Detector API is running. Go to /docs to test."}
+    return {"message": "Realitic API is running. Go to /docs to test."}
 
 
 @app.post("/predict")
@@ -808,6 +805,88 @@ async def predict_audio(file: UploadFile = File(...)):
             "voted_real": models_voted_real,
             "total":      total_models,
         },
+
+        "privacy":    {"stored_media": False},
+        "timing_ms":  {"total": t_total},
+    }
+
+
+# =========================================================================
+# FRAUD DETECTION — same backend, same audio receive as /predict-audio;
+# process path: audio → STT → PII filter → Gemini analysis.
+# =========================================================================
+
+from app.fraud_detection import run_fraud_pipeline
+
+
+@app.post("/analyze-fraud")
+async def analyze_fraud(file: UploadFile = File(...)):
+    """
+    Receive audio (same supported formats as /predict-audio), then run:
+    speech-to-text → filter PII → Gemini fraud analysis.
+    """
+    request_id = str(uuid.uuid4())
+    t_start = time.monotonic()
+
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    if ext not in AUDIO_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported format '{ext}'. Supported: {', '.join(sorted(AUDIO_EXTENSIONS))}",
+        )
+
+    suffix = ext or ".wav"
+    with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
+        content = await file.read()
+        tmp.write(content)
+        tmp_path = tmp.name
+
+    try:
+        result = run_fraud_pipeline(tmp_path)
+    except Exception as e:
+        os.unlink(tmp_path)
+        raise HTTPException(status_code=500, detail=f"Fraud analysis failed: {str(e)}")
+    finally:
+        if os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+
+    t_total = int((time.monotonic() - t_start) * 1000)
+
+    if result.get("error"):
+        raise HTTPException(status_code=500, detail=result["error"])
+
+    gemini = result.get("gemini_analysis") or {}
+    return {
+        "request_id":          request_id,
+
+        # Transcripts
+        "transcript_raw":      result["transcript_raw"],
+        "transcript_filtered": result["transcript_filtered"],
+        "redacted":            result.get("redacted", []),
+
+        # Hybrid risk verdict
+        "risk_level":          result["final_risk_level"],
+        "risk_score":          result["final_risk_score"],
+        "scam_type":           result["final_scam_type"],
+
+        # Per-signal details
+        "signals": {
+            "rule_score":       result["rule_signals"].get("rule_score", 0),
+            "matched_rules":    result["rule_signals"].get("matched_rules", []),
+            "playbook_matches": result.get("playbook_matches", []),
+            "gemini": {
+                "risk_level":      gemini.get("risk_level"),
+                "risk_score":      gemini.get("risk_score"),
+                "confidence":      gemini.get("confidence"),
+                "scam_type":       gemini.get("scam_type"),
+                "summary":         gemini.get("summary"),
+                "indicators":      gemini.get("indicators", []),
+                "recommendation":  gemini.get("recommendation"),
+            },
+        },
+
+        # Merged evidence from all sources
+        "evidence":            result.get("evidence", []),
 
         "privacy":    {"stored_media": False},
         "timing_ms":  {"total": t_total},

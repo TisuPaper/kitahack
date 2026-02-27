@@ -11,7 +11,7 @@ class DeepfakeDetectorApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Deepfake Detector',
+      title: 'Realitic',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(

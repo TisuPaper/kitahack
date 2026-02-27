@@ -1,4 +1,4 @@
-# Deepfake Detector — quick commands from repo root
+# Realitic — quick commands from repo root
 
 .PHONY: run run-flutter run-backend
 
