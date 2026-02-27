@@ -5,6 +5,7 @@ import '../services/api_service.dart';
 import '../widgets/background.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/confidence_chart.dart';
+import 'live_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isEmbedded;
@@ -524,6 +525,64 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
+            const SizedBox(height: 20),
+            // ── Or: Live Detection ──
+            Row(
+              children: [
+                Expanded(child: Divider(color: Colors.black.withValues(alpha: 0.12))),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text('or', style: TextStyle(fontSize: 12, color: Colors.black38, fontWeight: FontWeight.w500)),
+                ),
+                Expanded(child: Divider(color: Colors.black.withValues(alpha: 0.12))),
+              ],
+            ),
+            const SizedBox(height: 16),
+            GlassCard(
+              animate: true,
+              padding: const EdgeInsets.all(20),
+              child: InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LiveScreen()),
+                  );
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF818CF8).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.videocam_rounded, color: Color(0xFF818CF8), size: 26),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Live Detection',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.black87),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Screen capture with real-time analysis',
+                            style: TextStyle(fontSize: 12, color: Colors.black.withValues(alpha: 0.5)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.black26),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
       ),
@@ -915,9 +974,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildResultStep() {
-    final prediction = _apiResult?['prediction'] ?? 'Unknown';
-    final isFake = prediction.toString().toLowerCase() == 'fake';
-    final probabilities = _apiResult?['probabilities'] as Map<String, dynamic>? ?? {};
+    // Backend returns verdict (REAL/FAKE/UNCERTAIN); fallback to legacy 'prediction'
+    final verdict = (_apiResult?['verdict'] ?? _apiResult?['prediction'])?.toString() ?? 'Unknown';
+    final isFake = verdict.toUpperCase() == 'FAKE';
+    final isUncertain = verdict.toUpperCase() == 'UNCERTAIN';
+    // Backend returns final_p_fake; build probabilities for chart
+    final pFake = (_apiResult?['final_p_fake'] as num?)?.toDouble();
+    final Map<String, dynamic> probabilities = pFake != null
+        ? {'real': 1.0 - pFake, 'fake': pFake}
+        : _apiResult?['probabilities'] as Map<String, dynamic>? ?? {};
 
     return KeyedSubtree(
       key: const ValueKey('result'),
@@ -931,18 +996,18 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               children: [
                 Icon(
-                  isFake ? Icons.warning_rounded : Icons.verified_rounded,
+                  isFake ? Icons.warning_rounded : (isUncertain ? Icons.help_outline_rounded : Icons.verified_rounded),
                   size: 48,
-                  color: isFake ? const Color(0xFFEF4444) : const Color(0xFF22C55E),
+                  color: isFake ? const Color(0xFFEF4444) : (isUncertain ? const Color(0xFFF59E0B) : const Color(0xFF22C55E)),
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  isFake ? 'MANIPULATED' : 'AUTHENTIC',
+                  isFake ? 'MANIPULATED' : (isUncertain ? 'UNCERTAIN' : 'AUTHENTIC'),
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 4,
-                    color: isFake ? const Color(0xFFEF4444) : const Color(0xFF22C55E),
+                    color: isFake ? const Color(0xFFEF4444) : (isUncertain ? const Color(0xFFF59E0B) : const Color(0xFF22C55E)),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -951,6 +1016,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 14, color: Colors.black54),
                 ),
+                if (_apiResult?['confidence_band'] != null || _apiResult?['advice'] != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    [
+                      if (_apiResult?['confidence_band'] != null) '${_apiResult!['confidence_band']} confidence',
+                      if (_apiResult?['advice'] is Map && (_apiResult!['advice'] as Map)['why'] != null)
+                        (_apiResult!['advice'] as Map)['why'].toString(),
+                    ].join(' · '),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: Colors.black45),
+                  ),
+                ],
                 const SizedBox(height: 32),
                 
                 const Align(
