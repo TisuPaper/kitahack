@@ -320,15 +320,28 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
         flex-direction: column;
         align-items: center;
       }
+      
+      /* Reorder columns for mobile: Center (Video) first, then Left (Video/Audio), then Right (Details/Log) */
+      .center-column {
+        order: 1;
+        width: 100%;
+      }
+      
+      .side-column:nth-child(1) { /* Left panel (Video/Audio Analysis) */
+        order: 2;
+      }
+      
+      .side-column:nth-child(3) { /* Right panel (Details/Log) */
+        order: 3;
+      }
+
       .side-column {
         width: 100%;
         max-width: 800px;
-        flex-direction: row;
-        flex-wrap: wrap;
+        flex-direction: column; /* Stack cards vertically on mobile */
       }
       .card {
-        flex: 1;
-        min-width: 300px;
+        width: 100%;
       }
       .controls {
         flex-wrap: wrap;
