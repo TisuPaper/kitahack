@@ -272,6 +272,35 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       border-radius: 8px; padding: 8px 12px; font-size: 13px;
       font-weight: 600;
     }
+
+    /* Responsive Layout for Mobile/Smaller Screens */
+    @media (max-width: 800px) {
+      .header {
+        padding: 16px;
+        justify-content: center;
+      }
+      .header h1 {
+        display: none; /* Hide title to save space, as requested */
+      }
+      .controls {
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+      }
+      .main {
+        flex-direction: column;
+        height: auto;
+        padding: 16px;
+        gap: 16px;
+      }
+      .side-panel {
+        width: 100%;
+        overflow-y: visible;
+      }
+      .video-panel {
+        min-height: 350px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1218,34 +1247,38 @@ class _LiveScreenState extends State<LiveScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent, // Let the main layout background show through
-      body: Padding(
-        padding: const EdgeInsets.only(
-          left: 24, 
-          right: 24,
-          top: 80, // Match home_screen top padding
-          bottom: 40,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.4), // Glassmorphism base
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.8), width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 24,
-                offset: const Offset(0, 8),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scaffold(
+          backgroundColor: Colors.transparent, // Let the main layout background show through
+          body: Padding(
+            padding: EdgeInsets.only(
+              left: constraints.maxWidth > 600 ? 40 : 24, 
+              right: constraints.maxWidth > 600 ? 40 : 24,
+              top: 80, // Match home_screen top padding
+              bottom: 40,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.4), // Glassmorphism base
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.8), width: 1.5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
-            ],
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: const HtmlElementView(viewType: _viewType),
+              ),
+            ),
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(24),
-            child: const HtmlElementView(viewType: _viewType),
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
