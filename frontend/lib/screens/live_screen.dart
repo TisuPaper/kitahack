@@ -20,8 +20,8 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #0F172A;
-      color: #fff;
+      background: transparent; /* Changed to transparent to let Flutter background show through */
+      color: #1E293B; /* Changed to dark text for light theme */
       min-height: 100vh;
     }
 
@@ -30,22 +30,27 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       align-items: center;
       justify-content: space-between;
       padding: 16px 24px;
-      background: #1E293B;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.6); /* Glassmorphism light */
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      border-radius: 16px 16px 0 0;
     }
 
     .header h1 {
       font-size: 20px;
-      font-weight: 700;
+      font-weight: 800;
       display: flex;
       align-items: center;
       gap: 10px;
+      color: #1E293B;
+      letter-spacing: -0.5px;
     }
 
     .header h1 .icon {
       width: 32px;
       height: 32px;
-      background: rgba(129,140,248,0.2);
+      background: rgba(0,0,0,0.05);
       border-radius: 8px;
       display: flex;
       align-items: center;
@@ -73,14 +78,14 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     }
 
     .btn-start {
-      background: linear-gradient(135deg, #22C55E, #16A34A);
+      background: #1E293B; /* Dark button like home screen */
       color: white;
     }
 
-    .btn-start:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
+    .btn-start:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
     .btn-stop {
-      background: linear-gradient(135deg, #EF4444, #DC2626);
+      background: #EF4444;
       color: white;
     }
 
@@ -94,15 +99,15 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     }
 
     .btn-pip {
-      background: rgba(129,140,248,0.12);
-      border: 1px solid rgba(129,140,248,0.28);
-      color: #818CF8;
+      background: rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.1);
+      color: #1E293B;
     }
-    .btn-pip:hover { background: rgba(129,140,248,0.22); transform: translateY(-1px); }
+    .btn-pip:hover { background: rgba(0,0,0,0.08); transform: translateY(-1px); }
     .btn-pip.active {
-      background: rgba(129,140,248,0.28);
-      border-color: rgba(129,140,248,0.55);
-      box-shadow: 0 0 12px rgba(129,140,248,0.2);
+      background: rgba(0,0,0,0.1);
+      border-color: rgba(0,0,0,0.2);
+      box-shadow: 0 0 12px rgba(0,0,0,0.05);
     }
 
     .main {
@@ -115,17 +120,21 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     .video-panel {
       flex: 1;
       position: relative;
-      background: #1E293B;
+      background: rgba(255, 255, 255, 0.6); /* Glassmorphism light */
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-radius: 16px;
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.05);
     }
 
     #screenVideo {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      background: #000;
+      background: #000; /* Keep video background black for contrast */
+      border-radius: 16px;
     }
 
     #faceOverlay {
@@ -141,11 +150,11 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
-      color: rgba(255,255,255,0.3);
+      color: rgba(0,0,0,0.5);
     }
 
     .placeholder .big-icon { font-size: 64px; margin-bottom: 16px; }
-    .placeholder p { font-size: 16px; }
+    .placeholder p { font-size: 16px; font-weight: 600; color: #1E293B; }
 
     .verdict-overlay {
       position: absolute; top: 16px; right: 16px;
@@ -153,27 +162,28 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       display: none; flex-direction: column; gap: 4px;
       backdrop-filter: blur(16px); z-index: 10;
       transition: all 0.3s ease; max-width: 340px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     .verdict-overlay .vo-main { font-size: 20px; font-weight: 800; letter-spacing: 2px; }
     .verdict-overlay .vo-band { font-size: 12px; font-weight: 600; opacity: 0.8; }
-    .verdict-overlay .vo-why  { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+    .verdict-overlay .vo-why  { font-size: 11px; opacity: 0.8; margin-top: 2px; }
 
     .verdict-overlay.real {
-      display: flex; background: rgba(34,197,94,0.2);
+      display: flex; background: rgba(255,255,255,0.9);
       border: 1px solid rgba(34,197,94,0.4); color: #22C55E;
     }
     .verdict-overlay.fake {
-      display: flex; background: rgba(239,68,68,0.2);
+      display: flex; background: rgba(255,255,255,0.9);
       border: 1px solid rgba(239,68,68,0.4); color: #EF4444;
       animation: pulse-red 1.5s infinite;
     }
     .verdict-overlay.uncertain {
-      display: flex; background: rgba(245,158,11,0.2);
+      display: flex; background: rgba(255,255,255,0.9);
       border: 1px solid rgba(245,158,11,0.4); color: #F59E0B;
     }
     .verdict-overlay.analyzing {
-      display: flex; background: rgba(129,140,248,0.2);
-      border: 1px solid rgba(129,140,248,0.4); color: #818CF8;
+      display: flex; background: rgba(255,255,255,0.9);
+      border: 1px solid rgba(0,0,0,0.1); color: #1E293B;
     }
 
     @keyframes pulse-red {
@@ -183,35 +193,41 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
 
     .side-panel { width: 370px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
     .card {
-      background: #1E293B; border-radius: 14px; padding: 20px;
-      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.6); /* Glassmorphism light */
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 16px; padding: 20px;
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.05);
     }
     .card h3 {
-      font-size: 13px; color: rgba(255,255,255,0.45); text-transform: uppercase;
+      font-size: 13px; color: rgba(0,0,0,0.5); text-transform: uppercase;
       letter-spacing: 1px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+      font-weight: 700;
     }
 
     .vc-icon     { font-size: 36px; line-height: 1; }
     .vc-verdict  { font-size: 28px; font-weight: 800; letter-spacing: 3px; }
     .vc-band     { font-size: 13px; font-weight: 600; opacity: 0.75; margin-top: 2px; }
-    .vc-why      { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 10px; line-height: 1.4; }
+    .vc-why      { font-size: 13px; color: rgba(0,0,0,0.6); margin-top: 10px; line-height: 1.4; }
     .vc-steps    { list-style: none; margin-top: 10px; padding: 0; }
     .vc-steps li {
-      font-size: 12px; color: rgba(255,255,255,0.55); padding: 4px 0; padding-left: 18px;
+      font-size: 12px; color: rgba(0,0,0,0.6); padding: 4px 0; padding-left: 18px;
       position: relative; line-height: 1.5;
     }
     .vc-steps li::before {
       content: ''; position: absolute; left: 0; top: 9px;
-      width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.25);
+      width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid rgba(0,0,0,0.25);
     }
 
     .audio-indicator {
       display: flex; align-items: center; gap: 8px; padding: 8px 12px;
-      border-radius: 8px; background: rgba(129,140,248,0.1); font-size: 13px; color: #818CF8;
+      border-radius: 8px; background: rgba(0,0,0,0.05); font-size: 13px; color: #1E293B;
+      font-weight: 600;
     }
     .audio-bars { display: flex; gap: 2px; align-items: flex-end; height: 16px; }
     .audio-bars span {
-      width: 3px; background: #818CF8; border-radius: 2px;
+      width: 3px; background: #1E293B; border-radius: 2px;
       animation: audio-bar 0.8s ease-in-out infinite;
     }
     .audio-bars span:nth-child(1) { height: 6px; animation-delay: 0s; }
@@ -220,14 +236,14 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     .audio-bars span:nth-child(4) { height: 14px; animation-delay: 0.45s; }
     .audio-bars span:nth-child(5) { height: 10px; animation-delay: 0.6s; }
     @keyframes audio-bar { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.4); } }
-    #audioCanvas { width: 100%; height: 32px; border-radius: 8px; background: rgba(0,0,0,0.2); margin-top: 8px; }
+    #audioCanvas { width: 100%; height: 32px; border-radius: 8px; background: rgba(0,0,0,0.05); margin-top: 8px; }
 
     .details-toggle {
       display: flex; align-items: center; justify-content: space-between;
       cursor: pointer; user-select: none;
     }
     .details-toggle::after {
-      content: '\25B6'; font-size: 10px; color: rgba(255,255,255,0.3);
+      content: '\25B6'; font-size: 10px; color: rgba(0,0,0,0.3);
       transition: transform 0.2s;
     }
     .details-toggle.open::after { transform: rotate(90deg); }
@@ -236,23 +252,25 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     .detail-row {
       display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px;
     }
-    .detail-row .dl { color: rgba(255,255,255,0.4); }
-    .detail-row .dv { font-weight: 600; color: rgba(255,255,255,0.7); }
+    .detail-row .dl { color: rgba(0,0,0,0.5); }
+    .detail-row .dv { font-weight: 600; color: #1E293B; }
 
     .log-entry {
       padding: 6px 10px; border-radius: 8px; margin-bottom: 4px;
       font-size: 11px; display: flex; align-items: center; gap: 6px;
+      font-weight: 500;
     }
-    .log-entry.real { background: rgba(34,197,94,0.08); color: #22C55E; }
-    .log-entry.fake { background: rgba(239,68,68,0.08); color: #EF4444; }
-    .log-entry.uncertain { background: rgba(245,158,11,0.08); color: #F59E0B; }
-    .log-entry.analyzing { background: rgba(129,140,248,0.08); color: #818CF8; }
+    .log-entry.real { background: rgba(34,197,94,0.1); color: #16A34A; }
+    .log-entry.fake { background: rgba(239,68,68,0.1); color: #DC2626; }
+    .log-entry.uncertain { background: rgba(245,158,11,0.1); color: #D97706; }
+    .log-entry.analyzing { background: rgba(0,0,0,0.05); color: #1E293B; }
     .log-container { max-height: 260px; overflow-y: auto; }
 
     .interval-select {
-      background: #334155; color: white;
-      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.8); color: #1E293B;
+      border: 1px solid rgba(0,0,0,0.1);
       border-radius: 8px; padding: 8px 12px; font-size: 13px;
+      font-weight: 600;
     }
   </style>
 </head>
@@ -263,7 +281,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       Live Deepfake Detection
     </h1>
     <div class="controls">
-      <label style="font-size:13px; color:rgba(255,255,255,0.5);">
+      <label style="font-size:13px; color:rgba(0,0,0,0.5); font-weight: 600;">
         Scan every:
         <select id="intervalSelect" class="interval-select">
           <option value="2000">2s</option>
@@ -302,7 +320,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       <div class="card" id="videoVerdictCard">
         <h3>🖥 Video Analysis</h3>
         <div id="videoVerdictArea" style="text-align:center; padding:10px 0">
-          <div style="font-size:13px; color:rgba(255,255,255,0.35)">
+          <div style="font-size:13px; color:rgba(0,0,0,0.4); font-weight: 500;">
             Click "Start Capture" to begin
           </div>
         </div>
@@ -311,7 +329,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       <div class="card" id="audioVerdictCard">
         <h3>🎙 Audio Analysis</h3>
         <div id="audioStatus">
-          <div style="font-size:13px; color:rgba(255,255,255,0.35)">
+          <div style="font-size:13px; color:rgba(0,0,0,0.4); font-weight: 500;">
             Audio capture starts with screen share
           </div>
         </div>
@@ -325,10 +343,10 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
         <div class="details-body" id="detailsBody">
           <div class="detail-row"><span class="dl">State</span><span class="dv" id="statState">Idle</span></div>
           <div class="detail-row"><span class="dl">Frames analyzed</span><span class="dv" id="statFrames">0</span></div>
-          <div class="detail-row"><span class="dl">Fake detections</span><span class="dv" id="statFakes" style="color:#EF4444">0</span></div>
-          <div class="detail-row"><span class="dl">Real detections</span><span class="dv" id="statReals" style="color:#22C55E">0</span></div>
+          <div class="detail-row"><span class="dl">Fake detections</span><span class="dv" id="statFakes" style="color:#DC2626">0</span></div>
+          <div class="detail-row"><span class="dl">Real detections</span><span class="dv" id="statReals" style="color:#16A34A">0</span></div>
           <div class="detail-row"><span class="dl">Avg confidence</span><span class="dv" id="statConfidence">-</span></div>
-          <div id="detailsExtra" style="margin-top:6px; font-size:11px; color:rgba(255,255,255,0.35)"></div>
+          <div id="detailsExtra" style="margin-top:6px; font-size:11px; color:rgba(0,0,0,0.4)"></div>
         </div>
       </div>
 
@@ -1201,8 +1219,33 @@ class _LiveScreenState extends State<LiveScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      body: const HtmlElementView(viewType: _viewType),
+      backgroundColor: Colors.transparent, // Let the main layout background show through
+      body: Padding(
+        padding: const EdgeInsets.only(
+          left: 24, 
+          right: 24,
+          top: 80, // Match home_screen top padding
+          bottom: 40,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.4), // Glassmorphism base
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.8), width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 24,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: const HtmlElementView(viewType: _viewType),
+          ),
+        ),
+      ),
     );
   }
 }
