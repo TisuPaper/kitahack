@@ -1,6 +1,6 @@
-# Realitic — AI Media & Call Fraud Detection
+# Realitic — Privacy-first fraud detection
 
-A multi-modal AI fraud detection system covering **image**, **video**, and **audio deepfakes**, plus a **call fraud analysis** pipeline that transcribes speech, redacts private data, and uses a hybrid risk engine to detect scams.
+A multi-modal AI fraud detection system run at Trusted Execution Environment (TEE), covering **image**, **video**, and **audio deepfakes**, plus a **fraud analysis** pipeline that transcribes speech, redacts private data, and uses a hybrid risk engine to detect scams. 
 
 ---
 
