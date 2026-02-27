@@ -39,6 +39,8 @@ class _MainLayoutState extends State<MainLayout> {
 
           // Main Content Area with Smooth Fade Transition
           Positioned.fill(
+            // Add bottom padding so content doesn't hide behind the floating nav bar
+            bottom: 100, 
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 400),
               switchInCurve: Curves.easeOutCubic,
