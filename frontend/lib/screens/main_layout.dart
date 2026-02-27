@@ -173,13 +173,13 @@ class _MainLayoutState extends State<MainLayout> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                Icons.save_alt_rounded, // Download/Save icon
+                                Icons.history_rounded, // History icon
                                 size: 18,
                                 color: Colors.white,
                               ),
                               SizedBox(width: 6),
                               Text(
-                                'Save',
+                                'History',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,

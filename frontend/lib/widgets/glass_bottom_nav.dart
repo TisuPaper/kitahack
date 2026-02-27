@@ -19,7 +19,6 @@ class _GlassBottomNavState extends State<GlassBottomNav> {
     switch (index) {
       case 0: return 'Scanner';
       case 1: return 'Live Capture';
-      case 2: return 'History';
       default: return '';
     }
   }
@@ -28,7 +27,6 @@ class _GlassBottomNavState extends State<GlassBottomNav> {
     switch (index) {
       case 0: return LucideIcons.scanLine; // More suitable for "Scanner"
       case 1: return LucideIcons.video; // Suitable for "Live Capture"
-      case 2: return LucideIcons.history; // Suitable for "History"
       default: return LucideIcons.circle;
     }
   }
@@ -124,9 +122,9 @@ class _GlassBottomNavState extends State<GlassBottomNav> {
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: List.generate(3, (index) {
+                  children: List.generate(2, (index) { // Changed from 3 to 2
                     return Padding(
-                      padding: EdgeInsets.only(right: index < 2 ? 3.0 : 0.0),
+                      padding: EdgeInsets.only(right: index < 1 ? 3.0 : 0.0), // Changed index < 2 to index < 1
                       child: MouseRegion(
                         onEnter: (_) => setState(() => _hoveredIndex = index),
                         onExit: (_) => setState(() => _hoveredIndex = null),
