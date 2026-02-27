@@ -40,7 +40,9 @@ class _MainLayoutState extends State<MainLayout> {
           // Main Content Area with Smooth Fade Transition
           Positioned.fill(
             // Add bottom padding so content doesn't hide behind the floating nav bar
-            bottom: 100, 
+            // Navbar is at bottom: 24, and has height: 40. So 64 is exactly the top edge of the navbar.
+            // Adding a small 8px buffer so it's just right.
+            bottom: 40, 
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 400),
               switchInCurve: Curves.easeOutCubic,
@@ -106,7 +108,7 @@ class _MainLayoutState extends State<MainLayout> {
           Positioned(
             left: 0,
             right: 0,
-            bottom: 40,
+            bottom: 24, // Moved down from 40 to 24
             child: Center(
               child: GlassBottomNav(
                 currentIndex: _currentIndex,
