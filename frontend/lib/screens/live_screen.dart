@@ -41,61 +41,73 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
 
     .controls {
       display: flex;
-      gap: 12px;
+      gap: 16px;
       align-items: center;
-      background: rgba(255, 255, 255, 0.6);
+      background: transparent;
+      padding: 0;
+      border: none;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    .glass-btn {
+      background: linear-gradient(180deg, rgba(60, 60, 67, 0.8) 0%, rgba(28, 28, 30, 0.8) 100%);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
       padding: 12px 24px;
       border-radius: 100px; /* Pill shape */
-      border: 1px solid rgba(255,255,255,0.8);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.05);
-    }
-
-    .btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 100px; /* Pill shape */
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      letter-spacing: 0.3px;
     }
 
-    .btn-start {
-      background: #1E293B;
-      color: white;
+    .glass-btn:hover {
+      background: linear-gradient(180deg, rgba(70, 70, 77, 0.9) 0%, rgba(38, 38, 40, 0.9) 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
 
-    .btn-start:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-
-    .btn-stop {
-      background: #EF4444;
-      color: white;
+    .glass-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 
-    .btn-stop:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
-
-    .btn:disabled {
-      opacity: 0.4;
+    .glass-btn:disabled {
+      opacity: 0.5;
       cursor: not-allowed;
       transform: none !important;
       box-shadow: none !important;
     }
 
-    .btn-pip {
-      background: rgba(0,0,0,0.05);
-      border: 1px solid rgba(0,0,0,0.1);
-      color: #1E293B;
+    .btn-start {
+      /* Default glass style is fine, or add a subtle tint */
     }
-    .btn-pip:hover { background: rgba(0,0,0,0.08); transform: translateY(-1px); }
+
+    .btn-stop {
+      background: linear-gradient(180deg, rgba(220, 38, 38, 0.7) 0%, rgba(153, 27, 27, 0.8) 100%);
+      border-top: 1px solid rgba(255, 100, 100, 0.3);
+    }
+
+    .btn-stop:hover {
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.8) 0%, rgba(185, 28, 28, 0.9) 100%);
+    }
+
+    .btn-pip {
+      /* Default glass style */
+    }
     .btn-pip.active {
-      background: rgba(0,0,0,0.1);
-      border-color: rgba(0,0,0,0.2);
-      box-shadow: 0 0 12px rgba(0,0,0,0.05);
+      background: linear-gradient(180deg, rgba(80, 80, 87, 0.9) 0%, rgba(48, 48, 50, 0.9) 100%);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 16px rgba(255, 255, 255, 0.1);
     }
 
     /* Main Layout - Center Video, Left/Right Widgets */
@@ -263,11 +275,43 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     .log-entry.analyzing { background: rgba(0,0,0,0.05); color: #1E293B; }
     .log-container { max-height: 260px; overflow-y: auto; }
 
+    .interval-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(180deg, rgba(60, 60, 67, 0.8) 0%, rgba(28, 28, 30, 0.8) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      padding: 10px 20px;
+      border-radius: 100px;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
     .interval-select {
-      background: rgba(255,255,255,0.8); color: #1E293B;
-      border: 1px solid rgba(0,0,0,0.1);
-      border-radius: 8px; padding: 8px 12px; font-size: 13px;
+      background: transparent;
+      color: white;
+      border: none;
+      outline: none;
+      font-size: 14px;
       font-weight: 600;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      padding-right: 16px;
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+      background-repeat: no-repeat;
+      background-position: right center;
+      background-size: 10px auto;
+    }
+    .interval-select option {
+      background: #1C1C1E;
+      color: white;
     }
 
     /* Responsive Layout for Mobile/Smaller Screens */
@@ -296,7 +340,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
 <body>
   <div class="controls-container">
     <div class="controls">
-      <label style="font-size:13px; color:rgba(0,0,0,0.5); font-weight: 600;">
+      <div class="interval-wrapper">
         Scan every:
         <select id="intervalSelect" class="interval-select">
           <option value="2000">2s</option>
@@ -304,14 +348,14 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
           <option value="5000">5s</option>
           <option value="10000">10s</option>
         </select>
-      </label>
-      <button id="btnPip" class="btn btn-pip" onclick="toggleWidget()" title="Float results in a mini window">
+      </div>
+      <button id="btnPip" class="glass-btn btn-pip" onclick="toggleWidget()" title="Float results in a mini window">
         ⧉ Pop Out
       </button>
-      <button id="btnStart" class="btn btn-start" onclick="startCapture()">
+      <button id="btnStart" class="glass-btn btn-start" onclick="startCapture()">
         ▶ Start Capture
       </button>
-      <button id="btnStop" class="btn btn-stop" onclick="stopCapture()" disabled>
+      <button id="btnStop" class="glass-btn btn-stop" onclick="stopCapture()" disabled>
         ■ Stop
       </button>
     </div>
