@@ -365,7 +365,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     <!-- Left Side Panel -->
     <div class="side-column">
       <div class="card" id="videoVerdictCard">
-        <h3>🖥 Video Analysis</h3>
+        <h3>Video Analysis</h3>
         <div id="videoVerdictArea" style="text-align:center; padding:10px 0">
           <div style="font-size:13px; color:rgba(0,0,0,0.4); font-weight: 500;">
             Click "Start Capture" to begin
@@ -374,7 +374,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       </div>
 
       <div class="card" id="audioVerdictCard">
-        <h3>🎙 Audio Analysis</h3>
+        <h3>Audio Analysis</h3>
         <div id="audioStatus">
           <div style="font-size:13px; color:rgba(0,0,0,0.4); font-weight: 500;">
             Audio capture starts with screen share
@@ -408,7 +408,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     <div class="side-column">
       <div class="card">
         <h3 class="details-toggle" id="detailsToggle" onclick="toggleDetails()">
-          🔬 Technical Details
+          Technical Details
         </h3>
         <div class="details-body" id="detailsBody">
           <div class="detail-row"><span class="dl">State</span><span class="dv" id="statState">Idle</span></div>
@@ -421,7 +421,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       </div>
 
       <div class="card" style="flex:1;">
-        <h3>📋 Detection Log</h3>
+        <h3>Detection Log</h3>
         <div id="logContainer" class="log-container">
           <div class="log-entry analyzing">Waiting to start...</div>
         </div>
