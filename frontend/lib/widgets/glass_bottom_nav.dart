@@ -26,9 +26,9 @@ class _GlassBottomNavState extends State<GlassBottomNav> {
 
   IconData _getIcon(int index) {
     switch (index) {
-      case 0: return LucideIcons.sparkles;
-      case 1: return LucideIcons.video;
-      case 2: return LucideIcons.history;
+      case 0: return LucideIcons.scanLine; // More suitable for "Scanner"
+      case 1: return LucideIcons.video; // Suitable for "Live Capture"
+      case 2: return LucideIcons.history; // Suitable for "History"
       default: return LucideIcons.circle;
     }
   }
@@ -52,13 +52,14 @@ class _GlassBottomNavState extends State<GlassBottomNav> {
         AnimatedPositioned(
           duration: const Duration(milliseconds: 400),
           curve: Curves.easeOutBack,
-          bottom: 46, // 40 (menu height) + 6 (gap)
+          bottom: isHovering ? 46 : 36, // Slide up when hovering, down when hidden
           left: _getCenterOffset(activeIndex),
           child: FractionalTranslation(
             translation: const Offset(-0.5, 0),
             child: AnimatedOpacity(
               duration: const Duration(milliseconds: 200),
-              opacity: isHovering || widget.currentIndex == activeIndex ? 1.0 : 0.0,
+              // Only show tooltip when hovering, hide when not hovering
+              opacity: isHovering ? 1.0 : 0.0,
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
