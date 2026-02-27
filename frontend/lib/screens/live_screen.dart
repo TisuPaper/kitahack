@@ -1173,36 +1173,33 @@ class LiveScreen extends StatefulWidget {
 }
 
 class _LiveScreenState extends State<LiveScreen> {
-  static const _viewType = 'live-detection-blob';
-  static bool _registered = false;
+  late final String _viewType;
 
   @override
   void initState() {
     super.initState();
-    if (!_registered) {
-      final htmlContent = _liveHtmlTemplate.replaceAll(
-        '__API_BASE__',
-        ApiService.baseUrl,
-      );
+    _viewType = 'live-detection-${DateTime.now().microsecondsSinceEpoch}';
+    final htmlContent = _liveHtmlTemplate.replaceAll(
+      '__API_BASE__',
+      ApiService.baseUrl,
+    );
 
-      ui_web.platformViewRegistry.registerViewFactory(_viewType, (int viewId) {
-        return html.IFrameElement()
-          ..srcdoc = htmlContent
-          ..style.border = 'none'
-          ..style.width = '100%'
-          ..style.height = '100%'
-          ..allow = 'camera *; microphone *; display-capture *; picture-in-picture *; autoplay *'
-          ..setAttribute('allowfullscreen', 'true');
-      });
-      _registered = true;
-    }
+    ui_web.platformViewRegistry.registerViewFactory(_viewType, (int viewId) {
+      return html.IFrameElement()
+        ..srcdoc = htmlContent
+        ..style.border = 'none'
+        ..style.width = '100%'
+        ..style.height = '100%'
+        ..allow = 'camera *; microphone *; display-capture *; picture-in-picture *; autoplay *'
+        ..setAttribute('allowfullscreen', 'true');
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
-      body: const HtmlElementView(viewType: _viewType),
+      body: HtmlElementView(viewType: _viewType),
     );
   }
 }

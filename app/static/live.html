@@ -508,11 +508,13 @@
         document.getElementById('btnStop').disabled = false;
         document.getElementById('statState').textContent = '🟢 Capturing';
 
-        // Audio source: prefer screen-share audio, fall back to microphone
+        // Audio source: tab audio is reliable; screen/window audio often is not.
         let audioSourceStream = null;
         const screenAudioTracks = stream.getAudioTracks();
+        const surface = stream.getVideoTracks()[0]?.getSettings?.().displaySurface || '';
+        const isBrowserTabCapture = surface === 'browser';
 
-        if (screenAudioTracks.length > 0) {
+        if (screenAudioTracks.length > 0 && isBrowserTabCapture) {
           audioSourceStream = stream;
           document.getElementById('audioStatus').innerHTML = `
             <div class="audio-indicator">
@@ -534,14 +536,14 @@
                 <div class="audio-bars">
                   <span></span><span></span><span></span><span></span><span></span>
                 </div>
-                🎤 Recording via microphone...
+                🎤 Recording via microphone... ${!isBrowserTabCapture && screenAudioTracks.length > 0 ? '(screen/window audio not supported reliably)' : ''}
               </div>
             `;
           } catch (micErr) {
             console.warn('Microphone access denied:', micErr);
             document.getElementById('audioStatus').innerHTML = `
               <div style="font-size:13px; color:#F59E0B">
-                ⚠️ No audio source — share a browser tab or allow mic access
+                ⚠️ No audio source — share a browser tab (not screen/window) or allow mic access
               </div>
             `;
           }
