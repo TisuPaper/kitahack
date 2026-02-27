@@ -135,74 +135,91 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // If embedded inside MainLayout, just return the content padding and scroll area without the Scaffold/Background
-    if (widget.isEmbedded) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-        child: Column(
-            children: [
-              // Header Navigation / Tabs mimicking Image 2 "Extract Train Convert Tools"
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: _buildTopNav(),
-                ),
-              ),
-              const SizedBox(height: 32),
-              
-              // Main Content Area — scrollable
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Center(
+    // Use LayoutBuilder to make the layout responsive based on screen width
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Determine max width based on screen size. 
+        // On larger screens, we can allow it to be wider, but still constrained for readability.
+        final double maxWidth = constraints.maxWidth > 800 ? 600 : 400;
+        
+        // If embedded inside MainLayout, just return the content padding and scroll area without the Scaffold/Background
+        if (widget.isEmbedded) {
+          return Padding(
+            padding: EdgeInsets.only(
+              left: constraints.maxWidth > 600 ? 40 : 24, 
+              right: constraints.maxWidth > 600 ? 40 : 24,
+              top: 80, // Increased top padding to push content down below the logo
+              bottom: 40,
+            ),
+            child: Column(
+                children: [
+                  // Header Navigation / Tabs mimicking Image 2 "Extract Train Convert Tools"
+                  Center(
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 400),
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 400),
-                        transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                        child: _buildCurrentStep(),
+                      constraints: BoxConstraints(maxWidth: maxWidth),
+                      child: _buildTopNav(),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  
+                  // Main Content Area — scrollable
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: maxWidth),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 400),
+                            transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                            child: _buildCurrentStep(),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-      );
-    }
-    
-    // Standalone fallback
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      body: AnimatedGradientBackground(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-          child: Column(
-            children: [
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: _buildTopNav(),
-                ),
+          );
+        }
+        
+        // Standalone fallback
+        return Scaffold(
+          extendBodyBehindAppBar: true,
+          body: AnimatedGradientBackground(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: constraints.maxWidth > 600 ? 40 : 24, 
+                vertical: 40
               ),
-              const SizedBox(height: 32),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Center(
+              child: Column(
+                children: [
+                  Center(
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 400),
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 400),
-                        transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                        child: _buildCurrentStep(),
+                      constraints: BoxConstraints(maxWidth: maxWidth),
+                      child: _buildTopNav(),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: maxWidth),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 400),
+                            transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                            child: _buildCurrentStep(),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 

@@ -70,8 +70,11 @@ class _MainLayoutState extends State<MainLayout> {
           Positioned(
             top: 24,
             left: 24,
+            // Constrain the width of the logo area so it doesn't overlap with the center content
+            width: 150, 
             child: SafeArea(
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   // Logo image from assets
                   Container(
@@ -90,13 +93,18 @@ class _MainLayoutState extends State<MainLayout> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
-                    'REALYTIC',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w900, // Maximum boldness
-                      letterSpacing: -0.8,
-                      color: Colors.black87,
+                  // Wrap text in Expanded so it truncates instead of overflowing/overlapping
+                  const Expanded(
+                    child: Text(
+                      'REALYTIC',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900, // Maximum boldness
+                        letterSpacing: -0.8,
+                        color: Colors.black87,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
                   ),
                 ],
