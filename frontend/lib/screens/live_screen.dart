@@ -739,11 +739,8 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
         const bandLabel = BAND_LABELS[band] || '';
         const why   = result.advice ? result.advice.why : '';
 
-        verdictOverlay.className = 'verdict-overlay ' + vl;
-        verdictOverlay.innerHTML =
-          '<div class="vo-main">' + getEmoji(vl) + ' ' + v + '</div>' +
-          '<div class="vo-band">' + bandLabel + '</div>' +
-          (why ? '<div class="vo-why">' + why + '</div>' : '');
+        // Removed verdictOverlay update to hide the text on the video
+        verdictOverlay.style.display = 'none';
 
         const bbox = result.signals ? result.signals.face_bbox : null;
         const faceFound = result.signals ? result.signals.face_found : false;
