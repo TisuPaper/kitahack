@@ -120,13 +120,15 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     .video-panel {
       flex: 1;
       position: relative;
-      background: rgba(255, 255, 255, 0.6); /* Glassmorphism light */
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.4); /* Match upload container background */
       border-radius: 16px;
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.8);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+      border: 2px solid rgba(0,0,0,0.15); /* Match upload container border */
+      box-shadow: none; /* Remove heavy shadow to match upload container */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
     }
 
     #screenVideo {
@@ -134,7 +136,8 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       height: 100%;
       object-fit: contain;
       background: #000; /* Keep video background black for contrast */
-      border-radius: 16px;
+      border-radius: 14px;
+      display: none; /* Hide initially */
     }
 
     #faceOverlay {
@@ -142,19 +145,37 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       top: 0; left: 0;
       width: 100%; height: 100%;
       pointer-events: none;
+      display: none; /* Hide initially */
     }
 
     .placeholder {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
       text-align: center;
-      color: rgba(0,0,0,0.5);
+      color: rgba(0,0,0,0.54); /* Match upload container text color */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      padding: 32px 20px;
     }
 
-    .placeholder .big-icon { font-size: 64px; margin-bottom: 16px; }
-    .placeholder p { font-size: 16px; font-weight: 600; color: #1E293B; }
+    .placeholder .big-icon { 
+      font-size: 48px; /* Match upload container icon size */
+      margin-bottom: 16px; 
+      color: rgba(0,0,0,0.54);
+    }
+    .placeholder p { 
+      font-size: 16px; 
+      font-weight: 700; 
+      color: #1E293B; 
+    }
+    .placeholder .sub-text {
+      font-size: 12px;
+      color: rgba(0,0,0,0.54);
+      margin-top: 8px;
+      font-weight: 400;
+    }
 
     .verdict-overlay {
       position: absolute; top: 16px; right: 16px;
@@ -332,15 +353,19 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
   </div>
 
   <div class="main">
-    <div class="video-panel">
+    <div class="video-panel" id="videoPanel">
       <video id="screenVideo" autoplay muted></video>
       <canvas id="faceOverlay"></canvas>
       <div id="placeholder" class="placeholder">
-        <div class="big-icon">🖥️</div>
+        <div class="big-icon">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+          </svg>
+        </div>
         <p>Click "Start Capture" to share your screen</p>
-        <p style="font-size:13px; margin-top:8px; opacity:0.5">
-          Select a window, tab, or entire screen
-        </p>
+        <p class="sub-text">Select a window, tab, or entire screen</p>
       </div>
       <div id="verdictOverlay" class="verdict-overlay"></div>
     </div>
@@ -528,8 +553,12 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
           audio: true
         });
 
+        video.style.display = 'block';
+        faceOverlay.style.display = 'block';
         video.srcObject = stream;
         placeholder.style.display = 'none';
+        document.getElementById('videoPanel').style.border = 'none';
+        document.getElementById('videoPanel').style.background = '#000';
 
         document.getElementById('btnStart').disabled = true;
         document.getElementById('btnStop').disabled = false;
@@ -622,7 +651,11 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       }
 
       video.srcObject = null;
-      placeholder.style.display = '';
+      video.style.display = 'none';
+      faceOverlay.style.display = 'none';
+      placeholder.style.display = 'flex';
+      document.getElementById('videoPanel').style.border = '2px solid rgba(0,0,0,0.15)';
+      document.getElementById('videoPanel').style.background = 'rgba(255, 255, 255, 0.4)';
       verdictOverlay.className = 'verdict-overlay';
       verdictOverlay.style.display = 'none';
       clearFaceBox();
