@@ -263,12 +263,26 @@ print(f"\nInference complete: {len(results)} frames in {elapsed_total:.1f}s\n")
 
 
 # ---------------------------------------------------------------------------
-# Save raw results for later analysis
+# Save raw results for later analysis (cache for standalone analyze/optimize)
 # ---------------------------------------------------------------------------
 RAW_RESULTS_PATH = os.path.join(os.path.dirname(__file__), "eval_raw_results.json")
 with open(RAW_RESULTS_PATH, "w") as f:
     json.dump(results, f, indent=2)
 print(f"Raw results saved to {RAW_RESULTS_PATH}\n")
+
+# ---------------------------------------------------------------------------
+# Optional: run analysis and optimization in-process (direct pass, no re-read)
+# ---------------------------------------------------------------------------
+try:
+    import analyze_results
+    analyze_results.analyze(results)
+except Exception as e:
+    print(f"analyze_results skipped: {e}\n")
+try:
+    import optimize_video_level
+    optimize_video_level.optimize(results)
+except Exception as e:
+    print(f"optimize_video_level skipped: {e}\n")
 
 
 # ---------------------------------------------------------------------------
