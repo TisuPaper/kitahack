@@ -75,6 +75,7 @@ class _MainLayoutState extends State<MainLayout> {
             child: SafeArea(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Logo image from assets
                   Container(
@@ -105,6 +106,91 @@ class _MainLayoutState extends State<MainLayout> {
                       ),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Top Right Buttons (Settings & Save/History)
+          Positioned(
+            top: 24,
+            right: 24,
+            child: SafeArea(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Settings Button (Light grey circle)
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(18),
+                        onTap: () {
+                          // TODO: Implement settings action
+                        },
+                        child: const Icon(
+                          Icons.settings_outlined,
+                          size: 20,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Save/History Button (Dark pill)
+                  Container(
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2D2D2D), // Dark grey/black
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(18),
+                        onTap: () {
+                          // TODO: Implement save/history action
+                        },
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.save_alt_rounded, // Download/Save icon
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                'Save',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
