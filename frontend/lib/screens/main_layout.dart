@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart'; // The current Scanner tab
+import 'live_screen.dart'; // The Live Capture tab
 import '../widgets/glass_bottom_nav.dart';
 import '../widgets/background.dart';
 
@@ -21,8 +22,7 @@ class _MainLayoutState extends State<MainLayout> {
     super.initState();
     _pages = [
       const HomeScreen(isEmbedded: true), // We'll modify HomeScreen to remove its own Scaffold/Background if embedded
-      const _PlaceholderPage(title: 'Live Capture', icon: Icons.videocam_rounded),
-      const _PlaceholderPage(title: 'History', icon: Icons.history_rounded),
+      const LiveScreen(), // The Live Capture screen
     ];
   }
 
