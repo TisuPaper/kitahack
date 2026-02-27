@@ -559,11 +559,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF818CF8).withValues(alpha: 0.15),
+                        color: Colors.black.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.black.withValues(alpha: 0.1)),
                       ),
                       child: const Center(
-                        child: Icon(Icons.videocam_rounded, color: Color(0xFF818CF8), size: 26),
+                        child: Icon(Icons.videocam_outlined, color: Colors.black54, size: 26),
                       ),
                     ),
                     const SizedBox(width: 16),
