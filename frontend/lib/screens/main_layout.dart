@@ -62,6 +62,44 @@ class _MainLayoutState extends State<MainLayout> {
             ),
           ),
 
+          // Top Left Logo
+          Positioned(
+            top: 24,
+            left: 24,
+            child: SafeArea(
+              child: Row(
+                children: [
+                  // Logo image from Unsplash
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: const BoxDecoration(
+                      color: Colors.black87,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                         BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
+                      ],
+                      image: DecorationImage(
+                        image: NetworkImage('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=100&auto=format&fit=crop'),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Realytic',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.8,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           // Floating Bottom Navigation Bar
           Positioned(
             left: 0,

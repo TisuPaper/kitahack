@@ -1,66 +1,165 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
-class GlassBottomNav extends StatelessWidget {
+class GlassBottomNav extends StatefulWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
   const GlassBottomNav({super.key, required this.currentIndex, required this.onTap});
 
   @override
+  State<GlassBottomNav> createState() => _GlassBottomNavState();
+}
+
+class _GlassBottomNavState extends State<GlassBottomNav> {
+  int? _hoveredIndex;
+
+  String _getLabel(int index) {
+    switch (index) {
+      case 0: return 'Scanner';
+      case 1: return 'Live Capture';
+      case 2: return 'History';
+      default: return '';
+    }
+  }
+
+  IconData _getIcon(int index) {
+    switch (index) {
+      case 0: return LucideIcons.sparkles;
+      case 1: return LucideIcons.video;
+      case 2: return LucideIcons.history;
+      default: return LucideIcons.circle;
+    }
+  }
+
+  double _getCenterOffset(int index) {
+    // Left padding (6) + (index * (IconWidth (32) + Gap (3))) + HalfIconWidth (16)
+    return 6.0 + (index * 35.0) + 16.0;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(100),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.6), // Light macOS glass
-            borderRadius: BorderRadius.circular(100),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.8), width: 1.5),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
-              )
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min, // Hug the icons tightly
-            children: [
-              _NavIcon(
-                icon: Icons.auto_awesome, 
-                isSelected: currentIndex == 0,
-                onTap: () => onTap(0),
+    // Determine which index to show tooltip for: hovered if any, else selected
+    final activeIndex = _hoveredIndex ?? widget.currentIndex;
+    final isHovering = _hoveredIndex != null;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.bottomCenter,
+      children: [
+        // 1. Floating Tooltip Popout
+        AnimatedPositioned(
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeOutBack,
+          bottom: 46, // 40 (menu height) + 6 (gap)
+          left: _getCenterOffset(activeIndex),
+          child: FractionalTranslation(
+            translation: const Offset(-0.5, 0),
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 200),
+              opacity: isHovering || widget.currentIndex == activeIndex ? 1.0 : 0.0,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 0, spreadRadius: 1),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                    child: Container(
+                      height: 28,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.95), // Light glass tooltip
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.black.withValues(alpha: 0.05), width: 1),
+                      ),
+                      alignment: Alignment.center,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: Text(
+                          _getLabel(activeIndex),
+                          key: ValueKey(activeIndex),
+                          style: const TextStyle(
+                            fontSize: 13, 
+                            fontWeight: FontWeight.w500, 
+                            height: 1.2,
+                            color: Colors.black87
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(width: 8),
-              _NavIcon(
-                icon: Icons.videocam_outlined, 
-                isSelected: currentIndex == 1,
-                onTap: () => onTap(1),
-              ),
-              const SizedBox(width: 8),
-              _NavIcon(
-                icon: Icons.grid_view_rounded, 
-                isSelected: currentIndex == 2,
-                onTap: () => onTap(2),
-              ),
-            ],
+            ),
           ),
         ),
-      ),
+
+        // 2. Main Nav Bar Pill
+        Container(
+          height: 40,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(100),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 0, spreadRadius: 1),
+              BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 16, offset: const Offset(0, 8), spreadRadius: -4),
+            ]
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(100),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.95), // Light macOS glass nav bar
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(color: Colors.black.withValues(alpha: 0.05), width: 1),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(3, (index) {
+                    return Padding(
+                      padding: EdgeInsets.only(right: index < 2 ? 3.0 : 0.0),
+                      child: MouseRegion(
+                        onEnter: (_) => setState(() => _hoveredIndex = index),
+                        onExit: (_) => setState(() => _hoveredIndex = null),
+                        child: _NavIconButton(
+                          icon: _getIcon(index),
+                          isSelected: widget.currentIndex == index,
+                          isHovered: _hoveredIndex == index,
+                          onTap: () => widget.onTap(index),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _NavIcon extends StatelessWidget {
+class _NavIconButton extends StatelessWidget {
   final IconData icon;
   final bool isSelected;
+  final bool isHovered;
   final VoidCallback onTap;
 
-  const _NavIcon({required this.icon, required this.isSelected, required this.onTap});
+  const _NavIconButton({
+    required this.icon,
+    required this.isSelected,
+    required this.isHovered,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -68,17 +167,18 @@ class _NavIcon extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.all(12),
+        width: 32,
+        height: 32,
         decoration: BoxDecoration(
-          color: isSelected ? Colors.black87 : Colors.transparent, // Minimalist black for active tab
+          color: isHovered || isSelected ? Colors.black.withValues(alpha: 0.06) : Colors.transparent, // Subtle active effect
           shape: BoxShape.circle,
         ),
         child: Icon(
           icon,
-          size: 24,
-          color: isSelected ? Colors.white : Colors.black45, // Muted generic grey for inactive
+          size: 18,
+          color: isSelected ? Colors.black87 : Colors.black54, // Solid black active, grey inactive
         ),
       ),
     );
