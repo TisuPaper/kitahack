@@ -21,7 +21,14 @@ class _MainLayoutState extends State<MainLayout> {
   void initState() {
     super.initState();
     _pages = [
-      const HomeScreen(isEmbedded: true), // We'll modify HomeScreen to remove its own Scaffold/Background if embedded
+      HomeScreen(
+        isEmbedded: true,
+        onNavigateToLive: () {
+          setState(() {
+            _currentIndex = 1;
+          });
+        },
+      ), // We'll modify HomeScreen to remove its own Scaffold/Background if embedded
       const LiveScreen(), // The Live Capture screen
     ];
   }
@@ -39,10 +46,9 @@ class _MainLayoutState extends State<MainLayout> {
 
           // Main Content Area with Smooth Fade Transition
           Positioned.fill(
-            // Add bottom padding so content doesn't hide behind the floating nav bar
-            // Navbar is at bottom: 24, and has height: 40. So 64 is exactly the top edge of the navbar.
-            // Adding a small 8px buffer so it's just right.
-            bottom: 40, 
+            // Add top padding so content doesn't hide behind the top nav bar
+            top: 32, 
+            bottom: 0,
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 400),
               switchInCurve: Curves.easeOutCubic,
@@ -198,11 +204,11 @@ class _MainLayoutState extends State<MainLayout> {
             ),
           ),
 
-          // Floating Bottom Navigation Bar
+          // Floating Top Navigation Bar
           Positioned(
             left: 0,
             right: 0,
-            bottom: 24, // Moved down from 40 to 24
+            top: 24, // Moved to top to align with logo and buttons
             child: Center(
               child: GlassBottomNav(
                 currentIndex: _currentIndex,

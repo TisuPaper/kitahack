@@ -9,8 +9,9 @@ import 'live_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isEmbedded;
+  final VoidCallback? onNavigateToLive;
 
-  const HomeScreen({super.key, this.isEmbedded = false});
+  const HomeScreen({super.key, this.isEmbedded = false, this.onNavigateToLive});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -543,9 +544,13 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(20),
               child: InkWell(
                 onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const LiveScreen()),
-                  );
+                  if (widget.onNavigateToLive != null) {
+                    widget.onNavigateToLive!();
+                  } else {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const LiveScreen()),
+                    );
+                  }
                 },
                 borderRadius: BorderRadius.circular(16),
                 child: Row(

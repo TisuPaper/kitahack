@@ -44,13 +44,13 @@ class _GlassBottomNavState extends State<GlassBottomNav> {
 
     return Stack(
       clipBehavior: Clip.none,
-      alignment: Alignment.bottomCenter,
+      alignment: Alignment.topCenter, // Changed to topCenter
       children: [
         // 1. Floating Tooltip Popout
         AnimatedPositioned(
           duration: const Duration(milliseconds: 400),
           curve: Curves.easeOutBack,
-          bottom: isHovering ? 46 : 36, // Slide up when hovering, down when hidden
+          top: isHovering ? 46 : 36, // Slide down when hovering, up when hidden (since it's at the top now)
           left: _getCenterOffset(activeIndex),
           child: FractionalTranslation(
             translation: const Offset(-0.5, 0),

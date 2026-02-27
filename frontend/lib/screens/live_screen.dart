@@ -150,7 +150,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       justify-content: center;
       aspect-video: 16/9;
       min-height: 450px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.08); /* Floating shadow */
+      box-shadow: none; /* Removed shadow */
     }
 
     #screenVideo {
