@@ -8,7 +8,10 @@ import '../widgets/confidence_chart.dart';
 import 'live_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final bool isEmbedded;
+  final VoidCallback? onNavigateToLive;
+
+  const HomeScreen({super.key, this.isEmbedded = false, this.onNavigateToLive});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -134,41 +137,91 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      body: AnimatedGradientBackground(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-          child: Column(
-            children: [
-              // Header Navigation / Tabs mimicking Image 2 "Extract Train Convert Tools"
-              Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: _buildTopNav(),
-                ),
-              ),
-              const SizedBox(height: 32),
-              
-              // Main Content Area — scrollable
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Center(
+    // Use LayoutBuilder to make the layout responsive based on screen width
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Determine max width based on screen size. 
+        // On larger screens, we can allow it to be wider, but still constrained for readability.
+        final double maxWidth = constraints.maxWidth > 800 ? 600 : 400;
+        
+        // If embedded inside MainLayout, just return the content padding and scroll area without the Scaffold/Background
+        if (widget.isEmbedded) {
+          return Padding(
+            padding: EdgeInsets.only(
+              left: constraints.maxWidth > 600 ? 40 : 24, 
+              right: constraints.maxWidth > 600 ? 40 : 24,
+              top: 80, // Increased top padding to push content down below the logo
+              bottom: 40,
+            ),
+            child: Column(
+                children: [
+                  // Header Navigation / Tabs mimicking Image 2 "Extract Train Convert Tools"
+                  Center(
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 400),
-                      child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 400),
-                        transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                        child: _buildCurrentStep(),
+                      constraints: BoxConstraints(maxWidth: maxWidth),
+                      child: _buildTopNav(),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  
+                  // Main Content Area — scrollable
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: maxWidth),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 400),
+                            transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                            child: _buildCurrentStep(),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
+          );
+        }
+        
+        // Standalone fallback
+        return Scaffold(
+          extendBodyBehindAppBar: true,
+          body: AnimatedGradientBackground(
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: constraints.maxWidth > 600 ? 40 : 24, 
+                vertical: 40
+              ),
+              child: Column(
+                children: [
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: maxWidth),
+                      child: _buildTopNav(),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: maxWidth),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 400),
+                            transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                            child: _buildCurrentStep(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 
@@ -491,9 +544,13 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(20),
               child: InkWell(
                 onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const LiveScreen()),
-                  );
+                  if (widget.onNavigateToLive != null) {
+                    widget.onNavigateToLive!();
+                  } else {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const LiveScreen()),
+                    );
+                  }
                 },
                 borderRadius: BorderRadius.circular(16),
                 child: Row(
@@ -502,11 +559,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF818CF8).withValues(alpha: 0.15),
+                        color: Colors.black.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.black.withValues(alpha: 0.1)),
                       ),
                       child: const Center(
-                        child: Icon(Icons.videocam_rounded, color: Color(0xFF818CF8), size: 26),
+                        child: Icon(Icons.videocam_outlined, color: Colors.black54, size: 26),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -991,6 +1049,74 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 24),
+          
+          // User Feedback Section
+          GlassCard(
+            animate: true,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Was this analysis helpful?',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.black87),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Your feedback helps us improve our detection models.',
+                  style: TextStyle(fontSize: 13, color: Colors.black54),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Thank you for your feedback!'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.thumb_up_outlined, size: 18),
+                        label: const Text('Yes, it was accurate'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.green.shade700,
+                          side: BorderSide(color: Colors.green.shade200),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Thank you for your feedback!'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.thumb_down_outlined, size: 18),
+                        label: const Text('No, it seems wrong'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red.shade700,
+                          side: BorderSide(color: Colors.red.shade200),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
           TextButton.icon(
              onPressed: _reset,
              icon: const Icon(Icons.refresh_rounded, color: Colors.black87),

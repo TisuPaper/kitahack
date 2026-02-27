@@ -20,105 +20,137 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #0F172A;
-      color: #fff;
+      background: transparent;
+      color: #1E293B;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      overflow-x: hidden;
     }
 
-    .header {
+    /* Top Controls - Centered above the screen */
+    .controls-container {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 24px;
-      background: #1E293B;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .header h1 {
-      font-size: 20px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .header h1 .icon {
-      width: 32px;
-      height: 32px;
-      background: rgba(129,140,248,0.2);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
       justify-content: center;
-      font-size: 18px;
+      margin-bottom: 24px;
+      width: 100%;
+      z-index: 10;
     }
 
     .controls {
       display: flex;
-      gap: 12px;
+      gap: 16px;
       align-items: center;
+      background: transparent;
+      padding: 0;
+      border: none;
+      box-shadow: none;
+      backdrop-filter: none;
     }
 
-    .btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 10px;
+    .glass-btn {
+      background: linear-gradient(180deg, rgba(60, 60, 67, 0.8) 0%, rgba(28, 28, 30, 0.8) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.9);
+      padding: 12px 24px;
+      border-radius: 100px; /* Pill shape */
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      letter-spacing: 0.3px;
     }
 
-    .btn-start {
-      background: linear-gradient(135deg, #22C55E, #16A34A);
-      color: white;
+    .glass-btn:hover {
+      background: linear-gradient(180deg, rgba(70, 70, 77, 0.9) 0%, rgba(38, 38, 40, 0.9) 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
 
-    .btn-start:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
-
-    .btn-stop {
-      background: linear-gradient(135deg, #EF4444, #DC2626);
-      color: white;
+    .glass-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 
-    .btn-stop:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
-
-    .btn:disabled {
-      opacity: 0.4;
+    .glass-btn:disabled {
+      opacity: 0.5;
       cursor: not-allowed;
       transform: none !important;
       box-shadow: none !important;
     }
 
-    .btn-pip {
-      background: rgba(129,140,248,0.12);
-      border: 1px solid rgba(129,140,248,0.28);
-      color: #818CF8;
-    }
-    .btn-pip:hover { background: rgba(129,140,248,0.22); transform: translateY(-1px); }
-    .btn-pip.active {
-      background: rgba(129,140,248,0.28);
-      border-color: rgba(129,140,248,0.55);
-      box-shadow: 0 0 12px rgba(129,140,248,0.2);
+    .btn-start {
+      /* Default glass style is fine, or add a subtle tint */
     }
 
-    .main {
+    .btn-stop {
+      background: linear-gradient(180deg, rgba(220, 38, 38, 0.7) 0%, rgba(153, 27, 27, 0.8) 100%);
+      border-top: 1px solid rgba(255, 100, 100, 0.3);
+    }
+
+    .btn-stop:hover {
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.8) 0%, rgba(185, 28, 28, 0.9) 100%);
+    }
+
+    .btn-pip {
+      /* Default glass style */
+    }
+    .btn-pip.active {
+      background: linear-gradient(180deg, rgba(80, 80, 87, 0.9) 0%, rgba(48, 48, 50, 0.9) 100%);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 16px rgba(255, 255, 255, 0.1);
+    }
+
+    /* Main Layout - Center Video, Left/Right Widgets */
+    .main-layout {
       display: flex;
+      width: 100%;
+      max-width: 1400px;
+      gap: 32px;
+      align-items: flex-start;
+      justify-content: center;
+    }
+
+    /* Side Panels (Left and Right) */
+    .side-column {
+      display: flex;
+      flex-direction: column;
       gap: 20px;
-      padding: 20px;
-      height: calc(100vh - 68px);
+      width: 300px;
+      flex-shrink: 0;
+    }
+
+    /* Center Video Panel */
+    .center-column {
+      flex: 1;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
     .video-panel {
-      flex: 1;
+      width: 100%;
       position: relative;
-      background: #1E293B;
-      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 24px; /* More rounded like the image */
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.06);
+      border: 2px solid rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      aspect-video: 16/9;
+      min-height: 450px;
+      box-shadow: none; /* Removed shadow */
     }
 
     #screenVideo {
@@ -126,6 +158,8 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       height: 100%;
       object-fit: contain;
       background: #000;
+      border-radius: 22px;
+      display: none;
     }
 
     #faceOverlay {
@@ -133,85 +167,76 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       top: 0; left: 0;
       width: 100%; height: 100%;
       pointer-events: none;
+      display: none;
     }
 
     .placeholder {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
       text-align: center;
-      color: rgba(255,255,255,0.3);
+      color: rgba(0,0,0,0.54);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      padding: 32px 20px;
     }
 
-    .placeholder .big-icon { font-size: 64px; margin-bottom: 16px; }
-    .placeholder p { font-size: 16px; }
-
-    .verdict-overlay {
-      position: absolute; top: 16px; right: 16px;
-      padding: 14px 22px; border-radius: 14px;
-      display: none; flex-direction: column; gap: 4px;
-      backdrop-filter: blur(16px); z-index: 10;
-      transition: all 0.3s ease; max-width: 340px;
+    .placeholder .big-icon { 
+      font-size: 48px;
+      margin-bottom: 16px; 
+      color: rgba(0,0,0,0.54);
     }
-    .verdict-overlay .vo-main { font-size: 20px; font-weight: 800; letter-spacing: 2px; }
-    .verdict-overlay .vo-band { font-size: 12px; font-weight: 600; opacity: 0.8; }
-    .verdict-overlay .vo-why  { font-size: 11px; opacity: 0.65; margin-top: 2px; }
-
-    .verdict-overlay.real {
-      display: flex; background: rgba(34,197,94,0.2);
-      border: 1px solid rgba(34,197,94,0.4); color: #22C55E;
+    .placeholder p { 
+      font-size: 16px; 
+      font-weight: 700; 
+      color: #1E293B; 
     }
-    .verdict-overlay.fake {
-      display: flex; background: rgba(239,68,68,0.2);
-      border: 1px solid rgba(239,68,68,0.4); color: #EF4444;
-      animation: pulse-red 1.5s infinite;
-    }
-    .verdict-overlay.uncertain {
-      display: flex; background: rgba(245,158,11,0.2);
-      border: 1px solid rgba(245,158,11,0.4); color: #F59E0B;
-    }
-    .verdict-overlay.analyzing {
-      display: flex; background: rgba(129,140,248,0.2);
-      border: 1px solid rgba(129,140,248,0.4); color: #818CF8;
+    .placeholder .sub-text {
+      font-size: 12px;
+      color: rgba(0,0,0,0.54);
+      margin-top: 8px;
+      font-weight: 400;
     }
 
-    @keyframes pulse-red {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
-      50% { box-shadow: 0 0 20px 4px rgba(239,68,68,0.2); }
-    }
-
-    .side-panel { width: 370px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+    /* Floating Cards for Widgets */
     .card {
-      background: #1E293B; border-radius: 14px; padding: 20px;
-      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.06);
     }
     .card h3 {
-      font-size: 13px; color: rgba(255,255,255,0.45); text-transform: uppercase;
+      font-size: 13px; color: rgba(0,0,0,0.5); text-transform: uppercase;
       letter-spacing: 1px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+      font-weight: 700;
     }
 
     .vc-icon     { font-size: 36px; line-height: 1; }
     .vc-verdict  { font-size: 28px; font-weight: 800; letter-spacing: 3px; }
     .vc-band     { font-size: 13px; font-weight: 600; opacity: 0.75; margin-top: 2px; }
-    .vc-why      { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 10px; line-height: 1.4; }
+    .vc-why      { font-size: 13px; color: rgba(0,0,0,0.6); margin-top: 10px; line-height: 1.4; }
     .vc-steps    { list-style: none; margin-top: 10px; padding: 0; }
     .vc-steps li {
-      font-size: 12px; color: rgba(255,255,255,0.55); padding: 4px 0; padding-left: 18px;
+      font-size: 12px; color: rgba(0,0,0,0.6); padding: 4px 0; padding-left: 18px;
       position: relative; line-height: 1.5;
     }
     .vc-steps li::before {
       content: ''; position: absolute; left: 0; top: 9px;
-      width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.25);
+      width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid rgba(0,0,0,0.25);
     }
 
     .audio-indicator {
       display: flex; align-items: center; gap: 8px; padding: 8px 12px;
-      border-radius: 8px; background: rgba(129,140,248,0.1); font-size: 13px; color: #818CF8;
+      border-radius: 8px; background: rgba(0,0,0,0.05); font-size: 13px; color: #1E293B;
+      font-weight: 600;
     }
     .audio-bars { display: flex; gap: 2px; align-items: flex-end; height: 16px; }
     .audio-bars span {
-      width: 3px; background: #818CF8; border-radius: 2px;
+      width: 3px; background: #1E293B; border-radius: 2px;
       animation: audio-bar 0.8s ease-in-out infinite;
     }
     .audio-bars span:nth-child(1) { height: 6px; animation-delay: 0s; }
@@ -220,14 +245,14 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     .audio-bars span:nth-child(4) { height: 14px; animation-delay: 0.45s; }
     .audio-bars span:nth-child(5) { height: 10px; animation-delay: 0.6s; }
     @keyframes audio-bar { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.4); } }
-    #audioCanvas { width: 100%; height: 32px; border-radius: 8px; background: rgba(0,0,0,0.2); margin-top: 8px; }
+    #audioCanvas { width: 100%; height: 32px; border-radius: 8px; background: rgba(0,0,0,0.05); margin-top: 8px; }
 
     .details-toggle {
       display: flex; align-items: center; justify-content: space-between;
       cursor: pointer; user-select: none;
     }
     .details-toggle::after {
-      content: '\25B6'; font-size: 10px; color: rgba(255,255,255,0.3);
+      content: '\25B6'; font-size: 10px; color: rgba(0,0,0,0.3);
       transition: transform 0.2s;
     }
     .details-toggle.open::after { transform: rotate(90deg); }
@@ -236,34 +261,99 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     .detail-row {
       display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px;
     }
-    .detail-row .dl { color: rgba(255,255,255,0.4); }
-    .detail-row .dv { font-weight: 600; color: rgba(255,255,255,0.7); }
+    .detail-row .dl { color: rgba(0,0,0,0.5); }
+    .detail-row .dv { font-weight: 600; color: #1E293B; }
 
     .log-entry {
       padding: 6px 10px; border-radius: 8px; margin-bottom: 4px;
       font-size: 11px; display: flex; align-items: center; gap: 6px;
+      font-weight: 500;
     }
-    .log-entry.real { background: rgba(34,197,94,0.08); color: #22C55E; }
-    .log-entry.fake { background: rgba(239,68,68,0.08); color: #EF4444; }
-    .log-entry.uncertain { background: rgba(245,158,11,0.08); color: #F59E0B; }
-    .log-entry.analyzing { background: rgba(129,140,248,0.08); color: #818CF8; }
+    .log-entry.real { background: rgba(34,197,94,0.1); color: #16A34A; }
+    .log-entry.fake { background: rgba(239,68,68,0.1); color: #DC2626; }
+    .log-entry.uncertain { background: rgba(245,158,11,0.1); color: #D97706; }
+    .log-entry.analyzing { background: rgba(0,0,0,0.05); color: #1E293B; }
     .log-container { max-height: 260px; overflow-y: auto; }
 
+    .interval-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(180deg, rgba(60, 60, 67, 0.8) 0%, rgba(28, 28, 30, 0.8) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      padding: 10px 20px;
+      border-radius: 100px;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
     .interval-select {
-      background: #334155; color: white;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px; padding: 8px 12px; font-size: 13px;
+      background: transparent;
+      color: white;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      padding-right: 16px;
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFFFFF%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+      background-repeat: no-repeat;
+      background-position: right center;
+      background-size: 10px auto;
+    }
+    .interval-select option {
+      background: #1C1C1E;
+      color: white;
+    }
+
+    /* Responsive Layout for Mobile/Smaller Screens */
+    @media (max-width: 1000px) {
+      .main-layout {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      /* Reorder columns for mobile: Center (Video) first, then Left (Video/Audio), then Right (Details/Log) */
+      .center-column {
+        order: 1;
+        width: 100%;
+      }
+      
+      .side-column:nth-child(1) { /* Left panel (Video/Audio Analysis) */
+        order: 2;
+      }
+      
+      .side-column:nth-child(3) { /* Right panel (Details/Log) */
+        order: 3;
+      }
+
+      .side-column {
+        width: 100%;
+        max-width: 800px;
+        flex-direction: column; /* Stack cards vertically on mobile */
+      }
+      .card {
+        width: 100%;
+      }
+      .controls {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>
-      <span class="icon">🛡️</span>
-      Live Deepfake Detection
-    </h1>
+  <div class="controls-container">
     <div class="controls">
-      <label style="font-size:13px; color:rgba(255,255,255,0.5);">
+      <div class="interval-wrapper">
         Scan every:
         <select id="intervalSelect" class="interval-select">
           <option value="2000">2s</option>
@@ -271,69 +361,80 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
           <option value="5000">5s</option>
           <option value="10000">10s</option>
         </select>
-      </label>
-      <button id="btnPip" class="btn btn-pip" onclick="toggleWidget()" title="Float results in a mini window">
+      </div>
+      <button id="btnPip" class="glass-btn btn-pip" onclick="toggleWidget()" title="Float results in a mini window">
         ⧉ Pop Out
       </button>
-      <button id="btnStart" class="btn btn-start" onclick="startCapture()">
+      <button id="btnStart" class="glass-btn btn-start" onclick="startCapture()">
         ▶ Start Capture
       </button>
-      <button id="btnStop" class="btn btn-stop" onclick="stopCapture()" disabled>
+      <button id="btnStop" class="glass-btn btn-stop" onclick="stopCapture()" disabled>
         ■ Stop
       </button>
     </div>
   </div>
 
-  <div class="main">
-    <div class="video-panel">
-      <video id="screenVideo" autoplay muted></video>
-      <canvas id="faceOverlay"></canvas>
-      <div id="placeholder" class="placeholder">
-        <div class="big-icon">🖥️</div>
-        <p>Click "Start Capture" to share your screen</p>
-        <p style="font-size:13px; margin-top:8px; opacity:0.5">
-          Select a window, tab, or entire screen
-        </p>
-      </div>
-      <div id="verdictOverlay" class="verdict-overlay"></div>
-    </div>
-
-    <div class="side-panel">
+  <div class="main-layout">
+    <!-- Left Side Panel -->
+    <div class="side-column">
       <div class="card" id="videoVerdictCard">
-        <h3>🖥 Video Analysis</h3>
+        <h3>Video Analysis</h3>
         <div id="videoVerdictArea" style="text-align:center; padding:10px 0">
-          <div style="font-size:13px; color:rgba(255,255,255,0.35)">
+          <div style="font-size:13px; color:rgba(0,0,0,0.4); font-weight: 500;">
             Click "Start Capture" to begin
           </div>
         </div>
       </div>
 
       <div class="card" id="audioVerdictCard">
-        <h3>🎙 Audio Analysis</h3>
+        <h3>Audio Analysis</h3>
         <div id="audioStatus">
-          <div style="font-size:13px; color:rgba(255,255,255,0.35)">
+          <div style="font-size:13px; color:rgba(0,0,0,0.4); font-weight: 500;">
             Audio capture starts with screen share
           </div>
         </div>
         <canvas id="audioCanvas"></canvas>
       </div>
+    </div>
 
+    <!-- Center Video Panel -->
+    <div class="center-column">
+      <div class="video-panel" id="videoPanel">
+        <video id="screenVideo" autoplay muted></video>
+        <canvas id="faceOverlay"></canvas>
+        <div id="placeholder" class="placeholder">
+          <div class="big-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+          </div>
+          <p>Click "Start Capture" to share your screen</p>
+          <p class="sub-text">Select a window, tab, or entire screen</p>
+        </div>
+        <div id="verdictOverlay" class="verdict-overlay"></div>
+      </div>
+    </div>
+
+    <!-- Right Side Panel -->
+    <div class="side-column">
       <div class="card">
         <h3 class="details-toggle" id="detailsToggle" onclick="toggleDetails()">
-          🔬 Technical Details
+          Technical Details
         </h3>
         <div class="details-body" id="detailsBody">
           <div class="detail-row"><span class="dl">State</span><span class="dv" id="statState">Idle</span></div>
           <div class="detail-row"><span class="dl">Frames analyzed</span><span class="dv" id="statFrames">0</span></div>
-          <div class="detail-row"><span class="dl">Fake detections</span><span class="dv" id="statFakes" style="color:#EF4444">0</span></div>
-          <div class="detail-row"><span class="dl">Real detections</span><span class="dv" id="statReals" style="color:#22C55E">0</span></div>
+          <div class="detail-row"><span class="dl">Fake detections</span><span class="dv" id="statFakes" style="color:#DC2626">0</span></div>
+          <div class="detail-row"><span class="dl">Real detections</span><span class="dv" id="statReals" style="color:#16A34A">0</span></div>
           <div class="detail-row"><span class="dl">Avg confidence</span><span class="dv" id="statConfidence">-</span></div>
-          <div id="detailsExtra" style="margin-top:6px; font-size:11px; color:rgba(255,255,255,0.35)"></div>
+          <div id="detailsExtra" style="margin-top:6px; font-size:11px; color:rgba(0,0,0,0.4)"></div>
         </div>
       </div>
 
       <div class="card" style="flex:1;">
-        <h3>📋 Detection Log</h3>
+        <h3>Detection Log</h3>
         <div id="logContainer" class="log-container">
           <div class="log-entry analyzing">Waiting to start...</div>
         </div>
@@ -481,8 +582,12 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
           audio: true
         });
 
+        video.style.display = 'block';
+        faceOverlay.style.display = 'block';
         video.srcObject = stream;
         placeholder.style.display = 'none';
+        document.getElementById('videoPanel').style.border = 'none';
+        document.getElementById('videoPanel').style.background = '#000';
 
         document.getElementById('btnStart').disabled = true;
         document.getElementById('btnStop').disabled = false;
@@ -575,7 +680,11 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       }
 
       video.srcObject = null;
-      placeholder.style.display = '';
+      video.style.display = 'none';
+      faceOverlay.style.display = 'none';
+      placeholder.style.display = 'flex';
+      document.getElementById('videoPanel').style.border = '2px solid rgba(0,0,0,0.15)';
+      document.getElementById('videoPanel').style.background = 'rgba(255, 255, 255, 0.4)';
       verdictOverlay.className = 'verdict-overlay';
       verdictOverlay.style.display = 'none';
       clearFaceBox();
@@ -643,11 +752,8 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
         const bandLabel = BAND_LABELS[band] || '';
         const why   = result.advice ? result.advice.why : '';
 
-        verdictOverlay.className = 'verdict-overlay ' + vl;
-        verdictOverlay.innerHTML =
-          '<div class="vo-main">' + getEmoji(vl) + ' ' + v + '</div>' +
-          '<div class="vo-band">' + bandLabel + '</div>' +
-          (why ? '<div class="vo-why">' + why + '</div>' : '');
+        // Removed verdictOverlay update to hide the text on the video
+        verdictOverlay.style.display = 'none';
 
         const bbox = result.signals ? result.signals.face_bbox : null;
         const faceFound = result.signals ? result.signals.face_found : false;
@@ -1197,9 +1303,21 @@ class _LiveScreenState extends State<LiveScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      body: HtmlElementView(viewType: _viewType),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scaffold(
+          backgroundColor: Colors.transparent, // Let the main layout background show through
+          body: Padding(
+            padding: EdgeInsets.only(
+              left: constraints.maxWidth > 600 ? 40 : 24, 
+              right: constraints.maxWidth > 600 ? 40 : 24,
+              top: 80, // Match home_screen top padding
+              bottom: 40,
+            ),
+            child: HtmlElementView(viewType: _viewType),
+          ),
+        );
+      },
     );
   }
 }
