@@ -66,6 +66,7 @@ The client (Flutter app on mobile or web) sends media to a FastAPI backend runni
 | **Audio deepfake** | PyTorch — CNN-LSTM, TCN, TCN-LSTM; 16 kHz mono; soundfile / PyAV for decoding |
 | **Fraud pipeline** | Whisper (local STT), custom PII filter (typed redaction), rule engine (bilingual EN/MY), playbook matcher (token overlap), Google Gemini (LLM) |
 | **Deployment** | Backend on confidential VM  (TEE), Frontend on Firebase|
+
 Web link: https://realitic-app.web.app
 Can test the backend api via: http://35.198.241.242:8000/docs
 
