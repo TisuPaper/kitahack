@@ -47,8 +47,8 @@ Realytic is a **multi-modal deepfake and call-fraud detection system** that runs
 
 The client (Flutter app on mobile or web) sends media to a FastAPI backend running inside a **Trusted Execution Environment (TEE)**. The backend routes by media type, runs ensemble deepfake models and (for audio) a fraud pipeline, then returns scores and evidence.
 
+![Kitahack 2026 (2)](https://github.com/user-attachments/assets/22e207f2-c080-43b2-89f0-5b7b18cb8422)
 
-![Kitahack 2026 (1)](https://github.com/user-attachments/assets/bf1f36cf-e4f4-41ce-8a53-35c4c981e53f)
 
 - **Client:** Flutter (iOS, Android, Web). Uploads images/videos/audio or streams live capture; displays verdicts, confidence, and fraud risk (e.g. risk level, scam type, evidence).
 - **TEE / Backend:** FastAPI. **Image** → face crop (OpenCV) → visual deepfake ensemble (Xception + ViT, with EfficientNet tiebreaker when uncertain). **Video** → frame extraction → same visual pipeline. **Audio** → deepfake ensemble (CNN-LSTM, TCN, TCN-LSTM) and, in parallel, **fraud pipeline**: Speech-to-Text → PII redaction → Rule engine + Playbook matching + Gemini → hybrid risk score and evidence.
