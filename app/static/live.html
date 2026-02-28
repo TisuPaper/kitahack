@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Deepfake Detection</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0F172A;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: #1E293B;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header h1 .icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(129,140,248,0.2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-start {
+      background: linear-gradient(135deg, #22C55E, #16A34A);
+      color: white;
+    }
+
+    .btn-start:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
+
+    .btn-stop {
+      background: linear-gradient(135deg, #EF4444, #DC2626);
+      color: white;
+    }
+
+    .btn-stop:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    .main {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+      height: calc(100vh - 68px);
+    }
+
+    .video-panel {
+      flex: 1;
+      position: relative;
+      background: #1E293B;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    #screenVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+    }
+
+    .placeholder {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: rgba(255,255,255,0.3);
+    }
+
+    .placeholder .big-icon { font-size: 64px; margin-bottom: 16px; }
+    .placeholder p { font-size: 16px; }
+
+    /* Floating verdict overlay */
+    .verdict-overlay {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      backdrop-filter: blur(16px);
+      z-index: 10;
+      transition: all 0.3s ease;
+    }
+
+    .verdict-overlay.real {
+      display: flex;
+      background: rgba(34,197,94,0.2);
+      border: 1px solid rgba(34,197,94,0.4);
+      color: #22C55E;
+    }
+
+    .verdict-overlay.fake {
+      display: flex;
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.4);
+      color: #EF4444;
+      animation: pulse-red 1.5s infinite;
+    }
+
+    .verdict-overlay.uncertain {
+      display: flex;
+      background: rgba(245,158,11,0.2);
+      border: 1px solid rgba(245,158,11,0.4);
+      color: #F59E0B;
+    }
+
+    .verdict-overlay.analyzing {
+      display: flex;
+      background: rgba(129,140,248,0.2);
+      border: 1px solid rgba(129,140,248,0.4);
+      color: #818CF8;
+    }
+
+    @keyframes pulse-red {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
+      50% { box-shadow: 0 0 20px 4px rgba(239,68,68,0.2); }
+    }
+
+    /* Side panel */
+    .side-panel {
+      width: 340px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .card {
+      background: #1E293B;
+      border-radius: 14px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .card h3 {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 13px;
+    }
+
+    .stat-row .label { color: rgba(255,255,255,0.5); }
+    .stat-row .value { font-weight: 600; }
+
+    .log-entry {
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .log-entry.real { background: rgba(34,197,94,0.1); color: #22C55E; }
+    .log-entry.fake { background: rgba(239,68,68,0.1); color: #EF4444; }
+    .log-entry.uncertain { background: rgba(245,158,11,0.1); color: #F59E0B; }
+    .log-entry.analyzing { background: rgba(129,140,248,0.1); color: #818CF8; }
+
+    .log-container {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .audio-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(129,140,248,0.1);
+      font-size: 13px;
+      color: #818CF8;
+    }
+
+    .audio-bars {
+      display: flex;
+      gap: 2px;
+      align-items: flex-end;
+      height: 16px;
+    }
+
+    .audio-bars span {
+      width: 3px;
+      background: #818CF8;
+      border-radius: 2px;
+      animation: audio-bar 0.8s ease-in-out infinite;
+    }
+
+    .audio-bars span:nth-child(1) { height: 6px; animation-delay: 0s; }
+    .audio-bars span:nth-child(2) { height: 12px; animation-delay: 0.15s; }
+    .audio-bars span:nth-child(3) { height: 8px; animation-delay: 0.3s; }
+    .audio-bars span:nth-child(4) { height: 14px; animation-delay: 0.45s; }
+    .audio-bars span:nth-child(5) { height: 10px; animation-delay: 0.6s; }
+
+    @keyframes audio-bar {
+      0%, 100% { transform: scaleY(1); }
+      50% { transform: scaleY(0.4); }
+    }
+
+    .interval-select {
+      background: #334155;
+      color: white;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+
+    #audioCanvas {
+      width: 100%;
+      height: 40px;
+      border-radius: 8px;
+      background: rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <h1>
+      <span class="icon">🛡️</span>
+      Live Deepfake Detection
+    </h1>
+    <div class="controls">
+      <label style="font-size:13px; color:rgba(255,255,255,0.5);">
+        Scan every:
+        <select id="intervalSelect" class="interval-select">
+          <option value="2000">2s</option>
+          <option value="3000" selected>3s</option>
+          <option value="5000">5s</option>
+          <option value="10000">10s</option>
+        </select>
+      </label>
+      <button id="btnStart" class="btn btn-start" onclick="startCapture()">
+        ▶ Start Capture
+      </button>
+      <button id="btnStop" class="btn btn-stop" onclick="stopCapture()" disabled>
+        ■ Stop
+      </button>
+    </div>
+  </div>
+
+  <!-- Main layout -->
+  <div class="main">
+    <!-- Video panel -->
+    <div class="video-panel">
+      <video id="screenVideo" autoplay muted></video>
+      <div id="placeholder" class="placeholder">
+        <div class="big-icon">🖥️</div>
+        <p>Click "Start Capture" to share your screen</p>
+        <p style="font-size:13px; margin-top:8px; opacity:0.5">
+          Select a window, tab, or entire screen
+        </p>
+      </div>
+      <div id="verdictOverlay" class="verdict-overlay"></div>
+    </div>
+
+    <!-- Side panel -->
+    <div class="side-panel">
+      <!-- Status -->
+      <div class="card">
+        <h3>📊 Status</h3>
+        <div class="stat-row">
+          <span class="label">State</span>
+          <span class="value" id="statState">Idle</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Frames analyzed</span>
+          <span class="value" id="statFrames">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Fake detections</span>
+          <span class="value" id="statFakes" style="color:#EF4444">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Real detections</span>
+          <span class="value" id="statReals" style="color:#22C55E">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Avg confidence</span>
+          <span class="value" id="statConfidence">-</span>
+        </div>
+      </div>
+
+      <!-- Audio -->
+      <div class="card">
+        <h3>🎙️ Audio</h3>
+        <div id="audioStatus">
+          <div style="font-size:13px; color:rgba(255,255,255,0.4)">
+            Audio capture starts with screen share
+          </div>
+        </div>
+        <canvas id="audioCanvas" style="margin-top: 10px;"></canvas>
+      </div>
+
+      <!-- Log -->
+      <div class="card" style="flex:1;">
+        <h3>📋 Detection Log</h3>
+        <div id="logContainer" class="log-container">
+          <div class="log-entry analyzing">
+            Waiting to start...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden canvas for frame extraction -->
+  <canvas id="frameCanvas" style="display:none;"></canvas>
+
+  <script>
+    // ---- State ----
+    let stream = null;
+    let audioStream = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let scanInterval = null;
+    let frameCount = 0;
+    let fakeCount = 0;
+    let realCount = 0;
+    let totalConfidence = 0;
+    let isAnalyzing = false;
+    let audioContext = null;
+    let analyserNode = null;
+    let animFrameId = null;
+
+    const API_BASE = window.location.origin; // same server
+
+    // ---- Elements ----
+    const video = document.getElementById('screenVideo');
+    const placeholder = document.getElementById('placeholder');
+    const verdictOverlay = document.getElementById('verdictOverlay');
+    const logContainer = document.getElementById('logContainer');
+    const canvas = document.getElementById('frameCanvas');
+    const ctx = canvas.getContext('2d');
+    const audioCanvas = document.getElementById('audioCanvas');
+    const audioCtx2d = audioCanvas.getContext('2d');
+
+    // ---- Start capture ----
+    async function startCapture() {
+      try {
+        // Request screen + audio
+        stream = await navigator.mediaDevices.getDisplayMedia({
+          video: { cursor: 'always' },
+          audio: true  // capture tab/system audio
+        });
+
+        video.srcObject = stream;
+        placeholder.style.display = 'none';
+
+        document.getElementById('btnStart').disabled = true;
+        document.getElementById('btnStop').disabled = false;
+        document.getElementById('statState').textContent = '🟢 Capturing';
+
+        // Check if audio track exists
+        const audioTracks = stream.getAudioTracks();
+        if (audioTracks.length > 0) {
+          startAudioVisualization(stream);
+          startAudioRecording(stream);
+          document.getElementById('audioStatus').innerHTML = `
+            <div class="audio-indicator">
+              <div class="audio-bars">
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+              Recording audio...
+            </div>
+          `;
+        } else {
+          document.getElementById('audioStatus').innerHTML = `
+            <div style="font-size:13px; color:#F59E0B">
+              ⚠️ No audio — share a browser tab for audio capture
+            </div>
+          `;
+        }
+
+        // Start scanning frames
+        const interval = parseInt(document.getElementById('intervalSelect').value);
+        scanInterval = setInterval(analyzeFrame, interval);
+
+        // Handle stream ending (user clicks "Stop sharing")
+        stream.getVideoTracks()[0].onended = () => stopCapture();
+
+        addLog('analyzing', '🟢 Capture started — scanning every ' +
+          (interval / 1000) + 's');
+      } catch (err) {
+        console.error('Screen capture failed:', err);
+        addLog('uncertain', '❌ Screen capture cancelled or denied');
+      }
+    }
+
+    // ---- Stop capture ----
+    function stopCapture() {
+      if (stream) {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+      }
+
+      if (scanInterval) {
+        clearInterval(scanInterval);
+        scanInterval = null;
+      }
+
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+
+      if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+      }
+
+      if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = null;
+      }
+
+      video.srcObject = null;
+      placeholder.style.display = '';
+      verdictOverlay.className = 'verdict-overlay';
+      verdictOverlay.style.display = 'none';
+
+      document.getElementById('btnStart').disabled = false;
+      document.getElementById('btnStop').disabled = true;
+      document.getElementById('statState').textContent = '⏹ Stopped';
+
+      addLog('analyzing', '⏹ Capture stopped');
+
+      // If we have audio, offer download
+      if (audioChunks.length > 0) {
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        const url = URL.createObjectURL(blob);
+        addLog('analyzing',
+          `🎙️ Audio recorded — <a href="${url}" download="captured_audio.webm" style="color:#818CF8">Download</a>`
+        );
+        audioChunks = [];
+      }
+    }
+
+    // ---- Analyze a single frame ----
+    async function analyzeFrame() {
+      if (isAnalyzing || !stream) return;
+      isAnalyzing = true;
+
+      try {
+        // Extract frame from video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+
+        // Convert to blob
+        const blob = await new Promise(resolve =>
+          canvas.toBlob(resolve, 'image/jpeg', 0.85)
+        );
+
+        if (!blob) {
+          isAnalyzing = false;
+          return;
+        }
+
+        // Show analyzing state
+        verdictOverlay.className = 'verdict-overlay analyzing';
+        verdictOverlay.textContent = '🔍 Analyzing...';
+
+        // Send to API
+        const formData = new FormData();
+        formData.append('file', blob, 'frame.jpg');
+
+        const response = await fetch(`${API_BASE}/predict`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.detail || 'API error');
+        }
+
+        const result = await response.json();
+        frameCount++;
+
+        // Update verdict overlay
+        const pred = result.prediction.toLowerCase();
+        const conf = (result.confidence * 100).toFixed(1);
+        verdictOverlay.className = `verdict-overlay ${pred}`;
+        verdictOverlay.innerHTML = `${getEmoji(pred)} ${result.prediction} — ${conf}%`;
+
+        // Update stats
+        if (pred === 'fake') fakeCount++;
+        else if (pred === 'real') realCount++;
+        totalConfidence += result.confidence;
+
+        document.getElementById('statFrames').textContent = frameCount;
+        document.getElementById('statFakes').textContent = fakeCount;
+        document.getElementById('statReals').textContent = realCount;
+        document.getElementById('statConfidence').textContent =
+          (totalConfidence / frameCount * 100).toFixed(1) + '%';
+
+        // Add log entry
+        const time = new Date().toLocaleTimeString();
+        const forensic = result.forensic_analysis;
+        const anomalies = forensic ? forensic.anomaly_flags : 0;
+        addLog(pred,
+          `${getEmoji(pred)} ${time} — ${result.prediction} (${conf}%) — ${anomalies} anomalies`
+        );
+
+      } catch (err) {
+        console.error('Analysis error:', err);
+        addLog('uncertain', `⚠️ Error: ${err.message}`);
+      }
+
+      isAnalyzing = false;
+    }
+
+    // ---- Audio recording ----
+    function startAudioRecording(mediaStream) {
+      try {
+        mediaRecorder = new MediaRecorder(mediaStream, {
+          mimeType: 'audio/webm;codecs=opus'
+        });
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.start(1000); // collect chunks every 1s
+      } catch (err) {
+        console.error('Audio recording failed:', err);
+      }
+    }
+
+    // ---- Audio visualization ----
+    function startAudioVisualization(mediaStream) {
+      try {
+        audioContext = new AudioContext();
+        const source = audioContext.createMediaStreamSource(mediaStream);
+        analyserNode = audioContext.createAnalyser();
+        analyserNode.fftSize = 256;
+        source.connect(analyserNode);
+
+        drawAudioWaveform();
+      } catch (err) {
+        console.error('Audio viz failed:', err);
+      }
+    }
+
+    function drawAudioWaveform() {
+      if (!analyserNode) return;
+
+      const bufferLength = analyserNode.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      function draw() {
+        animFrameId = requestAnimationFrame(draw);
+        analyserNode.getByteFrequencyData(dataArray);
+
+        const w = audioCanvas.width = audioCanvas.clientWidth;
+        const h = audioCanvas.height = audioCanvas.clientHeight;
+        audioCtx2d.clearRect(0, 0, w, h);
+
+        const barWidth = (w / bufferLength) * 2;
+        let x = 0;
+
+        for (let i = 0; i < bufferLength; i++) {
+          const barHeight = (dataArray[i] / 255) * h;
+          const hue = 240 + (dataArray[i] / 255) * 60; // blue to purple
+          audioCtx2d.fillStyle = `hsla(${hue}, 70%, 60%, 0.8)`;
+          audioCtx2d.fillRect(x, h - barHeight, barWidth - 1, barHeight);
+          x += barWidth;
+        }
+      }
+
+      draw();
+    }
+
+    // ---- Helpers ----
+    function getEmoji(pred) {
+      switch (pred) {
+        case 'fake': return '🚨';
+        case 'real': return '✅';
+        default: return '❓';
+      }
+    }
+
+    function addLog(type, message) {
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.innerHTML = message;
+      logContainer.prepend(entry);
+
+      // Keep max 50 entries
+      while (logContainer.children.length > 50) {
+        logContainer.removeChild(logContainer.lastChild);
+      }
+    }
+  </script>
+</body>
+</html>

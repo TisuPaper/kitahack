@@ -4,9 +4,6 @@ __pycache__/
 *.pyo
 venv/
 .env
-.env.local
-app/.env.local
-app/forensic_features.py
 
 # Model weights (too large for GitHub)
 models/
@@ -35,9 +32,3 @@ Thumbs.db
 
 # Data
 app/data
-
-# Eval outputs (from evaluate_ensemble / analyze_results / optimize_video_level)
-eval_raw_results.json
-eval_summary.json
-eval_celebdf_results.json
-eval_detailed_summary.json

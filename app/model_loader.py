@@ -4,24 +4,23 @@ import torch
 import torch.nn as nn
 import timm
 from huggingface_hub import hf_hub_download
+from transformers import ViTForImageClassification, ViTImageProcessor
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
+# ===================================================================
+# CHAMPION: FaceForge XceptionNet  (90% on FF++ C23)
+# ===================================================================
+
 class FaceForgeDetector(nn.Module):
-    """
-    FaceForge Detector: XceptionNet backbone + custom classification head.
-    Trained on FaceForensics++ (C40 compression), 99.33% accuracy on test set.
-    Labels: 0=Real, 1=Fake
-    """
+    """XceptionNet backbone + custom head. Labels: 0=Real, 1=Fake."""
 
     def __init__(self):
         super().__init__()
-        # XceptionNet backbone (timm legacy_xception)
         self.backbone = timm.create_model(
             "legacy_xception", pretrained=False, num_classes=0
         )
-        # Custom head: Dropout(0.5) → FC(2048→512)+ReLU → Dropout(0.3) → FC(512→2)
         self.classifier = nn.Sequential(
             nn.Dropout(0.5),
             nn.Linear(2048, 512),
@@ -31,48 +30,66 @@ class FaceForgeDetector(nn.Module):
         )
 
     def forward(self, x):
-        features = self.backbone(x)
-        return self.classifier(features)
+        return self.classifier(self.backbone(x))
 
 
-def load_model():
-    """Download and load the FaceForge detector."""
-    # Download weights from HuggingFace
+def _load_champion():
     weight_path = hf_hub_download(
         repo_id="huzaifanasirrr/faceforge-detector",
         filename="detector_best.pth",
     )
-
-    # Load checkpoint
     checkpoint = torch.load(weight_path, map_location=device, weights_only=False)
     state_dict = checkpoint.get("model_state_dict", checkpoint)
 
-    # Build the model
     model = FaceForgeDetector()
-
-    # Strip 'xception.' prefix from backbone weights, 'classifier.' from head
-    backbone_weights = {}
-    classifier_weights = {}
+    backbone_w, classifier_w = {}, {}
     for k, v in state_dict.items():
         if k.startswith("xception."):
-            backbone_weights[k.replace("xception.", "", 1)] = v
+            backbone_w[k.replace("xception.", "", 1)] = v
         elif k.startswith("classifier."):
-            classifier_weights[k.replace("classifier.", "", 1)] = v
+            classifier_w[k.replace("classifier.", "", 1)] = v
 
-    # Load weights
-    model.backbone.load_state_dict(backbone_weights, strict=False)
-    model.classifier.load_state_dict(classifier_weights)
-
-    model.to(device)
-    model.eval()
-    print("✅ FaceForge Detector loaded (XceptionNet, FF++ C40, 99.33% accuracy)")
+    model.backbone.load_state_dict(backbone_w, strict=False)
+    model.classifier.load_state_dict(classifier_w)
+    model.to(device).eval()
+    print("✅ Champion loaded: FaceForge XceptionNet (90% FF++ C23)")
     return model
 
 
-# Preprocessing: matches the model card exactly
+# ===================================================================
+# CHALLENGER: ViT
+# Tries to load fine-tuned model from models/vit_finetuned_ffpp/
+# Falls back to prithivMLmods/Deep-Fake-Detector-v2-Model
+# ===================================================================
+
+import os as _os
+_FINETUNED_PATH = _os.path.join(
+    _os.path.dirname(_os.path.dirname(__file__)), "models", "vit_finetuned_ffpp"
+)
+
+
+def _load_challenger():
+    if _os.path.isdir(_FINETUNED_PATH) and _os.path.exists(
+        _os.path.join(_FINETUNED_PATH, "config.json")
+    ):
+        # Use our GPU-fine-tuned model
+        m = ViTForImageClassification.from_pretrained(_FINETUNED_PATH).to(device).eval()
+        p = ViTImageProcessor.from_pretrained(_FINETUNED_PATH)
+        print(f"✅ Challenger loaded: Fine-tuned ViT from {_FINETUNED_PATH}")
+    else:
+        # Fall back to HuggingFace pretrained
+        name = "prithivMLmods/Deep-Fake-Detector-v2-Model"
+        m = ViTForImageClassification.from_pretrained(name).to(device).eval()
+        p = ViTImageProcessor.from_pretrained(name)
+        print("✅ Challenger loaded: prithivMLmods ViT (HuggingFace, 52.5%)")
+        print("   ℹ️  To improve: run colab_finetune_vit.py on GPU, save to models/vit_finetuned_ffpp/")
+    return m, p
+
+
+# Preprocessing for champion
 from torchvision import transforms
 
-preprocess = transforms.Compose([
+champion_preprocess = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
@@ -80,4 +97,5 @@ preprocess = transforms.Compose([
 
 
 # Load at startup
-model = load_model()
+champion = _load_champion()
+challenger_model, challenger_processor = _load_challenger()
