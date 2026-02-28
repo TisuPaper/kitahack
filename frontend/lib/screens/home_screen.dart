@@ -972,13 +972,81 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(fontSize: 12, color: Colors.black45),
                   ),
                 ],
-                const SizedBox(height: 32),
-                
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text('Confidence Score', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.black87)),
-                ),
+                if (isUncertain) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF59E0B).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.lightbulb_outline_rounded, size: 18, color: Color(0xFFD97706)),
+                        SizedBox(width: 8),
+                        Text(
+                          'Tip: Please provide a clearer video with a more visible face.',
+                          style: TextStyle(color: Color(0xFFD97706), fontSize: 13, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 24),
+                
+                // --- EXPANDABLE CONFIDENCE SCORE SECTION ---
+                Theme(
+                  data: Theme.of(context).copyWith(
+                    dividerColor: Colors.transparent,
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                  ),
+                  child: ExpansionTile(
+                    tilePadding: EdgeInsets.zero,
+                    iconColor: Colors.black87,
+                    collapsedIconColor: Colors.black87,
+                    title: const Text(
+                      'Confidence Score',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.black87),
+                    ),
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.only(bottom: 24),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (_apiResult?['timing_ms']?['total'] != null)
+                              _buildDetailRow('Processing Time', '${_apiResult!['timing_ms']['total']} ms', Icons.timer_outlined),
+                            if (_apiResult?['media_type'] == 'video' && _apiResult?['sampling']?['frames_used'] != null)
+                              _buildDetailRow('Frames Analyzed', '${_apiResult!['sampling']['frames_used']}', Icons.burst_mode_outlined),
+                            if (_apiResult?['reasons'] != null)
+                              _buildDetailRow('Detection Path', (_apiResult!['reasons'] as List).join(', '), Icons.alt_route_rounded),
+                            if (_apiResult?['warnings'] != null && (_apiResult!['warnings'] as List).isNotEmpty)
+                              _buildDetailRow('Warnings', '${(_apiResult!['warnings'] as List).length} flag(s)', Icons.warning_amber_rounded, color: Colors.orange.shade700),
+                            // Optional generic info dump for easy debugging
+                            const SizedBox(height: 8),
+                            Text('RAW METRICS', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1, color: Colors.black38)),
+                            const SizedBox(height: 4),
+                            Text(
+                              _apiResult?['video_stats']?.toString() ?? _apiResult?['models_summary']?.toString() ?? _apiResult?['ensemble_summary']?.toString() ?? 'N/A',
+                              style: const TextStyle(fontSize: 11, fontFamily: 'monospace', color: Colors.black54),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // ----------------------------------
                 
                 // Use the new custom Chart Widget
                 ConfidenceChart(probabilities: probabilities),
@@ -1062,6 +1130,28 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
         ),
+      ),
+    );
+  }
+
+  // Helper widget to render individual rows inside the Analysis Details ExpansionTile
+  Widget _buildDetailRow(String label, String value, IconData icon, {Color? color}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16, color: color ?? Colors.black45),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(label, style: const TextStyle(fontSize: 13, color: Colors.black54)),
+          ),
+          Text(
+            value,
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: color ?? Colors.black87),
+            textAlign: TextAlign.right,
+          ),
+        ],
       ),
     );
   }

@@ -41,3 +41,6 @@ eval_raw_results.json
 eval_summary.json
 eval_celebdf_results.json
 eval_detailed_summary.json
+
+.md
+*.md 
