@@ -1,6 +1,6 @@
-# Realytic — AI Media & Call Fraud Detection
+# Realytic — Deepfake & Fraud Detector
 
-A multi-modal AI fraud detection system run at Trusted Execution Environment (TEE), covering image, video, and audio deepfakes, plus a fraud analysis pipeline that transcribes speech, redacts private data, and uses a hybrid risk engine to detect scams accross multiple platforms (web/native app).
+A privacy-preserving, multi-modal deepfake detection system run at Trusted Execution Environment (TEE), covering image, video, and audio deepfakes, plus a fraud analysis pipeline that transcribes speech, redacts private data, and uses a hybrid risk engine to detect scams accross multiple platforms (web/native app).
 
 ---
 
