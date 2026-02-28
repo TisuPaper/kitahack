@@ -15,10 +15,8 @@ A multi-modal AI fraud detection system run at Trusted Execution Environment (TE
 7. [Audio Deepfake Detection](#7-audio-deepfake-detection)
 8. [Call Fraud Detection (Advanced)](#8-call-fraud-detection-advanced)
 9. [API Reference](#9-api-reference)
-10. [Running the Backend](#10-running-the-backend)
-11. [Evaluation & Tuning](#11-evaluation--tuning)
-12. [Challenges Faced](#12-challenges-faced)
-13. [Future Roadmap](#13-future-roadmap)
+10. [Challenges Faced](#10-challenges-faced)
+11. [Future Roadmap](#11-future-roadmap)
 
 ---
 
@@ -437,7 +435,7 @@ See [Section 8](#8-call-fraud-detection-advanced) for full response schema.
 
 ---
 
-## 12. Challenges Faced
+## 10. Challenges Faced
 
 - **Uncertain band in visual detection** — Champion + Challenger often output mid-range scores (0.35–0.65) on certain fakes (e.g. Celeb-DF). **Approach:** A third model (EfficientNet-B4, trained on Celeb-DF) is invoked only when the primary ensemble is uncertain, acting as a tiebreaker and significantly improving accuracy on those cases.
 - **Video quality and face visibility** — Low resolution, blur, or few visible faces lead to inconsistent per-frame scores and "UNCERTAIN" verdicts. **Approach:** Video-level aggregation (e.g. mean score), clear confidence bands, and in-app tips (e.g. "Try better lighting or a closer face") so users understand why the result is uncertain.
@@ -447,7 +445,7 @@ See [Section 8](#8-call-fraud-detection-advanced) for full response schema.
 
 ---
 
-## 13. Future Roadmap
+## 11. Future Roadmap
 
 - **Models & data** — Add or swap visual/audio models; fine-tune on more diverse deepfake datasets (e.g. additional face-forgery and voice-clone corpora).
 - **Detection coverage & precision** — **Image/video/audio:** detect more deepfake types (e.g. more forgery methods and generators) and improve precision so real vs fake is more accurate, including on edge cases (low quality, compression, partial faces). **Fraud:** detect more scam types and patterns (e.g. new playbooks, regional variants); improve precision to reduce false positives and missed scams.
