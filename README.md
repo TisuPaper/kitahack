@@ -1,43 +1,56 @@
 # Realitic — AI Media & Call Fraud Detection
 
-A multi-modal AI fraud detection system covering **image**, **video**, and **audio deepfakes**, plus a **call fraud analysis** pipeline that transcribes speech, redacts private data, and uses a hybrid risk engine to detect scams.
+A multi-modal AI fraud detection system run at Trusted Execution Environment (TEE), covering image, video, and audio deepfakes, plus a fraud analysis pipeline that transcribes speech, redacts private data, and uses a hybrid risk engine to detect scams accross multiple platforms (web/native app).
 
 ---
 
 ## Table of Contents
 
 1. [Problem Statement](#1-problem-statement)
-2. [Architecture](#2-architecture)
-3. [Tech Stack](#3-tech-stack)
-4. [Challenges Faced](#4-challenges-faced)
-5. [Future Roadmap](#5-future-roadmap)
-6. [System Overview](#6-system-overview)
-7. [Visual Deepfake Detection (Image & Video)](#7-visual-deepfake-detection-image--video)
-8. [Audio Deepfake Detection](#8-audio-deepfake-detection)
-9. [Call Fraud Detection (Advanced)](#9-call-fraud-detection-advanced)
-10. [API Reference](#10-api-reference)
-11. [Running the Backend](#11-running-the-backend)
-12. [Evaluation & Tuning](#12-evaluation--tuning)
+2. [Solution & Features](#2-solution--features)
+3. [Architecture](#3-architecture)
+4. [Tech Stack](#4-tech-stack)
+5. [System Overview](#5-system-overview)
+6. [Visual Deepfake Detection (Image & Video)](#6-visual-deepfake-detection-image--video)
+7. [Audio Deepfake Detection](#7-audio-deepfake-detection)
+8. [Call Fraud Detection (Advanced)](#8-call-fraud-detection-advanced)
+9. [API Reference](#9-api-reference)
+10. [Running the Backend](#10-running-the-backend)
+11. [Evaluation & Tuning](#11-evaluation--tuning)
+12. [Challenges Faced](#12-challenges-faced)
+13. [Future Roadmap](#13-future-roadmap)
 
 ---
 
 ## 1. Problem Statement
 
-- **Proliferation of deepfakes** — Synthesised images, face-swapped videos, and cloned voices are increasingly used in fraud, misinformation, and social engineering. Users lack simple tools to check whether media or a call is genuine.
-- **Binary labels are not enough** — A simple “real” or “fake” label is often insufficient; users and downstream systems need **confidence scores** and **explainable signals** to make informed decisions.
-- **Call and audio fraud** — Scam calls (OTP harvesting, impersonation, urgent transfers) rely on scripted language and social engineering. Detection must combine **speech understanding**, **pattern matching**, and **privacy-safe** use of LLMs.
-- **Real-world usage** — People often consume content **live** (e.g. YouTube, voice messages) rather than downloading files. The system must support **live capture** (screen/tab share) with real-time analysis, not only file upload.
-- **Privacy and trust** — Personal data (phone numbers, OTPs, NRIC) in call audio must **never** be sent to third-party APIs in raw form; redaction and a **hybrid** (rules + LLM) design reduce dependency on a single provider and protect user privacy.
-
-Realitic addresses these by providing **multi-modal deepfake detection** (image, video, audio), **call fraud analysis** with PII redaction and a rules + playbook + Gemini pipeline, **confidence bands** and advice, and **live capture** on web with optional pop-out widget.
+- **Deepfake-enabled fraud is now a real financial threat, not a “future risk.** — Fraud losses are already massive (US$12.5B reported in 2024), and deepfakes are rapidly scaling—occurring as frequently as one attempt every five minutes—making impersonation scams harder and faster than ever.
+- **People can’t reliably tell what’s real, and the tools aren’t simple across devices.** — People can’t reliably tell what’s real, and the tools aren’t simple across devices. Even among consumers familiar with generative AI, 59% say they have a hard time distinguishing human vs AI media, yet verification isn’t “one-tap” across both phone and PC during live situations (calls, streams, messages).
+- **Privacy and trust** — Call recordings and transcripts can contain OTPs, NRIC, bank details, and phone numbers—so people hesitate to use detection tools if they must upload sensitive content to external servers.
 
 ---
 
-## 2. Architecture
+## 2. Solution & Features
+
+Realitic is a **multi-modal deepfake and call-fraud detection system** that runs in a Trusted Execution Environment (TEE) without storing user's data. It gives users confidence scores and actionable advice instead of a simple real/fake label, and keeps sensitive data out of third-party APIs.
+
+**Highlights:**
+
+- **Image & video deepfake** — Ensemble of Xception, ViT, and EfficientNet-B4 with a tiebreaker for uncertain cases; confidence bands (HIGH/MEDIUM/LOW) and per-model signals; face crop and frame sampling for video.
+- **Audio deepfake** — Three models (CNN-LSTM, TCN, TCN-LSTM) with chunk-level majority vote; supports common formats (WAV, MP3, WebM, etc.).
+- **Call fraud pipeline** — Speech-to-text (Whisper) → typed PII redaction → rule engine + playbook matching + Gemini; hybrid risk score (rules + playbook + LLM) and merged evidence; scam type and recommendation.
+- **Live capture (web)** — Share screen or tab; real-time face and audio analysis。
+- **Privacy-first** — PII is redacted before any LLM call; backend can run on a confidential VM (TEE); no storage of uploaded media by default.
+- **Cross-platform** — Flutter app on iOS, Android, and web; same API for upload and live flows.
+
+---
+
+## 3. Architecture
 
 The client (Flutter app on mobile or web) sends media to a FastAPI backend running inside a **Trusted Execution Environment (TEE)**. The backend routes by media type, runs ensemble deepfake models and (for audio) a fraud pipeline, then returns scores and evidence.
 
-![Architecture diagram — Realitic deepfake and fraud detection](image/Kitahack%202026%20(1).jpg)
+
+![Kitahack 2026 (1)](https://github.com/user-attachments/assets/bf1f36cf-e4f4-41ce-8a53-35c4c981e53f)
 
 - **Client:** Flutter (iOS, Android, Web). Uploads images/videos/audio or streams live capture; displays verdicts, confidence, and fraud risk (e.g. risk level, scam type, evidence).
 - **TEE / Backend:** FastAPI. **Image** → face crop (OpenCV) → visual deepfake ensemble (Xception + ViT, with EfficientNet tiebreaker when uncertain). **Video** → frame extraction → same visual pipeline. **Audio** → deepfake ensemble (CNN-LSTM, TCN, TCN-LSTM) and, in parallel, **fraud pipeline**: Speech-to-Text → PII redaction → Rule engine + Playbook matching + Gemini → hybrid risk score and evidence.
@@ -45,41 +58,21 @@ The client (Flutter app on mobile or web) sends media to a FastAPI backend runni
 
 ---
 
-## 3. Tech Stack
+## 4. Tech Stack
 
 | Layer | Technologies |
 |-------|--------------|
-| **Frontend** | Flutter (Dart) — mobile (iOS/Android) and web; live capture via `getDisplayMedia`; in-app browser for `/live` or embedded WebView |
+| **Frontend** | Flutter (Dart) — mobile (iOS/Android) and web|
 | **Backend** | FastAPI (Python 3.x), Uvicorn |
 | **Visual deepfake** | OpenCV (face detection/crop), PyTorch — FaceForge (Xception), ViT (Vision Transformer), EfficientNet-B4 (tiebreaker) |
 | **Audio deepfake** | PyTorch — CNN-LSTM, TCN, TCN-LSTM; 16 kHz mono; soundfile / PyAV for decoding |
 | **Fraud pipeline** | Whisper (local STT), custom PII filter (typed redaction), rule engine (bilingual EN/MY), playbook matcher (token overlap), Google Gemini (LLM) |
-| **Deployment** | Backend on VM or inside TEE; optional Nginx, systemd; frontend static build or same-origin `/live` |
+| **Deployment** | Backend on confidential VM  (TEE)|
 
 ---
 
-## 4. Challenges Faced
+## 5. System Overview
 
-- **Uncertain band in visual detection** — Champion + Challenger often output mid-range scores (0.35–0.65) on certain fakes (e.g. Celeb-DF). **Approach:** A third model (EfficientNet-B4, trained on Celeb-DF) is invoked only when the primary ensemble is uncertain, acting as a tiebreaker and significantly improving accuracy on those cases.
-- **Video quality and face visibility** — Low resolution, blur, or few visible faces lead to inconsistent per-frame scores and “UNCERTAIN” verdicts. **Approach:** Video-level aggregation (e.g. mean score), clear confidence bands, and in-app tips (e.g. “Try better lighting or a closer face”) so users understand why the result is uncertain.
-- **System audio in live capture** — On macOS, “Share system audio” with window/screen capture often yields no usable track; only tab audio is reliable. **Approach:** Use `getDisplayMedia` with `systemAudio: 'include'` and fallback to microphone; document that for reliable audio capture on macOS, users should share a **browser tab** where the audio is playing.
-- **Gemini API quota (429)** — Free tier has tight limits (e.g. requests per day). **Approach:** Catch quota/rate-limit errors in the Gemini client, return a friendly fallback (e.g. “API quota exceeded”) and a neutral risk score so the pipeline still returns rules + playbook results; avoid surfacing raw API error payloads to the UI.
-- **PII in call audio** — Sending raw transcripts to an LLM would leak phone numbers, OTPs, NRIC. **Approach:** Typed PII redaction (e.g. `[PHONE]`, `[OTP]`, `[NRIC]`) before any LLM call; merge overlapping spans; keep evidence and scam analysis useful without exposing real identifiers.
-- **Latency vs accuracy** — Multiple models and the fraud pipeline (STT → rules → playbook → Gemini) add latency. **Approach:** Run audio deepfake and fraud in one request; cache Whisper model; optional one-time analysis in live mode so the UI doesn’t hammer the backend every few seconds.
-
----
-
-## 5. Future Roadmap
-
-- **Models & data** — Add or swap visual/audio models; fine-tune on more diverse deepfake datasets (e.g. additional face-forgery and voice-clone corpora).
-- **Fraud pipeline** — Support more languages and scam playbooks; optional streaming STT for long calls; tune hybrid weights (rules vs playbook vs Gemini) from production feedback.
-- **Live capture** — Improve UX for system audio (e.g. when browser/OS support improves); native mobile screen capture where applicable.
-- **Explainability & ops** — Audit logs for verdicts and fraud signals; dashboards for model usage (e.g. how often the tiebreaker is used); A/B tests on confidence thresholds.
-- **Deployment** — One-click backend + frontend deploy (e.g. Docker, cloud runbooks); rate limiting and auth for public APIs.
-
----
-
-## 6. System Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -101,7 +94,7 @@ The client (Flutter app on mobile or web) sends media to a FastAPI backend runni
 
 ---
 
-## 7. Visual Deepfake Detection (Image & Video)
+## 6. Visual Deepfake Detection (Image & Video)
 
 ### Models
 
@@ -146,21 +139,9 @@ z = 0.25×logit(champ) + 1.0×logit(chall) + 0.5×logit(fallback) + 2.5
 - Each frame scored independently; final verdict from `mean(final_p_fake)`.
 - If >50% of frames have no detectable face → whole video is `UNCERTAIN`.
 
-### Showcase Cases
-
-**Case A: Real video corrected by Fallback**
-- Video: `FaceForensics++/original/000.mp4` (Real)
-- Without tiebreaker: Challenger uncertain → primary score 0.54 → **Fake (wrong)**
-- With tiebreaker: Fallback says real → blended score 0.19 → **Real (correct)**
-
-**Case B: Fake video corrected by Fallback**
-- Video: `Celeb-synthesis/id0_id4_0004.mp4` (Fake)
-- Without tiebreaker: Champion says real → primary score 0.44 → **Real (wrong)**
-- With tiebreaker: Fallback (Celeb-DF trained) says fake → blended score 0.71 → **Fake (correct)**
-
 ---
 
-## 8. Audio Deepfake Detection
+## 7. Audio Deepfake Detection
 
 Detects **AI-synthesised or cloned voices** using three independently-trained models operating on raw audio waveforms.
 
@@ -219,7 +200,7 @@ Audio file
 
 ---
 
-## 9. Call Fraud Detection (Advanced)
+## 8. Call Fraud Detection (Advanced)
 
 Detects **phone scams and social engineering attacks** from call audio. Combines three independent signals into a single hybrid risk score — no single point of failure.
 
@@ -298,7 +279,7 @@ Rules are bilingual (English + Malay) and run entirely **on-device** — no API 
 
 **3. Scam Playbook Matching (RAG-lite, offline)**
 
-Token overlap similarity against 8 known scam script templates:
+Token overlap similarity against 8 known scam script templates (current):
 - Police / Bank Impersonation
 - Tech Support / Remote Access
 - Investment / Crypto
@@ -372,31 +353,9 @@ final_risk_score = 0.35 × rule_score
 }
 ```
 
-### Setup (Quick)
-
-```bash
-# 1. Install deps
-pip install -r app/requirements-fraud.txt
-
-# 2. Install ffmpeg (for Whisper)
-brew install ffmpeg          # macOS
-sudo apt install ffmpeg      # Linux
-
-# 3. Set Gemini API key (get one at aistudio.google.com/apikey)
-echo "GEMINI_API_KEY=your_key" > app/.env.local
-
-# 4. Run backend
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-# 5. Test
-curl -X POST http://localhost:8000/analyze-fraud -F "file=@call.wav"
-```
-
-Full setup guide: [`app/docs/SETUP_FRAUD_DETECTION.md`](app/docs/SETUP_FRAUD_DETECTION.md)
-
 ---
 
-## 10. API Reference
+## 9. API Reference
 
 ### `POST /predict` — Image deepfake
 
@@ -468,70 +427,37 @@ Additional `reasons` for video: `high_variance` · `low_face_rate` · `consisten
 
 ### `POST /predict-audio` — Audio deepfake
 
-See [Section 8](#8-audio-deepfake-detection) for full response schema.
+See [Section 7](#7-audio-deepfake-detection) for full response schema.
 
 ---
 
 ### `POST /analyze-fraud` — Call fraud
 
-See [Section 9](#9-call-fraud-detection-advanced) for full response schema.
+See [Section 8](#8-call-fraud-detection-advanced) for full response schema.
 
 ---
 
-## 11. Running the Backend
+## 12. Challenges Faced
 
-```bash
-# From project root
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-
-# Or
-make run-backend
-```
-
-**Model locations:**
-
-| Model | Source |
-|-------|--------|
-| Champion (FaceForge) | HuggingFace `huzaifanasirrr/faceforge-detector` |
-| Challenger (ViT) | `models/vit_finetuned_twostage/` |
-| Fallback (EfficientNet) | `models/efficientnet_finetuned_ffpp/` |
-| Audio models | `models/cnn-lstm_audio_classifier.pth`, `tcn_audio_classifier.pth`, `tcn-lstm_audio_classifier.pth` |
-
-**Environment variables (optional):**
-
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `GEMINI_API_KEY` | — | Required for `/analyze-fraud` |
-| `GEMINI_MODEL` | `gemini-1.5-flash` | Gemini model name |
-| `WHISPER_MODEL` | `base` | Whisper size: `tiny`/`base`/`small`/`medium`/`large` |
-| `FRAUD_USE_GEMINI_STT` | off | Use Gemini for transcription instead of Whisper |
-| `FRAUD_PII_PATTERNS_FILE` | — | Path to extra PII regex patterns (`LABEL\|regex` per line) |
-
-Set via `app/.env.local` (loaded automatically on startup).
+- **Uncertain band in visual detection** — Champion + Challenger often output mid-range scores (0.35–0.65) on certain fakes (e.g. Celeb-DF). **Approach:** A third model (EfficientNet-B4, trained on Celeb-DF) is invoked only when the primary ensemble is uncertain, acting as a tiebreaker and significantly improving accuracy on those cases.
+- **Video quality and face visibility** — Low resolution, blur, or few visible faces lead to inconsistent per-frame scores and "UNCERTAIN" verdicts. **Approach:** Video-level aggregation (e.g. mean score), clear confidence bands, and in-app tips (e.g. "Try better lighting or a closer face") so users understand why the result is uncertain.
+- **Gemini API quota (429)** — Free tier has tight limits (e.g. requests per day). **Approach:** Catch quota/rate-limit errors in the Gemini client, return a friendly fallback (e.g. "API quota exceeded") and a neutral risk score so the pipeline still returns rules + playbook results; avoid surfacing raw API error payloads to the UI.
+- **PII in call audio** — Sending raw transcripts to an LLM would leak phone numbers, OTPs, NRIC. **Approach:** Typed PII redaction (e.g. `[PHONE]`, `[OTP]`, `[NRIC]`) before any LLM call; merge overlapping spans; keep evidence and scam analysis useful without exposing real identifiers.
+- **Latency vs accuracy** — Multiple models and the fraud pipeline (STT → rules → playbook → Gemini) add latency. **Approach:** Run audio deepfake and fraud in one request; cache Whisper model; optional one-time analysis in live mode so the UI doesn't hammer the backend every few seconds.
 
 ---
 
-## 12. Evaluation & Tuning
+## 13. Future Roadmap
 
-| Script | Purpose |
-|--------|---------|
-| `evaluate_ensemble.py` | Run all 3 visual models on FF++ C23, grid-search ensemble weights |
-| `analyze_results.py` | Analyse saved results (distributions, thresholds, calibrated blending) |
-| `optimize_video_level.py` | Optimise video-level stacking coefficients and threshold |
-
-Raw results (`eval_raw_results.json`, `eval_celebdf_results.json`) can be reused without re-running inference.
+- **Models & data** — Add or swap visual/audio models; fine-tune on more diverse deepfake datasets (e.g. additional face-forgery and voice-clone corpora).
+- **Detection coverage & precision** — **Image/video/audio:** detect more deepfake types (e.g. more forgery methods and generators) and improve precision so real vs fake is more accurate, including on edge cases (low quality, compression, partial faces). **Fraud:** detect more scam types and patterns (e.g. new playbooks, regional variants); improve precision to reduce false positives and missed scams.
+- **Fraud pipeline** — Support more languages and scam playbooks; optional streaming STT for long calls; tune hybrid weights (rules vs playbook vs Gemini) from production feedback.
+- **Live capture** — Improve UX for live capturing (e.g. when browser/OS support improves); native mobile screen capture where applicable.
+- **Explainability** — Enhance the explainable part so users get more detail on **why** content is classified as real or fake (e.g. which visual or audio cues drove the verdict, per-model contributions, and for video/audio which segments or frames were most suspicious); surface this in the UI and API for better trust and decision-making.
+- **Ops** — Audit logs for verdicts and fraud signals; dashboards for model usage (e.g. how often the tiebreaker is used); A/B tests on confidence thresholds.
+- **Deployment** — One-click backend + frontend deploy (e.g. Docker, cloud runbooks); rate limiting and auth for public APIs.
 
 ---
 
-## Summary
+**Team 3004** — Lim Fang Yee, Lee Wai Yee
 
-| Component | Unique Aspect |
-|-----------|--------------|
-| **Visual ensemble** | Two-stage logit stacking; Fallback only activates when primary is uncertain |
-| **Fallback tiebreaker** | Celeb-DF trained EfficientNet corrects errors in the uncertain band |
-| **Audio deepfake** | Three independent temporal models; chunk-level majority vote |
-| **PII Firewall** | Typed redaction ([PHONE], [OTP] …) preserves context for LLM while protecting privacy |
-| **Rule engine** | 10 bilingual (EN+MY) heuristic rules; offline, zero-latency |
-| **Playbook matching** | Token-overlap similarity vs 8 known scam scripts; no ML model needed |
-| **Hybrid risk score** | Rules 35% + Playbook 20% + Gemini 45% → final score 0–100 |
-| **Evidence output** | Quoted snippets with reasons from all three sources for explainable detection |
