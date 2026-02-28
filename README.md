@@ -450,6 +450,7 @@ See [Section 8](#8-call-fraud-detection-advanced) for full response schema.
 - **Detection coverage & precision** — **Image/video/audio:** detect more deepfake types (e.g. more forgery methods and generators) and improve precision so real vs fake is more accurate, including on edge cases (low quality, compression, partial faces). **Fraud:** detect more scam types and patterns (e.g. new playbooks, regional variants); improve precision to reduce false positives and missed scams.
 - **Fraud pipeline** — Support more languages and scam playbooks; optional streaming STT for long calls; tune hybrid weights (rules vs playbook vs Gemini) from production feedback.
 - **Live capture** — Improve UX for live capturing (e.g. when browser/OS support improves); native mobile screen capture where applicable.
+- Implement full features detector accross multiple platform. 
 - **Explainability** — Enhance the explainable part so users get more detail on **why** content is classified as real or fake (e.g. which visual or audio cues drove the verdict, per-model contributions, and for video/audio which segments or frames were most suspicious); surface this in the UI and API for better trust and decision-making.
 - **Ops** — Audit logs for verdicts and fraud signals; dashboards for model usage (e.g. how often the tiebreaker is used); A/B tests on confidence thresholds.
 - **Deployment** — One-click backend + frontend deploy (e.g. Docker, cloud runbooks); rate limiting and auth for public APIs.
