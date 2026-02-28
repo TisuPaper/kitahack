@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.env
+.env.local
+app/.env.local
+app/forensic_features.py
+
+# Model weights (too large for GitHub)
+models/
+*.pth
+*.safetensors
+*.onnx
+*.h5
+
+# Flutter
+frontend/.dart_tool/
+frontend/build/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Colab outputs
+*.ipynb_checkpoints/
+
+# Data
+app/data
+
+# Eval outputs (from evaluate_ensemble / analyze_results / optimize_video_level)
+eval_raw_results.json
+eval_summary.json
+eval_celebdf_results.json
+eval_detailed_summary.json
