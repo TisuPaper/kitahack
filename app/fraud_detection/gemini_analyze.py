@@ -133,7 +133,23 @@ Transcript:
 {filtered_transcript.strip() or "(empty — possibly silence or no speech detected)"}
 """
 
-    response = model.generate_content(prompt)
+    try:
+        response = model.generate_content(prompt)
+    except Exception as e:
+        err_msg = str(e).lower()
+        if "429" in err_msg or "quota" in err_msg or "rate" in err_msg or "resource_exhausted" in err_msg:
+            return _validate({
+                "risk_level":   "medium",
+                "risk_score":   50,
+                "confidence":   0.5,
+                "scam_type":    "other",
+                "summary":      "Fraud analysis temporarily unavailable (API quota exceeded). Try again later or check your Gemini plan.",
+                "indicators":   [],
+                "evidence":     [],
+                "recommendation": "Manual review recommended. Retry after a short delay or check https://ai.google.dev/gemini-api/docs/rate-limits",
+            })
+        raise
+
     raw = _extract_json(response.text or "")
 
     try:

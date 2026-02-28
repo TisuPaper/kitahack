@@ -94,9 +94,14 @@ def run_fraud_pipeline(audio_path: str) -> dict:
         gemini_out = analyze_for_fraud(result["transcript_filtered"], rule_context=rule_ctx)
         result["gemini_analysis"] = gemini_out
     except Exception as e:
+        err = str(e).lower()
+        if "429" in err or "quota" in err or "rate" in err:
+            summary_msg = "Fraud analysis temporarily unavailable (API quota exceeded). Try again later."
+        else:
+            summary_msg = f"Gemini unavailable: {e}"
         gemini_out = {
             "risk_level": "medium", "risk_score": 50, "confidence": 0.5,
-            "scam_type": "other", "summary": f"Gemini unavailable: {e}",
+            "scam_type": "other", "summary": summary_msg,
             "indicators": [], "evidence": [], "recommendation": "Manual review required.",
         }
         result["gemini_analysis"] = gemini_out

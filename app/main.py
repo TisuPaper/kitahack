@@ -10,6 +10,7 @@ except ImportError:
     pass  # python-dotenv optional; use export GEMINI_API_KEY=... if not installed
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.responses import HTMLResponse
 from app.model_loader import (
     champion, champion_preprocess,
     challenger_model, challenger_processor,
@@ -52,6 +53,12 @@ class _PermissionsPolicyMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(_PermissionsPolicyMiddleware)
 
+@app.get("/live", response_class=HTMLResponse)
+async def get_live_page():
+    html_path = Path(__file__).resolve().parent / "live.html"
+    if html_path.exists():
+        return html_path.read_text("utf-8")
+    return HTMLResponse("<h1>live.html not found in backend folder</h1>", status_code=404)
 
 # ---- Face detector (Haar cascade) ----
 face_cascade = cv2.CascadeClassifier(
@@ -282,7 +289,6 @@ _NEXT_STEPS = {
     "UNCERTAIN": [
         "Try with better lighting or a closer face",
         "Upload a short video for more data",
-        "Avoid screenshots with overlays",
     ],
 }
 
@@ -454,6 +460,12 @@ async def predict(file: UploadFile = File(...)):
         )
 
     t_total = int((time.monotonic() - t_start) * 1000)
+
+    print(f"\n--- [IMAGE ANALYSIS] {request_id} ---")
+    print(f"Tiebreaker: {'Yes' if tiebreaker_used else 'No'}")
+    print(f"Final Score: {final_fake * 100:.1f}% Fake | Verdict: {verdict}")
+    print(f"Total Time: {t_total}ms")
+    print("-" * 45 + "\n")
 
     return {
         "request_id": request_id,
@@ -658,6 +670,12 @@ async def predict_video(file: UploadFile = File(...)):
 
     t_total = int((time.monotonic() - t_start) * 1000)
 
+    print(f"\n--- [VIDEO ANALYSIS] {request_id} ---")
+    print(f"Frames Analyzed: {total} | Tiebreaker Calls: {'Yes' if any_tiebreaker else 'No'}")
+    print(f"Average Score: {avg_p_fake * 100:.1f}% Fake | Verdict: {verdict}")
+    print(f"Total Time: {t_total}ms")
+    print("-" * 45 + "\n")
+
     return {
         "request_id": request_id,
         "media_type": "video",
@@ -753,7 +771,7 @@ async def predict_audio(file: UploadFile = File(...)):
             os.unlink(tmp_path)
 
     # ── Build structured response ──────────────────────────────────────────
-    avg_p_fake   = raw["probabilities"]["fake"]
+    avg_p_fake   = 1.0-raw["probabilities"]["fake"]
     verdict, uncertain = _verdict(avg_p_fake, True)
     confidence_band    = _confidence_band(avg_p_fake)
 
@@ -784,6 +802,12 @@ async def predict_audio(file: UploadFile = File(...)):
             })
 
     t_total = int((time.monotonic() - t_start) * 1000)
+
+    print(f"\n--- [AUDIO ANALYSIS] {request_id} ---")
+    print(f"Models Called: {total_models} | Votes Fake: {models_voted_fake}/{total_models}")
+    print(f"Confidence Score: {avg_p_fake * 100:.1f}% Fake | Verdict: {verdict}")
+    print(f"Total Time: {t_total}ms")
+    print("-" * 45 + "\n")
 
     return {
         "request_id":      request_id,
@@ -856,6 +880,15 @@ async def analyze_fraud(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=result["error"])
 
     gemini = result.get("gemini_analysis") or {}
+    
+    rule_c = len(result.get("rule_signals", {}).get("matched_rules", []))
+    pb_c = len(result.get("playbook_matches", []))
+    print(f"\n--- [FRAUD ANALYSIS] {request_id} ---")
+    print(f"Rules Matched: {rule_c} | Playbooks Matched: {pb_c} | Gemini Called: True")
+    print(f"Risk Score: {result.get('final_risk_score')} | Type: {result.get('final_scam_type')}")
+    print(f"Total Time: {t_total}ms")
+    print("-" * 45 + "\n")
+
     return {
         "request_id":          request_id,
 

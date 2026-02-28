@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Realitic — Live Detection</title>
   <link rel="icon" id="pageFavicon" type="image/png" href="">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -21,7 +26,7 @@
       justify-content: space-between;
       padding: 16px 24px;
       background: #1E293B;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .header h1 {
@@ -35,7 +40,7 @@
     .header h1 .icon {
       width: 32px;
       height: 32px;
-      background: rgba(129,140,248,0.2);
+      background: rgba(129, 140, 248, 0.2);
       border-radius: 8px;
       display: flex;
       align-items: center;
@@ -67,14 +72,20 @@
       color: white;
     }
 
-    .btn-start:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
+    .btn-start:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
 
     .btn-stop {
       background: linear-gradient(135deg, #EF4444, #DC2626);
       color: white;
     }
 
-    .btn-stop:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+    .btn-stop:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
 
     .btn:disabled {
       opacity: 0.4;
@@ -84,15 +95,20 @@
     }
 
     .btn-pip {
-      background: rgba(129,140,248,0.12);
-      border: 1px solid rgba(129,140,248,0.28);
+      background: rgba(129, 140, 248, 0.12);
+      border: 1px solid rgba(129, 140, 248, 0.28);
       color: #818CF8;
     }
-    .btn-pip:hover { background: rgba(129,140,248,0.22); transform: translateY(-1px); }
+
+    .btn-pip:hover {
+      background: rgba(129, 140, 248, 0.22);
+      transform: translateY(-1px);
+    }
+
     .btn-pip.active {
-      background: rgba(129,140,248,0.28);
-      border-color: rgba(129,140,248,0.55);
-      box-shadow: 0 0 12px rgba(129,140,248,0.2);
+      background: rgba(129, 140, 248, 0.28);
+      border-color: rgba(129, 140, 248, 0.55);
+      box-shadow: 0 0 12px rgba(129, 140, 248, 0.2);
     }
 
     .main {
@@ -108,7 +124,7 @@
       background: #1E293B;
       border-radius: 16px;
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.06);
+      border: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     #screenVideo {
@@ -121,9 +137,12 @@
     /* Face-box overlay — sits directly on top of the video */
     #faceOverlay {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      pointer-events: none;   /* clicks pass through to video */
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      /* clicks pass through to video */
     }
 
     .placeholder {
@@ -132,127 +151,375 @@
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
-      color: rgba(255,255,255,0.3);
+      color: rgba(255, 255, 255, 0.3);
     }
 
-    .placeholder .big-icon { font-size: 64px; margin-bottom: 16px; }
-    .placeholder p { font-size: 16px; }
+    .placeholder .big-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .placeholder p {
+      font-size: 16px;
+    }
 
     /* Floating verdict overlay */
     .verdict-overlay {
-      position: absolute; top: 16px; right: 16px;
-      padding: 14px 22px; border-radius: 14px;
-      display: none; flex-direction: column; gap: 4px;
-      backdrop-filter: blur(16px); z-index: 10;
-      transition: all 0.3s ease; max-width: 340px;
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      padding: 14px 22px;
+      border-radius: 14px;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      backdrop-filter: blur(16px);
+      z-index: 10;
+      transition: all 0.3s ease;
+      max-width: 340px;
     }
-    .verdict-overlay .vo-main { font-size: 20px; font-weight: 800; letter-spacing: 2px; }
-    .verdict-overlay .vo-band { font-size: 12px; font-weight: 600; opacity: 0.8; }
-    .verdict-overlay .vo-why  { font-size: 11px; opacity: 0.65; margin-top: 2px; }
+
+    .verdict-overlay .vo-main {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 2px;
+    }
+
+    .verdict-overlay .vo-band {
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.8;
+    }
+
+    .verdict-overlay .vo-why {
+      font-size: 11px;
+      opacity: 0.65;
+      margin-top: 2px;
+    }
 
     .verdict-overlay.real {
-      display: flex; background: rgba(34,197,94,0.2);
-      border: 1px solid rgba(34,197,94,0.4); color: #22C55E;
+      display: flex;
+      background: rgba(34, 197, 94, 0.2);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: #22C55E;
     }
+
     .verdict-overlay.fake {
-      display: flex; background: rgba(239,68,68,0.2);
-      border: 1px solid rgba(239,68,68,0.4); color: #EF4444;
+      display: flex;
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #EF4444;
       animation: pulse-red 1.5s infinite;
     }
+
     .verdict-overlay.uncertain {
-      display: flex; background: rgba(245,158,11,0.2);
-      border: 1px solid rgba(245,158,11,0.4); color: #F59E0B;
+      display: flex;
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #F59E0B;
     }
+
     .verdict-overlay.analyzing {
-      display: flex; background: rgba(129,140,248,0.2);
-      border: 1px solid rgba(129,140,248,0.4); color: #818CF8;
+      display: flex;
+      background: rgba(129, 140, 248, 0.2);
+      border: 1px solid rgba(129, 140, 248, 0.4);
+      color: #818CF8;
     }
 
     @keyframes pulse-red {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
-      50% { box-shadow: 0 0 20px 4px rgba(239,68,68,0.2); }
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3);
+      }
+
+      50% {
+        box-shadow: 0 0 20px 4px rgba(239, 68, 68, 0.2);
+      }
     }
 
     /* Side panel */
-    .side-panel { width: 370px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
-    .card {
-      background: #1E293B; border-radius: 14px; padding: 20px;
-      border: 1px solid rgba(255,255,255,0.06);
+    .side-panel {
+      width: 370px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow-y: auto;
     }
+
+    .card {
+      background: #1E293B;
+      border-radius: 14px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
     .card h3 {
-      font-size: 13px; color: rgba(255,255,255,0.45); text-transform: uppercase;
-      letter-spacing: 1px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.45);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     /* Verdict card */
-    .vc-icon     { font-size: 36px; line-height: 1; }
-    .vc-verdict  { font-size: 28px; font-weight: 800; letter-spacing: 3px; }
-    .vc-band     { font-size: 13px; font-weight: 600; opacity: 0.75; margin-top: 2px; }
-    .vc-why      { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 10px; line-height: 1.4; }
-    .vc-steps    { list-style: none; margin-top: 10px; padding: 0; }
-    .vc-steps li {
-      font-size: 12px; color: rgba(255,255,255,0.55); padding: 4px 0; padding-left: 18px;
-      position: relative; line-height: 1.5;
+    .vc-icon {
+      font-size: 36px;
+      line-height: 1;
     }
+
+    .vc-verdict {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 3px;
+    }
+
+    .vc-band {
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0.75;
+      margin-top: 2px;
+    }
+
+    .vc-why {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.6);
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+
+    .vc-steps {
+      list-style: none;
+      margin-top: 10px;
+      padding: 0;
+    }
+
+    .vc-steps li {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.55);
+      padding: 4px 0;
+      padding-left: 18px;
+      position: relative;
+      line-height: 1.5;
+    }
+
     .vc-steps li::before {
-      content: ''; position: absolute; left: 0; top: 9px;
-      width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.25);
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 9px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
     }
 
     /* Audio card */
     .audio-indicator {
-      display: flex; align-items: center; gap: 8px; padding: 8px 12px;
-      border-radius: 8px; background: rgba(129,140,248,0.1); font-size: 13px; color: #818CF8;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(129, 140, 248, 0.1);
+      font-size: 13px;
+      color: #818CF8;
     }
-    .audio-bars { display: flex; gap: 2px; align-items: flex-end; height: 16px; }
+
+    .audio-bars {
+      display: flex;
+      gap: 2px;
+      align-items: flex-end;
+      height: 16px;
+    }
+
     .audio-bars span {
-      width: 3px; background: #818CF8; border-radius: 2px;
+      width: 3px;
+      background: #818CF8;
+      border-radius: 2px;
       animation: audio-bar 0.8s ease-in-out infinite;
     }
-    .audio-bars span:nth-child(1) { height: 6px; animation-delay: 0s; }
-    .audio-bars span:nth-child(2) { height: 12px; animation-delay: 0.15s; }
-    .audio-bars span:nth-child(3) { height: 8px; animation-delay: 0.3s; }
-    .audio-bars span:nth-child(4) { height: 14px; animation-delay: 0.45s; }
-    .audio-bars span:nth-child(5) { height: 10px; animation-delay: 0.6s; }
-    @keyframes audio-bar { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.4); } }
-    #audioCanvas { width: 100%; height: 32px; border-radius: 8px; background: rgba(0,0,0,0.2); margin-top: 8px; }
+
+    .audio-bars span:nth-child(1) {
+      height: 6px;
+      animation-delay: 0s;
+    }
+
+    .audio-bars span:nth-child(2) {
+      height: 12px;
+      animation-delay: 0.15s;
+    }
+
+    .audio-bars span:nth-child(3) {
+      height: 8px;
+      animation-delay: 0.3s;
+    }
+
+    .audio-bars span:nth-child(4) {
+      height: 14px;
+      animation-delay: 0.45s;
+    }
+
+    .audio-bars span:nth-child(5) {
+      height: 10px;
+      animation-delay: 0.6s;
+    }
+
+    @keyframes audio-bar {
+
+      0%,
+      100% {
+        transform: scaleY(1);
+      }
+
+      50% {
+        transform: scaleY(0.4);
+      }
+    }
+
+    #audioCanvas {
+      width: 100%;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      margin-top: 8px;
+    }
 
     /* Details toggle */
     .details-toggle {
-      display: flex; align-items: center; justify-content: space-between;
-      cursor: pointer; user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
     }
+
     .details-toggle::after {
-      content: '\25B6'; font-size: 10px; color: rgba(255,255,255,0.3);
+      content: '\25B6';
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.3);
       transition: transform 0.2s;
     }
-    .details-toggle.open::after { transform: rotate(90deg); }
-    .details-body { display: none; margin-top: 10px; }
-    .details-body.open { display: block; }
-    .detail-row {
-      display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px;
+
+    .details-toggle.open::after {
+      transform: rotate(90deg);
     }
-    .detail-row .dl { color: rgba(255,255,255,0.4); }
-    .detail-row .dv { font-weight: 600; color: rgba(255,255,255,0.7); }
+
+    .details-body {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .details-body.open {
+      display: block;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 12px;
+    }
+
+    .detail-row .dl {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .detail-row .dv {
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.7);
+    }
 
     /* Log */
     .log-entry {
-      padding: 6px 10px; border-radius: 8px; margin-bottom: 4px;
-      font-size: 11px; display: flex; align-items: center; gap: 6px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
-    .log-entry.real { background: rgba(34,197,94,0.08); color: #22C55E; }
-    .log-entry.fake { background: rgba(239,68,68,0.08); color: #EF4444; }
-    .log-entry.uncertain { background: rgba(245,158,11,0.08); color: #F59E0B; }
-    .log-entry.analyzing { background: rgba(129,140,248,0.08); color: #818CF8; }
-    .log-container { max-height: 260px; overflow-y: auto; }
+
+    .log-entry.real {
+      background: rgba(34, 197, 94, 0.08);
+      color: #22C55E;
+    }
+
+    .log-entry.fake {
+      background: rgba(239, 68, 68, 0.08);
+      color: #EF4444;
+    }
+
+    .log-entry.uncertain {
+      background: rgba(245, 158, 11, 0.08);
+      color: #F59E0B;
+    }
+
+    .log-entry.analyzing {
+      background: rgba(129, 140, 248, 0.08);
+      color: #818CF8;
+    }
+
+    .log-container {
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .fraud-block {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .fraud-block .fraud-title {
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 6px;
+    }
+
+    .fraud-block .fraud-risk {
+      font-weight: 700;
+    }
+
+    .fraud-block .fraud-risk.high {
+      color: #F87171;
+    }
+
+    .fraud-block .fraud-risk.medium {
+      color: #FBBF24;
+    }
+
+    .fraud-block .fraud-risk.low {
+      color: #4ADE80;
+    }
+
+    .fraud-block .fraud-evidence {
+      margin-top: 6px;
+      padding-left: 12px;
+      list-style: disc;
+      color: rgba(255, 255, 255, 0.7);
+    }
 
     .interval-select {
-      background: #334155; color: white;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px; padding: 8px 12px; font-size: 13px;
+      background: #334155;
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
     }
   </style>
 </head>
+
 <body>
   <!-- Header -->
   <div class="header">
@@ -270,7 +537,8 @@
           <option value="10000">10s</option>
         </select>
       </label>
-      <button id="btnPip" class="btn btn-pip" onclick="toggleWidget()" title="Float results in a mini window — stays visible on other tabs">
+      <button id="btnPip" class="btn btn-pip" onclick="toggleWidget()"
+        title="Float results in a mini window — stays visible on other tabs">
         ⧉ Pop Out
       </button>
       <button id="btnStart" class="btn btn-start" onclick="startCapture()">
@@ -330,9 +598,12 @@
         <div class="details-body" id="detailsBody">
           <div class="detail-row"><span class="dl">State</span><span class="dv" id="statState">Idle</span></div>
           <div class="detail-row"><span class="dl">Frames analyzed</span><span class="dv" id="statFrames">0</span></div>
-          <div class="detail-row"><span class="dl">Fake detections</span><span class="dv" id="statFakes" style="color:#EF4444">0</span></div>
-          <div class="detail-row"><span class="dl">Real detections</span><span class="dv" id="statReals" style="color:#22C55E">0</span></div>
-          <div class="detail-row"><span class="dl">Avg confidence</span><span class="dv" id="statConfidence">-</span></div>
+          <div class="detail-row"><span class="dl">Fake detections</span><span class="dv" id="statFakes"
+              style="color:#EF4444">0</span></div>
+          <div class="detail-row"><span class="dl">Real detections</span><span class="dv" id="statReals"
+              style="color:#22C55E">0</span></div>
+          <div class="detail-row"><span class="dl">Avg confidence</span><span class="dv" id="statConfidence">-</span>
+          </div>
           <div id="detailsExtra" style="margin-top:6px; font-size:11px; color:rgba(255,255,255,0.35)"></div>
         </div>
       </div>
@@ -357,32 +628,32 @@
 
     // Colour per verdict
     const VERDICT_COLOR = {
-      real:      '#22C55E',
-      fake:      '#EF4444',
+      real: '#22C55E',
+      fake: '#EF4444',
       uncertain: '#F59E0B',
     };
 
     function drawFaceBox(bbox, prediction) {
       // Sync canvas size to its CSS display size
-      faceOverlay.width  = faceOverlay.clientWidth;
+      faceOverlay.width = faceOverlay.clientWidth;
       faceOverlay.height = faceOverlay.clientHeight;
       faceCtx.clearRect(0, 0, faceOverlay.width, faceOverlay.height);
 
       if (!bbox) return;
 
       // The video uses object-fit:contain, so we need the actual rendered rect
-      const videoEl  = document.getElementById('screenVideo');
-      const vw       = videoEl.videoWidth;
-      const vh       = videoEl.videoHeight;
-      const cw       = faceOverlay.clientWidth;
-      const ch       = faceOverlay.clientHeight;
+      const videoEl = document.getElementById('screenVideo');
+      const vw = videoEl.videoWidth;
+      const vh = videoEl.videoHeight;
+      const cw = faceOverlay.clientWidth;
+      const ch = faceOverlay.clientHeight;
 
       if (!vw || !vh) return;
 
       // Letterbox / pillarbox offsets
-      const scale    = Math.min(cw / vw, ch / vh);
-      const offsetX  = (cw - vw * scale) / 2;
-      const offsetY  = (ch - vh * scale) / 2;
+      const scale = Math.min(cw / vw, ch / vh);
+      const offsetX = (cw - vw * scale) / 2;
+      const offsetY = (ch - vh * scale) / 2;
 
       // Convert normalised bbox → canvas pixels
       const rx = offsetX + bbox.x * vw * scale;
@@ -393,12 +664,12 @@
       const color = VERDICT_COLOR[prediction.toLowerCase()] || '#818CF8';
 
       // Outer glow
-      faceCtx.shadowColor  = color;
-      faceCtx.shadowBlur   = 12;
-      faceCtx.strokeStyle  = color;
-      faceCtx.lineWidth    = 2.5;
+      faceCtx.shadowColor = color;
+      faceCtx.shadowBlur = 12;
+      faceCtx.strokeStyle = color;
+      faceCtx.lineWidth = 2.5;
       faceCtx.strokeRect(rx, ry, rw, rh);
-      faceCtx.shadowBlur   = 0;
+      faceCtx.shadowBlur = 0;
 
       // Corner accents (L-shaped brackets)
       const cs = Math.min(rw, rh) * 0.18;  // corner segment length
@@ -406,10 +677,10 @@
       faceCtx.strokeStyle = color;
 
       const corners = [
-        [rx,      ry,      cs,  0,  0, cs],   // top-left
-        [rx + rw, ry,     -cs,  0,  0, cs],   // top-right
-        [rx,      ry + rh, cs,  0,  0,-cs],   // bottom-left
-        [rx + rw, ry + rh,-cs,  0,  0,-cs],   // bottom-right
+        [rx, ry, cs, 0, 0, cs],   // top-left
+        [rx + rw, ry, -cs, 0, 0, cs],   // top-right
+        [rx, ry + rh, cs, 0, 0, -cs],   // bottom-left
+        [rx + rw, ry + rh, -cs, 0, 0, -cs],   // bottom-right
       ];
       for (const [x, y, dx1, dy1, dx2, dy2] of corners) {
         faceCtx.beginPath();
@@ -420,21 +691,21 @@
       }
 
       // Label pill above the box
-      const label  = prediction.toUpperCase();
-      const font   = 'bold 13px Inter, -apple-system, sans-serif';
+      const label = prediction.toUpperCase();
+      const font = 'bold 13px Inter, -apple-system, sans-serif';
       faceCtx.font = font;
-      const tw     = faceCtx.measureText(label).width;
-      const ph     = 22;
-      const pw     = tw + 18;
-      const px     = rx + (rw - pw) / 2;
-      const py     = ry - ph - 6;
+      const tw = faceCtx.measureText(label).width;
+      const ph = 22;
+      const pw = tw + 18;
+      const px = rx + (rw - pw) / 2;
+      const py = ry - ph - 6;
 
       faceCtx.fillStyle = color + 'CC';   // semi-transparent fill
       roundRect(faceCtx, px, py, pw, ph, 6);
       faceCtx.fill();
 
       faceCtx.fillStyle = '#fff';
-      faceCtx.font      = font;
+      faceCtx.font = font;
       faceCtx.textAlign = 'center';
       faceCtx.fillText(label, px + pw / 2, py + 15);
       faceCtx.textAlign = 'left';
@@ -455,7 +726,7 @@
     }
 
     function clearFaceBox() {
-      faceOverlay.width  = faceOverlay.clientWidth;
+      faceOverlay.width = faceOverlay.clientWidth;
       faceOverlay.height = faceOverlay.clientHeight;
       faceCtx.clearRect(0, 0, faceOverlay.width, faceOverlay.height);
     }
@@ -469,6 +740,7 @@
     let audioHeaderChunk = null;    // first chunk contains the WebM/EBML header — must prefix every blob
     const AUDIO_BUFFER_MAX = 5;     // ~5 s at 1 s/chunk — enough for the models
     let isAnalyzingAudio = false;
+    let lastFraudAnalysisTime = 0;
     let scanInterval = null;
     let frameCount = 0;
     let fakeCount = 0;
@@ -479,6 +751,10 @@
     let analyserNode = null;
     let animFrameId = null;
     let audioChunkWatchdog = null;
+    let lastFraudHtml = null;
+    let lastFraudUpdateTime = null;
+    const FRAUD_DISPLAY_MS = 10000;
+    let audioAnalyzedOnce = false;
 
     const API_BASE = window.location.origin; // same server
 
@@ -495,11 +771,25 @@
     // ---- Start capture ----
     async function startCapture() {
       try {
-        // Request screen + audio
-        stream = await navigator.mediaDevices.getDisplayMedia({
-          video: { cursor: 'always' },
-          audio: true  // capture tab/system audio
-        });
+        // Request screen + audio; systemAudio: 'include' so "Share system audio" is offered for screen/window
+        try {
+          stream = await navigator.mediaDevices.getDisplayMedia({
+            video: { cursor: 'always' },
+            audio: {
+              suppressLocalAudioPlayback: true,
+            },
+            systemAudio: 'include',
+          });
+        } catch (optErr) {
+          if (optErr.name === 'TypeError' || optErr.name === 'OverconstrainedError') {
+            stream = await navigator.mediaDevices.getDisplayMedia({
+              video: { cursor: 'always' },
+              audio: true,
+            });
+          } else {
+            throw optErr;
+          }
+        }
 
         video.srcObject = stream;
         placeholder.style.display = 'none';
@@ -508,24 +798,24 @@
         document.getElementById('btnStop').disabled = false;
         document.getElementById('statState').textContent = '🟢 Capturing';
 
-        // Audio source: tab audio is reliable; screen/window audio often is not.
+        // Audio: use stream audio when present (tab or system audio from screen/window)
         let audioSourceStream = null;
         const screenAudioTracks = stream.getAudioTracks();
         const surface = stream.getVideoTracks()[0]?.getSettings?.().displaySurface || '';
         const isBrowserTabCapture = surface === 'browser';
 
-        if (screenAudioTracks.length > 0 && isBrowserTabCapture) {
+        if (screenAudioTracks.length > 0) {
           audioSourceStream = stream;
           document.getElementById('audioStatus').innerHTML = `
             <div class="audio-indicator">
               <div class="audio-bars">
                 <span></span><span></span><span></span><span></span><span></span>
               </div>
-              Recording tab audio...
+              ${isBrowserTabCapture ? 'Recording tab audio...' : 'Recording system/window audio...'}
             </div>
           `;
         } else {
-          // No audio from screen share (window/screen mode) — request microphone
+          // No audio from screen share — request microphone
           try {
             const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
             audioSourceStream = micStream;
@@ -543,7 +833,7 @@
             console.warn('Microphone access denied:', micErr);
             document.getElementById('audioStatus').innerHTML = `
               <div style="font-size:13px; color:#F59E0B">
-                ⚠️ No audio source — share a browser tab (not screen/window) or allow mic access
+                ⚠️ No audio source
               </div>
             `;
           }
@@ -595,6 +885,9 @@
         clearTimeout(audioChunkWatchdog);
         audioChunkWatchdog = null;
       }
+      lastFraudHtml = null;
+      lastFraudUpdateTime = null;
+      audioAnalyzedOnce = false;
 
       if (audioContext) {
         audioContext.close();
@@ -675,12 +968,12 @@
         const result = await response.json();
         frameCount++;
 
-        const v     = result.verdict || 'UNCERTAIN';
-        const vl    = v.toLowerCase();
+        const v = result.verdict || 'UNCERTAIN';
+        const vl = v.toLowerCase();
         const pFake = result.final_p_fake ?? 0.5;
-        const band  = result.confidence_band || '';
+        const band = result.confidence_band || '';
         const bandLabel = BAND_LABELS[band] || '';
-        const why   = result.advice ? result.advice.why : '';
+        const why = result.advice ? result.advice.why : '';
 
         // ── Verdict overlay on video (user-friendly) ──
         verdictOverlay.className = `verdict-overlay ${vl}`;
@@ -713,9 +1006,9 @@
         const detExtra = document.getElementById('detailsExtra');
         if (detExtra && result.models) {
           detExtra.innerHTML = result.models.map(m =>
-            `<div class="detail-row"><span class="dl">${m.name}</span><span class="dv">${(m.p_fake*100).toFixed(1)}%${m.used ? '' : ' (unused)'}</span></div>`
+            `<div class="detail-row"><span class="dl">${m.name}</span><span class="dv">${(m.p_fake * 100).toFixed(1)}%${m.used ? '' : ' (unused)'}</span></div>`
           ).join('') +
-          (result.timing_ms ? `<div class="detail-row"><span class="dl">Timing</span><span class="dv">${result.timing_ms.total}ms</span></div>` : '');
+            (result.timing_ms ? `<div class="detail-row"><span class="dl">Timing</span><span class="dv">${result.timing_ms.total}ms</span></div>` : '');
         }
 
         // ── Simplified log entry ──
@@ -752,7 +1045,7 @@
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') await audioCtx.resume();
         const source = audioCtx.createMediaStreamSource(new MediaStream(audioTracks));
-        const dest   = audioCtx.createMediaStreamDestination();
+        const dest = audioCtx.createMediaStreamDestination();
         source.connect(dest);
         const recordableStream = dest.stream;
 
@@ -801,7 +1094,7 @@
           if (audioAnalysisBuffer.length === 0) {
             try {
               if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-            } catch (_) {}
+            } catch (_) { }
             trySwitchToMicAudio('No tab audio detected');
           }
         }, 4500);
@@ -840,6 +1133,7 @@
 
     // ---- Real-time audio deepfake analysis ----
     async function analyzeAudio() {
+      if (audioAnalyzedOnce) return;
       if (isAnalyzingAudio || audioAnalysisBuffer.length < 3 || !stream) return;
       isAnalyzingAudio = true;
 
@@ -857,7 +1151,7 @@
         const resp = await fetch(`${API_BASE}/predict-audio`, { method: 'POST', body: fd });
         if (!resp.ok) {
           const errBody = await resp.json().catch(() => ({}));
-          const detail  = errBody.detail || `HTTP ${resp.status}`;
+          const detail = errBody.detail || `HTTP ${resp.status}`;
           console.warn('Audio API error:', detail);
           _showAudioError(detail);
           isAnalyzingAudio = false;
@@ -866,19 +1160,35 @@
 
         const result = await resp.json();
 
+        let fraudResult = null;
+        try {
+          const now = Date.now();
+          if (now - lastFraudAnalysisTime > 15000) {
+            lastFraudAnalysisTime = now;
+            const fdFraud = new FormData();
+            fdFraud.append('file', blob, 'live_audio.webm');
+            const fraudResp = await fetch(`${API_BASE}/analyze-fraud`, { method: 'POST', body: fdFraud });
+            if (fraudResp.ok) fraudResult = await fraudResp.json();
+          }
+        } catch (e) {
+          console.warn('Fraud analysis failed:', e);
+          lastFraudAnalysisTime = 0;
+        }
+
         // ── Side panel update ──
-        updateAudioDisplay(result);
+        updateAudioDisplay(result, fraudResult);
 
         // ── Floating widget ──
         updateWidgetAudio(result);
 
         // ── Log entry ──
-        const v    = result.verdict || 'UNCERTAIN';
-        const vl2  = v.toLowerCase();
+        const v = result.verdict || 'UNCERTAIN';
+        const vl2 = v.toLowerCase();
         const bandLabel2 = BAND_LABELS[result.confidence_band] || '';
         const time = new Date().toLocaleTimeString();
         addLog(vl2, `🎙 ${time} — Audio ${v} &middot; ${bandLabel2}`);
 
+        audioAnalyzedOnce = true;
       } catch (err) {
         console.error('Audio analysis error:', err);
         _showAudioError(err.message || 'Unknown error');
@@ -888,10 +1198,44 @@
     }
 
     // Update the audio card in the side panel with live result
-    function updateAudioDisplay(result) {
+    function updateAudioDisplay(result, fraudResult) {
       const statusEl = document.getElementById('audioStatus');
       if (!statusEl) return;
       renderVerdictCard(statusEl, result, 'audio');
+      const now = Date.now();
+      const shouldUpdateFraud = fraudResult && (!lastFraudUpdateTime || (now - lastFraudUpdateTime >= FRAUD_DISPLAY_MS));
+      if (shouldUpdateFraud) {
+        lastFraudHtml = getFraudBlockHtml(fraudResult);
+        lastFraudUpdateTime = now;
+      }
+      if (lastFraudHtml) {
+        const div = document.createElement('div');
+        div.className = 'fraud-block';
+        div.innerHTML = lastFraudHtml;
+        statusEl.appendChild(div);
+      }
+    }
+
+    function getFraudBlockHtml(fraud) {
+      const esc = (s) => {
+        if (s == null || s === '') return '';
+        s = String(s);
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      };
+      const level = (fraud.risk_level || '').toLowerCase();
+      const riskClass = level === 'high' ? 'high' : (level === 'medium' ? 'medium' : 'low');
+      const score = fraud.risk_score != null ? Math.round(fraud.risk_score) : '—';
+      const scamType = esc(fraud.scam_type || '—');
+      const summary = (fraud.signals && fraud.signals.gemini && fraud.signals.gemini.summary) ? esc(fraud.signals.gemini.summary) : '';
+      const recommendation = (fraud.recommendation) ? esc(fraud.recommendation) : ((fraud.signals && fraud.signals.gemini && fraud.signals.gemini.recommendation) ? esc(fraud.signals.gemini.recommendation) : '');
+      const evidence = Array.isArray(fraud.evidence) ? fraud.evidence : [];
+      const evidenceList = evidence.map(e => '<li>' + esc(typeof e === 'string' ? e : (e.text || e.reason || JSON.stringify(e))) + '</li>').join('');
+      return `<div class="fraud-title">🛡 Fraud / scam</div>
+        <div class="fraud-risk ${riskClass}">Risk: ${esc(fraud.risk_level || '—')} (${score})</div>
+        ${scamType !== '—' ? `<div style="margin-top:2px">Scam: ${scamType}</div>` : ''}
+        ${summary ? `<div style="margin-top:4px">${summary}</div>` : ''}
+        ${recommendation ? `<div style="margin-top:4px; font-weight:700; color:#1E293B;">💡 Action: ${recommendation}</div>` : ''}
+        ${evidenceList ? `<ul class="fraud-evidence">${evidenceList}</ul>` : ''}`;
     }
 
     // ---- Audio visualization ----
@@ -899,7 +1243,7 @@
       try {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         if (audioContext.state === 'suspended') {
-          audioContext.resume().catch(() => {});
+          audioContext.resume().catch(() => { });
         }
         const source = audioContext.createMediaStreamSource(mediaStream);
         analyserNode = audioContext.createAnalyser();
@@ -964,21 +1308,21 @@
 
     function toggleDetails() {
       const toggle = document.getElementById('detailsToggle');
-      const body   = document.getElementById('detailsBody');
+      const body = document.getElementById('detailsBody');
       toggle.classList.toggle('open');
       body.classList.toggle('open');
     }
 
     // Render a user-friendly verdict card into a container element
     function renderVerdictCard(container, result, mediaLabel) {
-      const v     = result.verdict || 'UNCERTAIN';
-      const vl    = v.toLowerCase();
-      const band  = BAND_LABELS[result.confidence_band] || 'Checking...';
-      const why   = result.advice ? result.advice.why : '';
+      const v = result.verdict || 'UNCERTAIN';
+      const vl = v.toLowerCase();
+      const band = BAND_LABELS[result.confidence_band] || 'Checking...';
+      const why = result.advice ? result.advice.why : '';
       const steps = result.advice ? result.advice.next_steps || [] : [];
       const emoji = getEmoji(vl);
       const colors = { real: '#22C55E', fake: '#EF4444', uncertain: '#F59E0B' };
-      const color  = colors[vl] || '#818CF8';
+      const color = colors[vl] || '#818CF8';
 
       const showSteps = mediaLabel === 'video' && v === 'UNCERTAIN';
       const stepsHtml = showSteps ? steps.map(s => `<li>${s}</li>`).join('') : '';
@@ -1127,14 +1471,14 @@
       const doc = widgetWindow.document;
       const colors = { REAL: '#22C55E', FAKE: '#EF4444', UNCERTAIN: '#F59E0B' };
       const bgTints = {
-        REAL:      'rgba(34,197,94,0.07)',
-        FAKE:      'rgba(239,68,68,0.10)',
+        REAL: 'rgba(34,197,94,0.07)',
+        FAKE: 'rgba(239,68,68,0.10)',
         UNCERTAIN: 'rgba(245,158,11,0.08)',
       };
       const emojis = { REAL: '✅', FAKE: '🚨', UNCERTAIN: '❓' };
-      const color  = colors[verdict]  || '#818CF8';
+      const color = colors[verdict] || '#818CF8';
       const bgTint = bgTints[verdict] || 'transparent';
-      const emoji  = emojis[verdict]  || '⏳';
+      const emoji = emojis[verdict] || '⏳';
       const bandLabel = BAND_LABELS[band] || '';
 
       const $ = id => doc.getElementById(id);
@@ -1142,10 +1486,10 @@
 
       // Thumbnail
       const thumbWrap = $('wThumbWrap');
-      const thumbImg  = $('wThumb');
+      const thumbImg = $('wThumb');
       if (thumbWrap && thumbImg) {
         if (thumbDataUrl) {
-          thumbImg.src            = thumbDataUrl;
+          thumbImg.src = thumbDataUrl;
           thumbWrap.style.display = 'block';
         } else {
           thumbWrap.style.display = 'none';
@@ -1154,10 +1498,10 @@
 
       // Verdict section
       $('wMain').style.background = bgTint;
-      $('wVerdict').textContent   = emoji + ' ' + verdict;
-      $('wVerdict').style.color   = color;
-      $('wBand').textContent      = bandLabel;
-      $('wBand').style.color      = color;
+      $('wVerdict').textContent = emoji + ' ' + verdict;
+      $('wVerdict').style.color = color;
+      $('wBand').textContent = bandLabel;
+      $('wBand').style.color = color;
       const whyEl = $('wWhy');
       if (whyEl) whyEl.textContent = why || '';
 
@@ -1165,7 +1509,7 @@
       const dot = $('wDot');
       if (dot) {
         dot.style.background = color;
-        dot.style.boxShadow  = `0 0 6px ${color}`;
+        dot.style.boxShadow = `0 0 6px ${color}`;
         setTimeout(() => { if (dot) dot.style.boxShadow = 'none'; }, 600);
       }
     }
@@ -1178,21 +1522,21 @@
       if (!$('wAudioVerdict')) return;
 
       const verdict = result.verdict || 'UNCERTAIN';
-      const band    = result.confidence_band || '';
-      const colors  = { REAL: '#22C55E', FAKE: '#EF4444', UNCERTAIN: '#F59E0B' };
-      const emojis  = { REAL: '✅', FAKE: '🚨', UNCERTAIN: '❓' };
-      const color   = colors[verdict] || '#818CF8';
+      const band = result.confidence_band || '';
+      const colors = { REAL: '#22C55E', FAKE: '#EF4444', UNCERTAIN: '#F59E0B' };
+      const emojis = { REAL: '✅', FAKE: '🚨', UNCERTAIN: '❓' };
+      const color = colors[verdict] || '#818CF8';
       const bandLabel = BAND_LABELS[band] || '';
 
       const divider = $('wAudioDivider');
-      const row     = $('wAudioRow');
+      const row = $('wAudioRow');
       if (divider) divider.style.display = 'block';
-      if (row)     row.style.display     = 'flex';
+      if (row) row.style.display = 'flex';
 
       $('wAudioVerdict').textContent = emojis[verdict] + ' ' + verdict;
       $('wAudioVerdict').style.color = color;
-      $('wAudioBand').textContent    = bandLabel;
-      $('wAudioBand').style.color    = color;
+      $('wAudioBand').textContent = bandLabel;
+      $('wAudioBand').style.color = color;
     }
 
     // Build a thumbnail (data URL) of the current frame with the face box drawn on it.
@@ -1211,7 +1555,7 @@
       if (!faceBox) return tc.toDataURL('image/jpeg', 0.8);
 
       const colors = { REAL: '#22C55E', FAKE: '#EF4444', UNCERTAIN: '#F59E0B' };
-      const color  = colors[verdict] || '#818CF8';
+      const color = colors[verdict] || '#818CF8';
 
       // bbox is normalised (0-1) relative to original video — map to thumbnail pixels
       const rx = faceBox.x * tw;
@@ -1220,21 +1564,21 @@
       const rh = faceBox.h * th;
 
       // Glow rect
-      tx.shadowColor  = color;
-      tx.shadowBlur   = 10;
-      tx.strokeStyle  = color;
-      tx.lineWidth    = 2;
+      tx.shadowColor = color;
+      tx.shadowBlur = 10;
+      tx.strokeStyle = color;
+      tx.lineWidth = 2;
       tx.strokeRect(rx, ry, rw, rh);
-      tx.shadowBlur   = 0;
+      tx.shadowBlur = 0;
 
       // Corner L-brackets
       const cs = Math.min(rw, rh) * 0.20;
-      tx.lineWidth   = 3;
-      const corners  = [
-        [rx,      ry,      cs,  0,  0, cs],
-        [rx + rw, ry,     -cs,  0,  0, cs],
-        [rx,      ry + rh, cs,  0,  0,-cs],
-        [rx + rw, ry + rh,-cs,  0,  0,-cs],
+      tx.lineWidth = 3;
+      const corners = [
+        [rx, ry, cs, 0, 0, cs],
+        [rx + rw, ry, -cs, 0, 0, cs],
+        [rx, ry + rh, cs, 0, 0, -cs],
+        [rx + rw, ry + rh, -cs, 0, 0, -cs],
       ];
       for (const [x, y, dx1, dy1, dx2, dy2] of corners) {
         tx.beginPath();
@@ -1260,9 +1604,9 @@
 
     function updateFavicon(verdict) {
       const colors = { REAL: '#22C55E', FAKE: '#EF4444', UNCERTAIN: '#F59E0B' };
-      const marks  = { REAL: '✓',       FAKE: '!',        UNCERTAIN: '?' };
-      const color  = colors[verdict] || '#818CF8';
-      const mark   = marks[verdict]  || '…';
+      const marks = { REAL: '✓', FAKE: '!', UNCERTAIN: '?' };
+      const color = colors[verdict] || '#818CF8';
+      const mark = marks[verdict] || '…';
 
       const c = _faviconCanvas;
       const x = c.getContext('2d');
@@ -1295,4 +1639,5 @@
     }
   </script>
 </body>
+
 </html>

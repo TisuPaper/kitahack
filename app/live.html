@@ -1,33 +1,155 @@
-// Live detection screen — embeds the full live detection UI inline.
-// This is a snapshot of app/static/live.html with API_BASE injected at runtime.
-// Web-only: uses dart:html for Blob URL + iframe rendering.
-
-import 'dart:convert';
-import 'dart:html' as html;
-import 'dart:ui_web' as ui_web;
-import 'package:flutter/material.dart';
-import '../services/api_service.dart';
-
-const String _liveHtmlTemplate = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Realitic — Live Detection</title>
   <link rel="icon" id="pageFavicon" type="image/png" href="">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: transparent;
+      background: linear-gradient(135deg, #E2E8F0 0%, #DBEAFE 40%, #F3E8FF 70%, #F1F5F9 100%);
       color: #1E293B;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+      padding: 0;
       overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient floating blobs */
+    .bg-blob-1 {
+      position: absolute;
+      top: -50px;
+      left: -50px;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(186, 230, 253, 0.3) 0%, transparent 70%);
+      z-index: -1;
+      animation: float1 15s ease-in-out infinite alternate;
+    }
+
+    .bg-blob-2 {
+      position: absolute;
+      bottom: -50px;
+      right: -50px;
+      width: 350px;
+      height: 350px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(233, 213, 255, 0.3) 0%, transparent 70%);
+      z-index: -1;
+      animation: float2 15s ease-in-out infinite alternate;
+    }
+
+    @keyframes float1 {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(50px);
+      }
+    }
+
+    @keyframes float2 {
+      0% {
+        transform: translateY(0);
+      }
+
+      100% {
+        transform: translateY(-30px);
+      }
+    }
+
+    /* Top Flutter-like App Bar */
+    .flutter-app-bar {
+      width: 100%;
+      max-width: 1400px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 32px;
+      z-index: 10;
+    }
+
+    .flutter-logo-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .flutter-logo-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .flutter-logo-area span.logo-text {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: #1E293B;
+    }
+
+    .flutter-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .flutter-action-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 18px;
+      background: rgba(0, 0, 0, 0.05);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .flutter-history-btn {
+      height: 36px;
+      border-radius: 18px;
+      background: #2D2D2D;
+      color: white;
+      border: none;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
+    }
+
+    .content-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 20px 20px 20px;
+      width: 100%;
+      flex: 1;
     }
 
     /* Top Controls - Centered above the screen */
@@ -59,7 +181,8 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
       color: rgba(255, 255, 255, 0.9);
       padding: 12px 24px;
-      border-radius: 100px; /* Pill shape */
+      border-radius: 100px;
+      /* Pill shape */
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;
@@ -104,6 +227,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     .btn-pip {
       /* Default glass style */
     }
+
     .btn-pip.active {
       background: linear-gradient(180deg, rgba(80, 80, 87, 0.9) 0%, rgba(48, 48, 50, 0.9) 100%);
       border-color: rgba(255, 255, 255, 0.3);
@@ -142,15 +266,17 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       width: 100%;
       position: relative;
       background: rgba(255, 255, 255, 0.4);
-      border-radius: 24px; /* More rounded like the image */
+      border-radius: 24px;
+      /* More rounded like the image */
       overflow: hidden;
-      border: 2px solid rgba(0,0,0,0.15);
+      border: 2px solid rgba(0, 0, 0, 0.15);
       display: flex;
       align-items: center;
       justify-content: center;
       aspect-video: 16/9;
       min-height: 450px;
-      box-shadow: none; /* Removed shadow */
+      box-shadow: none;
+      /* Removed shadow */
     }
 
     #screenVideo {
@@ -164,15 +290,17 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
 
     #faceOverlay {
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       pointer-events: none;
       display: none;
     }
 
     .placeholder {
       text-align: center;
-      color: rgba(0,0,0,0.54);
+      color: rgba(0, 0, 0, 0.54);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -182,19 +310,21 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       padding: 32px 20px;
     }
 
-    .placeholder .big-icon { 
+    .placeholder .big-icon {
       font-size: 48px;
-      margin-bottom: 16px; 
-      color: rgba(0,0,0,0.54);
+      margin-bottom: 16px;
+      color: rgba(0, 0, 0, 0.54);
     }
-    .placeholder p { 
-      font-size: 16px; 
-      font-weight: 700; 
-      color: #1E293B; 
+
+    .placeholder p {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1E293B;
     }
+
     .placeholder .sub-text {
       font-size: 12px;
-      color: rgba(0,0,0,0.54);
+      color: rgba(0, 0, 0, 0.54);
       margin-top: 8px;
       font-weight: 400;
     }
@@ -206,85 +336,262 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       -webkit-backdrop-filter: blur(20px);
       border-radius: 20px;
       padding: 20px;
-      border: 1px solid rgba(255,255,255,0.8);
-      box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
     }
+
     .card h3 {
-      font-size: 13px; color: rgba(0,0,0,0.5); text-transform: uppercase;
-      letter-spacing: 1px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
       font-weight: 700;
     }
 
-    .vc-icon     { font-size: 36px; line-height: 1; }
-    .vc-verdict  { font-size: 28px; font-weight: 800; letter-spacing: 3px; }
-    .vc-band     { font-size: 13px; font-weight: 600; opacity: 0.75; margin-top: 2px; }
-    .vc-why      { font-size: 13px; color: rgba(0,0,0,0.6); margin-top: 10px; line-height: 1.4; }
-    .vc-steps    { list-style: none; margin-top: 10px; padding: 0; }
-    .vc-steps li {
-      font-size: 12px; color: rgba(0,0,0,0.6); padding: 4px 0; padding-left: 18px;
-      position: relative; line-height: 1.5;
+    .vc-icon {
+      font-size: 36px;
+      line-height: 1;
     }
+
+    .vc-verdict {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 3px;
+    }
+
+    .vc-band {
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0.75;
+      margin-top: 2px;
+    }
+
+    .vc-why {
+      font-size: 13px;
+      color: rgba(0, 0, 0, 0.6);
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+
+    .vc-steps {
+      list-style: none;
+      margin-top: 10px;
+      padding: 0;
+    }
+
+    .vc-steps li {
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.6);
+      padding: 4px 0;
+      padding-left: 18px;
+      position: relative;
+      line-height: 1.5;
+    }
+
     .vc-steps li::before {
-      content: ''; position: absolute; left: 0; top: 9px;
-      width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid rgba(0,0,0,0.25);
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 9px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(0, 0, 0, 0.25);
     }
 
     .audio-indicator {
-      display: flex; align-items: center; gap: 8px; padding: 8px 12px;
-      border-radius: 8px; background: rgba(0,0,0,0.05); font-size: 13px; color: #1E293B;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.05);
+      font-size: 13px;
+      color: #1E293B;
       font-weight: 600;
     }
-    .audio-bars { display: flex; gap: 2px; align-items: flex-end; height: 16px; }
+
+    .audio-bars {
+      display: flex;
+      gap: 2px;
+      align-items: flex-end;
+      height: 16px;
+    }
+
     .audio-bars span {
-      width: 3px; background: #1E293B; border-radius: 2px;
+      width: 3px;
+      background: #1E293B;
+      border-radius: 2px;
       animation: audio-bar 0.8s ease-in-out infinite;
     }
-    .audio-bars span:nth-child(1) { height: 6px; animation-delay: 0s; }
-    .audio-bars span:nth-child(2) { height: 12px; animation-delay: 0.15s; }
-    .audio-bars span:nth-child(3) { height: 8px; animation-delay: 0.3s; }
-    .audio-bars span:nth-child(4) { height: 14px; animation-delay: 0.45s; }
-    .audio-bars span:nth-child(5) { height: 10px; animation-delay: 0.6s; }
-    @keyframes audio-bar { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.4); } }
-    #audioCanvas { width: 100%; height: 32px; border-radius: 8px; background: rgba(0,0,0,0.05); margin-top: 8px; }
+
+    .audio-bars span:nth-child(1) {
+      height: 6px;
+      animation-delay: 0s;
+    }
+
+    .audio-bars span:nth-child(2) {
+      height: 12px;
+      animation-delay: 0.15s;
+    }
+
+    .audio-bars span:nth-child(3) {
+      height: 8px;
+      animation-delay: 0.3s;
+    }
+
+    .audio-bars span:nth-child(4) {
+      height: 14px;
+      animation-delay: 0.45s;
+    }
+
+    .audio-bars span:nth-child(5) {
+      height: 10px;
+      animation-delay: 0.6s;
+    }
+
+    @keyframes audio-bar {
+
+      0%,
+      100% {
+        transform: scaleY(1);
+      }
+
+      50% {
+        transform: scaleY(0.4);
+      }
+    }
+
+    #audioCanvas {
+      width: 100%;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.05);
+      margin-top: 8px;
+    }
 
     .details-toggle {
-      display: flex; align-items: center; justify-content: space-between;
-      cursor: pointer; user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
     }
+
     .details-toggle::after {
-      content: '\25B6'; font-size: 10px; color: rgba(0,0,0,0.3);
+      content: '\25B6';
+      font-size: 10px;
+      color: rgba(0, 0, 0, 0.3);
       transition: transform 0.2s;
     }
-    .details-toggle.open::after { transform: rotate(90deg); }
-    .details-body { display: none; margin-top: 10px; }
-    .details-body.open { display: block; }
-    .detail-row {
-      display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px;
+
+    .details-toggle.open::after {
+      transform: rotate(90deg);
     }
-    .detail-row .dl { color: rgba(0,0,0,0.5); }
-    .detail-row .dv { font-weight: 600; color: #1E293B; }
+
+    .details-body {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .details-body.open {
+      display: block;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 12px;
+    }
+
+    .detail-row .dl {
+      color: rgba(0, 0, 0, 0.5);
+    }
+
+    .detail-row .dv {
+      font-weight: 600;
+      color: #1E293B;
+    }
 
     .log-entry {
-      padding: 6px 10px; border-radius: 8px; margin-bottom: 4px;
-      font-size: 11px; display: flex; align-items: center; gap: 6px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
       font-weight: 500;
     }
-    .log-entry.real { background: rgba(34,197,94,0.1); color: #16A34A; }
-    .log-entry.fake { background: rgba(239,68,68,0.1); color: #DC2626; }
-    .log-entry.uncertain { background: rgba(245,158,11,0.1); color: #D97706; }
-    .log-entry.analyzing { background: rgba(0,0,0,0.05); color: #1E293B; }
-    .log-container { max-height: 260px; overflow-y: auto; }
+
+    .log-entry.real {
+      background: rgba(34, 197, 94, 0.1);
+      color: #16A34A;
+    }
+
+    .log-entry.fake {
+      background: rgba(239, 68, 68, 0.1);
+      color: #DC2626;
+    }
+
+    .log-entry.uncertain {
+      background: rgba(245, 158, 11, 0.1);
+      color: #D97706;
+    }
+
+    .log-entry.analyzing {
+      background: rgba(0, 0, 0, 0.05);
+      color: #1E293B;
+    }
+
+    .log-container {
+      max-height: 260px;
+      overflow-y: auto;
+    }
 
     .fraud-block {
-      margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(0,0,0,0.08);
-      font-size: 12px; color: rgba(0,0,0,0.75);
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      font-size: 12px;
+      color: rgba(0, 0, 0, 0.75);
     }
-    .fraud-block .fraud-title { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #1E293B; margin-bottom: 6px; }
-    .fraud-block .fraud-risk { font-weight: 700; }
-    .fraud-block .fraud-risk.high { color: #DC2626; }
-    .fraud-block .fraud-risk.medium { color: #D97706; }
-    .fraud-block .fraud-risk.low { color: #16A34A; }
-    .fraud-block .fraud-evidence { margin-top: 6px; padding-left: 12px; list-style: disc; }
+
+    .fraud-block .fraud-title {
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #1E293B;
+      margin-bottom: 6px;
+    }
+
+    .fraud-block .fraud-risk {
+      font-weight: 700;
+    }
+
+    .fraud-block .fraud-risk.high {
+      color: #DC2626;
+    }
+
+    .fraud-block .fraud-risk.medium {
+      color: #D97706;
+    }
+
+    .fraud-block .fraud-risk.low {
+      color: #16A34A;
+    }
+
+    .fraud-block .fraud-evidence {
+      margin-top: 6px;
+      padding-left: 12px;
+      list-style: disc;
+    }
 
     .interval-wrapper {
       display: flex;
@@ -320,6 +627,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       background-position: right center;
       background-size: 10px auto;
     }
+
     .interval-select option {
       background: #1C1C1E;
       color: white;
@@ -331,29 +639,34 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
         flex-direction: column;
         align-items: center;
       }
-      
+
       /* Reorder columns for mobile: Center (Video) first, then Left (Video/Audio), then Right (Details/Log) */
       .center-column {
         order: 1;
         width: 100%;
       }
-      
-      .side-column:nth-child(1) { /* Left panel (Video/Audio Analysis) */
+
+      .side-column:nth-child(1) {
+        /* Left panel (Video/Audio Analysis) */
         order: 2;
       }
-      
-      .side-column:nth-child(3) { /* Right panel (Details/Log) */
+
+      .side-column:nth-child(3) {
+        /* Right panel (Details/Log) */
         order: 3;
       }
 
       .side-column {
         width: 100%;
         max-width: 800px;
-        flex-direction: column; /* Stack cards vertically on mobile */
+        flex-direction: column;
+        /* Stack cards vertically on mobile */
       }
+
       .card {
         width: 100%;
       }
+
       .controls {
         flex-wrap: wrap;
         justify-content: center;
@@ -361,93 +674,116 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     }
   </style>
 </head>
+
 <body>
-  <div class="controls-container">
-    <div class="controls">
-      <div class="interval-wrapper">
-        Scan every:
-        <select id="intervalSelect" class="interval-select">
-          <option value="2000">2s</option>
-          <option value="3000" selected>3s</option>
-          <option value="5000">5s</option>
-          <option value="10000">10s</option>
-        </select>
-      </div>
-      <button id="btnPip" class="glass-btn btn-pip" onclick="toggleWidget()" title="Float results in a mini window">
-        ⧉ Pop Out
-      </button>
-      <button id="btnStart" class="glass-btn btn-start" onclick="startCapture()">
-        ▶ Start Capture
-      </button>
-      <button id="btnStop" class="glass-btn btn-stop" onclick="stopCapture()" disabled>
-        ■ Stop
-      </button>
+  <div class="bg-blob-1"></div>
+  <div class="bg-blob-2"></div>
+
+  <div class="flutter-app-bar">
+    <div class="flutter-logo-area">
+      <div class="flutter-logo-circle">🛡️</div>
+      <span class="logo-text">REALYTIC</span>
+    </div>
+
+    <div class="flutter-actions">
+      <button class="flutter-action-btn">⚙️</button>
+      <button class="flutter-history-btn">🕒 History</button>
     </div>
   </div>
 
-  <div class="main-layout">
-    <!-- Left Side Panel -->
-    <div class="side-column">
-      <div class="card" id="videoVerdictCard">
-        <h3>Video Analysis</h3>
-        <div id="videoVerdictArea" style="text-align:center; padding:10px 0">
-          <div style="font-size:13px; color:rgba(0,0,0,0.4); font-weight: 500;">
-            Click "Start Capture" to begin
-          </div>
+  <div class="content-wrapper">
+    <div class="controls-container">
+      <div class="controls">
+        <div class="interval-wrapper">
+          Scan every:
+          <select id="intervalSelect" class="interval-select">
+            <option value="2000">2s</option>
+            <option value="3000" selected>3s</option>
+            <option value="5000">5s</option>
+            <option value="10000">10s</option>
+          </select>
         </div>
-      </div>
-
-      <div class="card" id="audioVerdictCard">
-        <h3>Audio Analysis</h3>
-        <div id="audioStatus">
-          <div style="font-size:13px; color:rgba(0,0,0,0.4); font-weight: 500;">
-            Audio capture starts with screen share
-          </div>
-        </div>
-        <canvas id="audioCanvas"></canvas>
-      </div>
-    </div>
-
-    <!-- Center Video Panel -->
-    <div class="center-column">
-      <div class="video-panel" id="videoPanel">
-        <video id="screenVideo" autoplay muted></video>
-        <canvas id="faceOverlay"></canvas>
-        <div id="placeholder" class="placeholder">
-          <div class="big-icon">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-              <line x1="8" y1="21" x2="16" y2="21"></line>
-              <line x1="12" y1="17" x2="12" y2="21"></line>
-            </svg>
-          </div>
-          <p>Click "Start Capture" to share your screen</p>
-          <p class="sub-text">Select a window, tab, or entire screen</p>
-        </div>
-        <div id="verdictOverlay" class="verdict-overlay"></div>
+        <button id="btnPip" class="glass-btn btn-pip" onclick="toggleWidget()" title="Float results in a mini window">
+          ⧉ Pop Out
+        </button>
+        <button id="btnStart" class="glass-btn btn-start" onclick="startCapture()">
+          ▶ Start Capture
+        </button>
+        <button id="btnStop" class="glass-btn btn-stop" onclick="stopCapture()" disabled>
+          ■ Stop
+        </button>
       </div>
     </div>
 
-    <!-- Right Side Panel -->
-    <div class="side-column">
-      <div class="card">
-        <h3 class="details-toggle" id="detailsToggle" onclick="toggleDetails()">
-          Technical Details
-        </h3>
-        <div class="details-body" id="detailsBody">
-          <div class="detail-row"><span class="dl">State</span><span class="dv" id="statState">Idle</span></div>
-          <div class="detail-row"><span class="dl">Frames analyzed</span><span class="dv" id="statFrames">0</span></div>
-          <div class="detail-row"><span class="dl">Fake detections</span><span class="dv" id="statFakes" style="color:#DC2626">0</span></div>
-          <div class="detail-row"><span class="dl">Real detections</span><span class="dv" id="statReals" style="color:#16A34A">0</span></div>
-          <div class="detail-row"><span class="dl">Avg confidence</span><span class="dv" id="statConfidence">-</span></div>
-          <div id="detailsExtra" style="margin-top:6px; font-size:11px; color:rgba(0,0,0,0.4)"></div>
+    <div class="main-layout">
+      <!-- Left Side Panel -->
+      <div class="side-column">
+        <div class="card" id="videoVerdictCard">
+          <h3>Video Analysis</h3>
+          <div id="videoVerdictArea" style="text-align:center; padding:10px 0">
+            <div style="font-size:13px; color:rgba(0,0,0,0.4); font-weight: 500;">
+              Click "Start Capture" to begin
+            </div>
+          </div>
+        </div>
+
+        <div class="card" id="audioVerdictCard">
+          <h3>Audio Analysis</h3>
+          <div id="audioStatus">
+            <div style="font-size:13px; color:rgba(0,0,0,0.4); font-weight: 500;">
+              Audio capture starts with screen share
+            </div>
+          </div>
+          <canvas id="audioCanvas"></canvas>
         </div>
       </div>
 
-      <div class="card" style="flex:1;">
-        <h3>Detection Log</h3>
-        <div id="logContainer" class="log-container">
-          <div class="log-entry analyzing">Waiting to start...</div>
+      <!-- Center Video Panel -->
+      <div class="center-column">
+        <div class="video-panel" id="videoPanel">
+          <video id="screenVideo" autoplay muted></video>
+          <canvas id="faceOverlay"></canvas>
+          <div id="placeholder" class="placeholder">
+            <div class="big-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </div>
+            <p>Click "Start Capture" to share your screen</p>
+            <p class="sub-text">Select a window, tab, or entire screen</p>
+          </div>
+          <div id="verdictOverlay" class="verdict-overlay"></div>
+        </div>
+      </div>
+
+      <!-- Right Side Panel -->
+      <div class="side-column">
+        <div class="card">
+          <h3 class="details-toggle" id="detailsToggle" onclick="toggleDetails()">
+            Technical Details
+          </h3>
+          <div class="details-body" id="detailsBody">
+            <div class="detail-row"><span class="dl">State</span><span class="dv" id="statState">Idle</span></div>
+            <div class="detail-row"><span class="dl">Frames analyzed</span><span class="dv" id="statFrames">0</span>
+            </div>
+            <div class="detail-row"><span class="dl">Fake detections</span><span class="dv" id="statFakes"
+                style="color:#DC2626">0</span></div>
+            <div class="detail-row"><span class="dl">Real detections</span><span class="dv" id="statReals"
+                style="color:#16A34A">0</span></div>
+            <div class="detail-row"><span class="dl">Avg confidence</span><span class="dv" id="statConfidence">-</span>
+            </div>
+            <div id="detailsExtra" style="margin-top:6px; font-size:11px; color:rgba(0,0,0,0.4)"></div>
+          </div>
+        </div>
+
+        <div class="card" style="flex:1;">
+          <h3>Detection Log</h3>
+          <div id="logContainer" class="log-container">
+            <div class="log-entry analyzing">Waiting to start...</div>
+          </div>
         </div>
       </div>
     </div>
@@ -460,29 +796,29 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     const faceCtx = faceOverlay.getContext('2d');
 
     const VERDICT_COLOR = {
-      real:      '#22C55E',
-      fake:      '#EF4444',
+      real: '#22C55E',
+      fake: '#EF4444',
       uncertain: '#F59E0B',
     };
 
     function drawFaceBox(bbox, prediction) {
-      faceOverlay.width  = faceOverlay.clientWidth;
+      faceOverlay.width = faceOverlay.clientWidth;
       faceOverlay.height = faceOverlay.clientHeight;
       faceCtx.clearRect(0, 0, faceOverlay.width, faceOverlay.height);
 
       if (!bbox) return;
 
-      const videoEl  = document.getElementById('screenVideo');
-      const vw       = videoEl.videoWidth;
-      const vh       = videoEl.videoHeight;
-      const cw       = faceOverlay.clientWidth;
-      const ch       = faceOverlay.clientHeight;
+      const videoEl = document.getElementById('screenVideo');
+      const vw = videoEl.videoWidth;
+      const vh = videoEl.videoHeight;
+      const cw = faceOverlay.clientWidth;
+      const ch = faceOverlay.clientHeight;
 
       if (!vw || !vh) return;
 
-      const scale    = Math.min(cw / vw, ch / vh);
-      const offsetX  = (cw - vw * scale) / 2;
-      const offsetY  = (ch - vh * scale) / 2;
+      const scale = Math.min(cw / vw, ch / vh);
+      const offsetX = (cw - vw * scale) / 2;
+      const offsetY = (ch - vh * scale) / 2;
 
       const rx = offsetX + bbox.x * vw * scale;
       const ry = offsetY + bbox.y * vh * scale;
@@ -491,22 +827,22 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
 
       const color = VERDICT_COLOR[prediction.toLowerCase()] || '#818CF8';
 
-      faceCtx.shadowColor  = color;
-      faceCtx.shadowBlur   = 12;
-      faceCtx.strokeStyle  = color;
-      faceCtx.lineWidth    = 2.5;
+      faceCtx.shadowColor = color;
+      faceCtx.shadowBlur = 12;
+      faceCtx.strokeStyle = color;
+      faceCtx.lineWidth = 2.5;
       faceCtx.strokeRect(rx, ry, rw, rh);
-      faceCtx.shadowBlur   = 0;
+      faceCtx.shadowBlur = 0;
 
       const cs = Math.min(rw, rh) * 0.18;
       faceCtx.lineWidth = 3.5;
       faceCtx.strokeStyle = color;
 
       const corners = [
-        [rx,      ry,      cs,  0,  0, cs],
-        [rx + rw, ry,     -cs,  0,  0, cs],
-        [rx,      ry + rh, cs,  0,  0,-cs],
-        [rx + rw, ry + rh,-cs,  0,  0,-cs],
+        [rx, ry, cs, 0, 0, cs],
+        [rx + rw, ry, -cs, 0, 0, cs],
+        [rx, ry + rh, cs, 0, 0, -cs],
+        [rx + rw, ry + rh, -cs, 0, 0, -cs],
       ];
       for (const [x, y, dx1, dy1, dx2, dy2] of corners) {
         faceCtx.beginPath();
@@ -516,21 +852,21 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
         faceCtx.stroke();
       }
 
-      const label  = prediction.toUpperCase();
-      const font   = 'bold 13px Inter, -apple-system, sans-serif';
+      const label = prediction.toUpperCase();
+      const font = 'bold 13px Inter, -apple-system, sans-serif';
       faceCtx.font = font;
-      const tw     = faceCtx.measureText(label).width;
-      const ph     = 22;
-      const pw     = tw + 18;
-      const px     = rx + (rw - pw) / 2;
-      const py     = ry - ph - 6;
+      const tw = faceCtx.measureText(label).width;
+      const ph = 22;
+      const pw = tw + 18;
+      const px = rx + (rw - pw) / 2;
+      const py = ry - ph - 6;
 
       faceCtx.fillStyle = color + 'CC';
       roundRect(faceCtx, px, py, pw, ph, 6);
       faceCtx.fill();
 
       faceCtx.fillStyle = '#fff';
-      faceCtx.font      = font;
+      faceCtx.font = font;
       faceCtx.textAlign = 'center';
       faceCtx.fillText(label, px + pw / 2, py + 15);
       faceCtx.textAlign = 'left';
@@ -551,7 +887,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     }
 
     function clearFaceBox() {
-      faceOverlay.width  = faceOverlay.clientWidth;
+      faceOverlay.width = faceOverlay.clientWidth;
       faceOverlay.height = faceOverlay.clientHeight;
       faceCtx.clearRect(0, 0, faceOverlay.width, faceOverlay.height);
     }
@@ -580,7 +916,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     const FRAUD_DISPLAY_MS = 10000;
     let audioAnalyzedOnce = false;
 
-    const API_BASE = '__API_BASE__';
+    const API_BASE = 'http://127.0.0.1:8000';
 
     const video = document.getElementById('screenVideo');
     const placeholder = document.getElementById('placeholder');
@@ -596,7 +932,9 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
         try {
           stream = await navigator.mediaDevices.getDisplayMedia({
             video: { cursor: 'always' },
-            audio: { suppressLocalAudioPlayback: true },
+            audio: {
+              suppressLocalAudioPlayback: true
+            },
             systemAudio: 'include'
           });
         } catch (optErr) {
@@ -623,15 +961,13 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
 
         let audioSourceStream = null;
         const screenAudioTracks = stream.getAudioTracks();
-        const surface = stream.getVideoTracks()[0]?.getSettings?.().displaySurface || '';
-        const isBrowserTabCapture = surface === 'browser';
 
         if (screenAudioTracks.length > 0) {
           audioSourceStream = stream;
           document.getElementById('audioStatus').innerHTML =
             '<div class="audio-indicator"><div class="audio-bars">' +
             '<span></span><span></span><span></span><span></span><span></span>' +
-            '</div>' + (isBrowserTabCapture ? 'Recording tab audio...' : 'Recording system/window audio...') + '</div>';
+            '</div>Recording audio...</div>';
         } else {
           try {
             const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -645,7 +981,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
             console.warn('Microphone access denied:', micErr);
             document.getElementById('audioStatus').innerHTML =
               '<div style="font-size:13px; color:#F59E0B">' +
-              '⚠️ No audio source</div>';
+              '⚠️ No audio source — share a browser tab or allow mic access</div>';
           }
         }
 
@@ -772,12 +1108,12 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
         const result = await response.json();
         frameCount++;
 
-        const v     = result.verdict || 'UNCERTAIN';
-        const vl    = v.toLowerCase();
+        const v = result.verdict || 'UNCERTAIN';
+        const vl = v.toLowerCase();
         const pFake = result.final_p_fake ?? 0.5;
-        const band  = result.confidence_band || '';
+        const band = result.confidence_band || '';
         const bandLabel = BAND_LABELS[band] || '';
-        const why   = result.advice ? result.advice.why : '';
+        const why = result.advice ? result.advice.why : '';
 
         // Removed verdictOverlay update to hide the text on the video
         verdictOverlay.style.display = 'none';
@@ -801,9 +1137,9 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
         const detExtra = document.getElementById('detailsExtra');
         if (detExtra && result.models) {
           detExtra.innerHTML = result.models.map(m =>
-            '<div class="detail-row"><span class="dl">' + m.name + '</span><span class="dv">' + (m.p_fake*100).toFixed(1) + '%' + (m.used ? '' : ' (unused)') + '</span></div>'
+            '<div class="detail-row"><span class="dl">' + m.name + '</span><span class="dv">' + (m.p_fake * 100).toFixed(1) + '%' + (m.used ? '' : ' (unused)') + '</span></div>'
           ).join('') +
-          (result.timing_ms ? '<div class="detail-row"><span class="dl">Timing</span><span class="dv">' + result.timing_ms.total + 'ms</span></div>' : '');
+            (result.timing_ms ? '<div class="detail-row"><span class="dl">Timing</span><span class="dv">' + result.timing_ms.total + 'ms</span></div>' : '');
         }
 
         const time = new Date().toLocaleTimeString();
@@ -836,7 +1172,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') await audioCtx.resume();
         const source = audioCtx.createMediaStreamSource(new MediaStream(audioTracks));
-        const dest   = audioCtx.createMediaStreamDestination();
+        const dest = audioCtx.createMediaStreamDestination();
         source.connect(dest);
         const recordableStream = dest.stream;
 
@@ -885,7 +1221,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
           if (audioAnalysisBuffer.length === 0) {
             try {
               if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-            } catch (_) {}
+            } catch (_) { }
             trySwitchToMicAudio('No tab audio detected');
           }
         }, 4500);
@@ -896,6 +1232,8 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     }
 
     async function trySwitchToMicAudio(reason) {
+      if (audioAnalysisBuffer.length > 0) return;
+
       try {
         const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         audioStream = micStream;
@@ -935,7 +1273,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
         const resp = await fetch(API_BASE + '/predict-audio', { method: 'POST', body: fd });
         if (!resp.ok) {
           const errBody = await resp.json().catch(() => ({}));
-          const detail  = errBody.detail || ('HTTP ' + resp.status);
+          const detail = errBody.detail || ('HTTP ' + resp.status);
           console.warn('Audio API error:', detail);
           _showAudioError(detail);
           isAnalyzingAudio = false;
@@ -962,8 +1300,8 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
         updateAudioDisplay(result, fraudResult);
         updateWidgetAudio(result);
 
-        const v    = result.verdict || 'UNCERTAIN';
-        const vl2  = v.toLowerCase();
+        const v = result.verdict || 'UNCERTAIN';
+        const vl2 = v.toLowerCase();
         const bandLabel2 = BAND_LABELS[result.confidence_band] || '';
         const time = new Date().toLocaleTimeString();
         addLog(vl2, '🎙 ' + time + ' — Audio ' + v + ' &middot; ' + bandLabel2);
@@ -1008,20 +1346,20 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       const summary = (fraud.signals && fraud.signals.gemini && fraud.signals.gemini.summary) ? esc(fraud.signals.gemini.summary) : '';
       const recommendation = (fraud.recommendation) ? esc(fraud.recommendation) : ((fraud.signals && fraud.signals.gemini && fraud.signals.gemini.recommendation) ? esc(fraud.signals.gemini.recommendation) : '');
       const evidence = Array.isArray(fraud.evidence) ? fraud.evidence : [];
-      const evidenceList = evidence.map(function(e) { return '<li>' + esc(typeof e === 'string' ? e : (e.text || e.reason || JSON.stringify(e))) + '</li>'; }).join('');
-      return '<div class="fraud-title">🛡 Fraud / scam</div>' /*+
+      const evidenceList = evidence.map(function (e) { return '<li>' + esc(typeof e === 'string' ? e : (e.text || e.reason || JSON.stringify(e))) + '</li>'; }).join('');
+      return '<div class="fraud-title">🛡 Fraud / scam</div>' +
         '<div class="fraud-risk ' + riskClass + '">Risk: ' + esc(fraud.risk_level || '—') + ' (' + score + ')</div>' +
         (scamType !== '—' ? '<div style="margin-top:2px">Scam: ' + scamType + '</div>' : '') +
         (summary ? '<div style="margin-top:4px">' + summary + '</div>' : '') +
         (recommendation ? '<div style="margin-top:4px; font-weight:700; color:#1E293B;">💡 Action: ' + recommendation + '</div>' : '') +
-        (evidenceList ? '<ul class="fraud-evidence">' + evidenceList + '</ul>' : '')*/;
+        (evidenceList ? '<ul class="fraud-evidence">' + evidenceList + '</ul>' : '');
     }
 
     function startAudioVisualization(mediaStream) {
       try {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
         if (audioContext.state === 'suspended') {
-          audioContext.resume().catch(() => {});
+          audioContext.resume().catch(() => { });
         }
         const source = audioContext.createMediaStreamSource(mediaStream);
         analyserNode = audioContext.createAnalyser();
@@ -1082,29 +1420,29 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
 
     function toggleDetails() {
       const toggle = document.getElementById('detailsToggle');
-      const body   = document.getElementById('detailsBody');
+      const body = document.getElementById('detailsBody');
       toggle.classList.toggle('open');
       body.classList.toggle('open');
     }
 
     function renderVerdictCard(container, result, mediaLabel) {
-      const v     = result.verdict || 'UNCERTAIN';
-      const vl    = v.toLowerCase();
-      const band  = BAND_LABELS[result.confidence_band] || 'Checking...';
-      const why   = result.advice ? result.advice.why : '';
+      const v = result.verdict || 'UNCERTAIN';
+      const vl = v.toLowerCase();
+      const band = BAND_LABELS[result.confidence_band] || 'Checking...';
+      const why = result.advice ? result.advice.why : '';
       const steps = result.advice ? result.advice.next_steps || [] : [];
       const emoji = getEmoji(vl);
       const colors = { real: '#22C55E', fake: '#EF4444', uncertain: '#F59E0B' };
-      const color  = colors[vl] || '#818CF8';
+      const color = colors[vl] || '#818CF8';
 
       const showSteps = mediaLabel === 'video' && v === 'UNCERTAIN';
       const stepsHtml = showSteps ? steps.map(s => '<li>' + s + '</li>').join('') : '';
 
       container.innerHTML =
         '<div style="text-align:center; padding:8px 0">' +
-          '<div class="vc-icon">' + emoji + '</div>' +
-          '<div class="vc-verdict" style="color:' + color + '">' + v + '</div>' +
-          '<div class="vc-band" style="color:' + color + '">' + band + '</div>' +
+        '<div class="vc-icon">' + emoji + '</div>' +
+        '<div class="vc-verdict" style="color:' + color + '">' + v + '</div>' +
+        '<div class="vc-band" style="color:' + color + '">' + band + '</div>' +
         '</div>' +
         '<div class="vc-why">' + why + '</div>' +
         (stepsHtml ? '<ul class="vc-steps">' + stepsHtml + '</ul>' : '');
@@ -1133,11 +1471,11 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       '<div class="w-header"><span>🛡 Realitic</span><div class="dot" id="wDot"></div></div>' +
       '<div class="w-thumb-wrap" id="wThumbWrap"><img id="wThumb" alt=""></div>' +
       '<div class="w-main" id="wMain">' +
-        '<div class="w-verdict" id="wVerdict" style="color:#818CF8">⏳ Waiting</div>' +
-        '<div class="w-band" id="wBand" style="color:#818CF8">—</div>' +
-        '<div class="w-why" id="wWhy"></div>' +
-        '<hr class="w-divider" id="wAudioDivider">' +
-        '<div class="w-audio-row" id="wAudioRow"><span class="wa-icon">🎙</span><span class="wa-verdict" id="wAudioVerdict">—</span><span class="wa-band" id="wAudioBand"></span></div>' +
+      '<div class="w-verdict" id="wVerdict" style="color:#818CF8">⏳ Waiting</div>' +
+      '<div class="w-band" id="wBand" style="color:#818CF8">—</div>' +
+      '<div class="w-why" id="wWhy"></div>' +
+      '<hr class="w-divider" id="wAudioDivider">' +
+      '<div class="w-audio-row" id="wAudioRow"><span class="wa-icon">🎙</span><span class="wa-verdict" id="wAudioVerdict">—</span><span class="wa-band" id="wAudioBand"></span></div>' +
       '</div>';
 
     function _setupWidgetDoc(doc) {
@@ -1165,7 +1503,7 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
           pip.addEventListener('pagehide', () => { widgetWindow = null; _refreshPipBtn(); });
           _refreshPipBtn();
           return;
-        } catch (e) {}
+        } catch (e) { }
       }
 
       const popup = window.open(
@@ -1200,19 +1538,19 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       const colors = { REAL: '#22C55E', FAKE: '#EF4444', UNCERTAIN: '#F59E0B' };
       const bgTints = { REAL: 'rgba(34,197,94,0.07)', FAKE: 'rgba(239,68,68,0.10)', UNCERTAIN: 'rgba(245,158,11,0.08)' };
       const emojis = { REAL: '✅', FAKE: '🚨', UNCERTAIN: '❓' };
-      const color  = colors[verdict]  || '#818CF8';
+      const color = colors[verdict] || '#818CF8';
       const bgTint = bgTints[verdict] || 'transparent';
-      const emoji  = emojis[verdict]  || '⏳';
+      const emoji = emojis[verdict] || '⏳';
       const bandLabel = BAND_LABELS[band] || '';
 
       const $ = id => doc.getElementById(id);
       if (!$('wVerdict')) return;
 
       const thumbWrap = $('wThumbWrap');
-      const thumbImg  = $('wThumb');
+      const thumbImg = $('wThumb');
       if (thumbWrap && thumbImg) {
         if (thumbDataUrl) {
-          thumbImg.src            = thumbDataUrl;
+          thumbImg.src = thumbDataUrl;
           thumbWrap.style.display = 'block';
         } else {
           thumbWrap.style.display = 'none';
@@ -1220,17 +1558,17 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       }
 
       $('wMain').style.background = bgTint;
-      $('wVerdict').textContent   = emoji + ' ' + verdict;
-      $('wVerdict').style.color   = color;
-      $('wBand').textContent      = bandLabel;
-      $('wBand').style.color      = color;
+      $('wVerdict').textContent = emoji + ' ' + verdict;
+      $('wVerdict').style.color = color;
+      $('wBand').textContent = bandLabel;
+      $('wBand').style.color = color;
       const whyEl = $('wWhy');
       if (whyEl) whyEl.textContent = why || '';
 
       const dot = $('wDot');
       if (dot) {
         dot.style.background = color;
-        dot.style.boxShadow  = '0 0 6px ' + color;
+        dot.style.boxShadow = '0 0 6px ' + color;
         setTimeout(() => { if (dot) dot.style.boxShadow = 'none'; }, 600);
       }
     }
@@ -1242,21 +1580,21 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       if (!$('wAudioVerdict')) return;
 
       const verdict = result.verdict || 'UNCERTAIN';
-      const band    = result.confidence_band || '';
-      const colors  = { REAL: '#22C55E', FAKE: '#EF4444', UNCERTAIN: '#F59E0B' };
-      const emojis  = { REAL: '✅', FAKE: '🚨', UNCERTAIN: '❓' };
-      const color   = colors[verdict] || '#818CF8';
+      const band = result.confidence_band || '';
+      const colors = { REAL: '#22C55E', FAKE: '#EF4444', UNCERTAIN: '#F59E0B' };
+      const emojis = { REAL: '✅', FAKE: '🚨', UNCERTAIN: '❓' };
+      const color = colors[verdict] || '#818CF8';
       const bandLabel = BAND_LABELS[band] || '';
 
       const divider = $('wAudioDivider');
-      const row     = $('wAudioRow');
+      const row = $('wAudioRow');
       if (divider) divider.style.display = 'block';
-      if (row)     row.style.display     = 'flex';
+      if (row) row.style.display = 'flex';
 
       $('wAudioVerdict').textContent = emojis[verdict] + ' ' + verdict;
       $('wAudioVerdict').style.color = color;
-      $('wAudioBand').textContent    = bandLabel;
-      $('wAudioBand').style.color    = color;
+      $('wAudioBand').textContent = bandLabel;
+      $('wAudioBand').style.color = color;
     }
 
     function createFaceThumbnail(faceBox, verdict) {
@@ -1272,27 +1610,27 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
       if (!faceBox) return tc.toDataURL('image/jpeg', 0.8);
 
       const colors = { REAL: '#22C55E', FAKE: '#EF4444', UNCERTAIN: '#F59E0B' };
-      const color  = colors[verdict] || '#818CF8';
+      const color = colors[verdict] || '#818CF8';
 
       const rx = faceBox.x * tw;
       const ry = faceBox.y * th;
       const rw = faceBox.w * tw;
       const rh = faceBox.h * th;
 
-      tx.shadowColor  = color;
-      tx.shadowBlur   = 10;
-      tx.strokeStyle  = color;
-      tx.lineWidth    = 2;
+      tx.shadowColor = color;
+      tx.shadowBlur = 10;
+      tx.strokeStyle = color;
+      tx.lineWidth = 2;
       tx.strokeRect(rx, ry, rw, rh);
-      tx.shadowBlur   = 0;
+      tx.shadowBlur = 0;
 
       const cs = Math.min(rw, rh) * 0.20;
-      tx.lineWidth   = 3;
-      const corners  = [
-        [rx,      ry,      cs,  0,  0, cs],
-        [rx + rw, ry,     -cs,  0,  0, cs],
-        [rx,      ry + rh, cs,  0,  0,-cs],
-        [rx + rw, ry + rh,-cs,  0,  0,-cs],
+      tx.lineWidth = 3;
+      const corners = [
+        [rx, ry, cs, 0, 0, cs],
+        [rx + rw, ry, -cs, 0, 0, cs],
+        [rx, ry + rh, cs, 0, 0, -cs],
+        [rx + rw, ry + rh, -cs, 0, 0, -cs],
       ];
       for (const [x, y, dx1, dy1, dx2, dy2] of corners) {
         tx.beginPath();
@@ -1315,9 +1653,9 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
 
     function updateFavicon(verdict) {
       const colors = { REAL: '#22C55E', FAKE: '#EF4444', UNCERTAIN: '#F59E0B' };
-      const marks  = { REAL: '✓',       FAKE: '!',        UNCERTAIN: '?' };
-      const color  = colors[verdict] || '#818CF8';
-      const mark   = marks[verdict]  || '…';
+      const marks = { REAL: '✓', FAKE: '!', UNCERTAIN: '?' };
+      const color = colors[verdict] || '#818CF8';
+      const mark = marks[verdict] || '…';
 
       const c = _faviconCanvas;
       const x = c.getContext('2d');
@@ -1347,55 +1685,11 @@ const String _liveHtmlTemplate = r'''<!DOCTYPE html>
     }
   </script>
 </body>
-</html>''';
 
-class LiveScreen extends StatefulWidget {
-  const LiveScreen({super.key});
-
-  @override
-  State<LiveScreen> createState() => _LiveScreenState();
-}
-
-class _LiveScreenState extends State<LiveScreen> {
-  late final String _viewType;
-
-  @override
-  void initState() {
-    super.initState();
-    _viewType = 'live-detection-${DateTime.now().microsecondsSinceEpoch}';
-    final htmlContent = _liveHtmlTemplate.replaceAll(
-      '__API_BASE__',
-      ApiService.baseUrl,
-    );
-
-    ui_web.platformViewRegistry.registerViewFactory(_viewType, (int viewId) {
-      return html.IFrameElement()
-        ..srcdoc = htmlContent
-        ..style.border = 'none'
-        ..style.width = '100%'
-        ..style.height = '100%'
-        ..allow = 'camera *; microphone *; display-capture *; picture-in-picture *; autoplay *'
-        ..setAttribute('allowfullscreen', 'true');
-    });
+</html>
+<script>
+  // Quick fix for API_BASE in standalone mode
+  if (typeof API_BASE === "undefined" || API_BASE === "http://127.0.0.1:8000") {
+    window.API_BASE = window.location.origin;
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Scaffold(
-          backgroundColor: Colors.transparent, // Let the main layout background show through
-          body: Padding(
-            padding: EdgeInsets.only(
-              left: constraints.maxWidth > 600 ? 40 : 24, 
-              right: constraints.maxWidth > 600 ? 40 : 24,
-              top: 80, // Match home_screen top padding
-              bottom: 40,
-            ),
-            child: HtmlElementView(viewType: _viewType),
-          ),
-        );
-      },
-    );
-  }
-}
+</script>
