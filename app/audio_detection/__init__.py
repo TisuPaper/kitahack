@@ -5,28 +5,14 @@ Audio Detection Package
 ----------------------
 Contains modules for:
 - config: configuration variables
-- data_preprocessing: audio segmenting and preprocessing
-- dataset: PyTorch Dataset for audio clips
 - models: CNN-LSTM, TCN, and TCN-LSTM models
-- train: training scripts
-- evaluate: model evaluation
-- inference: predicting new audio clips
-- visualize: visualization of results
+- inference (via app/audio_inference.py): multi-model ensemble prediction
 """
 
-# Optional: Expose key classes/functions at package level
-from .config import *
-from .data_preprocessing import *
-from .dataset import *
-from .models import *
+from .models import CNN_LSTM, TCN, TCN_LSTM
 
 __all__ = [
-    "config",
-    "data_preprocessing",
-    "dataset",
-    "models",
-    "train",
-    "evaluate",
-    "inference",
-    "visualize"
+    "CNN_LSTM",
+    "TCN",
+    "TCN_LSTM",
 ]

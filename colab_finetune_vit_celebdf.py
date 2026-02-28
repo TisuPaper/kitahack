@@ -1,5 +1,5 @@
 # =============================================================================
-# 🔥 Deepfake ViT Challenger — GPU Fine-Tuning Script V2 (Improved Accuracy)
+# 🔥 Deepfake ViT Challenger — GPU Celeb-DF Fine-Tuning Script
 # =============================================================================
 #
 # HOW TO USE:
@@ -7,19 +7,15 @@
 # 2. File → Upload Notebook → Upload this file (or paste into a cell)
 # 3. Runtime → Change runtime type → GPU (T4 is fine)
 # 4. Run All
-# 5. Download the model from /content/vit_finetuned_ffpp/ when done
-# 6. Copy downloaded folder to: kitahack/models/vit_finetuned_ffpp/
+# 5. Download the model from /content/vit_finetuned_celebdf/ when done
+# 6. Copy downloaded folder to: kitahack/models/vit_finetuned_celebdf/
 #
-# V2 IMPROVEMENTS:
-# - 3x more training data (200 videos, 15 frames each)
-# - Unfreeze last 6 layers (was 4)
-# - Label smoothing (reduces overconfidence)
-# - Mixup augmentation (better generalization)
-# - Multi-frame benchmark (test 5 frames per video, not just 1)
-# - Test ALL forgery types separately
+# DATASET:
+# This script trains the Vision Transformer on the Celeb-DF v2 dataset.
+# Celeb-DF contains ultra-realistic deepfakes that lack the common visual 
+# blending artifacts found in older datasets like FaceForensics++.
 #
-# Expected time: ~20-40 minutes on T4 GPU
-# Expected accuracy: 80-90% on FF++ C23
+# Expected time: ~30-50 minutes on T4 GPU
 # =============================================================================
 
 # ---- STEP 1: Install dependencies ----
@@ -37,26 +33,26 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from transformers import ViTForImageClassification, ViTImageProcessor
 
-# ---- STEP 2: Download FF++ C23 dataset ----
-print("📥 Downloading FF++ C23 dataset...")
+# ---- STEP 2: Download Celeb-DF v2 dataset ----
+print("📥 Downloading Celeb-DF v2 dataset...")
 import kagglehub
-dataset_path = kagglehub.dataset_download("xdxd003/ff-c23")
-DATASET = os.path.join(dataset_path, "FaceForensics++_C23")
+dataset_path = kagglehub.dataset_download("reubensuju/celeb-df-v2")
+# The reubensuju mirror extracts directly into the root folder
+DATASET = dataset_path
 print(f"✅ Dataset at: {DATASET}")
 
-# ---- STEP 3: Configuration (V2 — bigger, better) ----
+# ---- STEP 3: Configuration ----
 SEED = 42
 BATCH_SIZE = 16          # Smaller batch for GPU memory safety
-EPOCHS = 25              # More epochs (was 20)
-LR = 1e-5                # Lower LR for stability (was 2e-5)
+EPOCHS = 25              # More epochs
+LR = 1e-5                # Lower LR for stability
 WEIGHT_DECAY = 0.02      # Slightly more regularization
-LABEL_SMOOTHING = 0.1    # NEW: reduces overconfidence
-MAX_VIDEOS_PER_CLASS = 200  # 4x more data (was 50)
-FRAMES_PER_VIDEO = 15    # 1.5x more frames (was 10)
+LABEL_SMOOTHING = 0.1    # Reduces overconfidence
+MAX_VIDEOS_PER_CLASS = 300  
+FRAMES_PER_VIDEO = 15    
 VAL_SPLIT = 0.2
 MODEL_NAME = "prithivMLmods/Deep-Fake-Detector-v2-Model"
-SAVE_DIR = "/content/vit_finetuned_ffpp"
-MIXUP_ALPHA = 0.2        # NEW: mixup augmentation strength
+SAVE_DIR = "/content/vit_finetuned_celebdf"
 
 random.seed(SEED)
 np.random.seed(SEED)
@@ -92,6 +88,9 @@ def crop_face(pil_img, padding=0.3):
 def extract_frames_from_dir(video_dir, max_videos, frames_per_video):
     """Extract evenly-spaced, face-cropped frames from videos."""
     frames = []
+    if not os.path.exists(video_dir):
+        return frames
+        
     videos = sorted([f for f in os.listdir(video_dir) if f.endswith(".mp4")])
     videos = videos[:max_videos]
 
@@ -126,29 +125,28 @@ def extract_frames_from_dir(video_dir, max_videos, frames_per_video):
 
     return frames
 
-print("\n📂 Extracting frames (this may take a few minutes with more data)...")
-real_dir = os.path.join(DATASET, "original")
+print("\n📂 Extracting frames from Celeb-DF (this may take a few minutes)...")
 
-# Real frames
-real_frames = extract_frames_from_dir(real_dir, MAX_VIDEOS_PER_CLASS, FRAMES_PER_VIDEO)
-print(f"  ✅ Real: {len(real_frames)} frames")
+# Real datasets in Celeb-DF
+real_dir_1 = os.path.join(DATASET, "Celeb-real")
+real_dir_2 = os.path.join(DATASET, "YouTube-real")
 
-# Fake frames from all 4 manipulation types (balanced)
-fake_dirs = ["Deepfakes", "Face2Face", "FaceSwap", "NeuralTextures"]
-fake_frames = []
-for fd in fake_dirs:
-    d = os.path.join(DATASET, fd)
-    if os.path.exists(d):
-        n_per_type = MAX_VIDEOS_PER_CLASS // len(fake_dirs)
-        ff = extract_frames_from_dir(d, n_per_type, FRAMES_PER_VIDEO)
-        fake_frames.extend(ff)
-        print(f"  ✅ {fd}: {len(ff)} frames (total fake: {len(fake_frames)})")
+real_frames = extract_frames_from_dir(real_dir_1, int(MAX_VIDEOS_PER_CLASS*0.6), FRAMES_PER_VIDEO)
+real_frames += extract_frames_from_dir(real_dir_2, int(MAX_VIDEOS_PER_CLASS*0.4), FRAMES_PER_VIDEO)
+print(f"  ✅ Total Real: {len(real_frames)} frames")
 
-# Balance classes
+# Fake dataset in Celeb-DF
+fake_dir = os.path.join(DATASET, "Celeb-synthesis")
+# We sample enough fakes to roughly match the reals
+fake_frames = extract_frames_from_dir(fake_dir, MAX_VIDEOS_PER_CLASS, FRAMES_PER_VIDEO)
+print(f"  ✅ Total Fake: {len(fake_frames)} frames")
+
+# Balance classes exactly
 n = min(len(real_frames), len(fake_frames))
 real_frames = real_frames[:n]
 fake_frames = fake_frames[:n]
-print(f"\n📊 Balanced: {n} real + {n} fake = {2*n} total frames")
+print(f"\n📊 Balanced Dataset: {n} real + {n} fake = {2*n} total frames")
+
 
 # ---- STEP 6: Train/Val split (VIDEO-LEVEL to prevent data leakage) ----
 all_frames = real_frames + fake_frames
@@ -168,28 +166,17 @@ print(f"📊 Train: {len(train_frames)}, Val: {len(val_frames)}")
 # ---- STEP 7: Dataset with STRONGER augmentation ----
 processor = ViTImageProcessor.from_pretrained(MODEL_NAME)
 
-# V2: Stronger augmentations for better generalization
 train_augment = transforms.Compose([
     transforms.RandomHorizontalFlip(p=0.5),
-    transforms.RandomRotation(15),  # was 10
+    transforms.RandomRotation(15), 
     transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2, hue=0.05),
-    transforms.RandomResizedCrop(224, scale=(0.75, 1.0)),  # was 0.85
+    transforms.RandomResizedCrop(224, scale=(0.75, 1.0)), 
     transforms.RandomChoice([
         transforms.GaussianBlur(3, sigma=(0.1, 2.0)),
         transforms.GaussianBlur(5, sigma=(0.5, 1.5)),
         transforms.Lambda(lambda x: x),
     ]),
-    # V2: Random grayscale to learn texture not color
     transforms.RandomGrayscale(p=0.1),
-    # V2: Random erasing (cutout-like) to prevent overfitting
-    transforms.RandomApply([
-        transforms.Lambda(lambda x: transforms.functional.erase(
-            transforms.functional.to_tensor(x),
-            i=random.randint(0, 180), j=random.randint(0, 180),
-            h=random.randint(20, 60), w=random.randint(20, 60),
-            v=0
-        ).permute(1, 2, 0).numpy() if False else x)
-    ], p=0.0),  # disabled — just using the other augmentations
 ])
 
 
@@ -228,9 +215,8 @@ model.config.id2label = {0: "Real", 1: "Fake"}
 model.config.label2id = {"Real": 0, "Fake": 1}
 model.config.num_labels = 2
 
-# V2: Replace classifier head (must be plain nn.Linear for save/load_pretrained)
+# V2: Replace classifier head
 model.classifier = nn.Linear(model.config.hidden_size, 2)
-# Dropout applied separately during training (not part of classifier module)
 classifier_dropout = nn.Dropout(0.3)
 
 # Freeze all first
@@ -241,7 +227,7 @@ for param in model.parameters():
 for param in model.classifier.parameters():
     param.requires_grad = True
 
-# V2: Unfreeze last 6 encoder blocks (was 4 — allows deeper learning)
+# V2: Unfreeze last 6 encoder blocks 
 for block in model.vit.encoder.layer[-6:]:
     for param in block.parameters():
         param.requires_grad = True
@@ -270,12 +256,10 @@ def get_lr(epoch):
     return 0.5 * (1 + np.cos(np.pi * (epoch - warmup_epochs) / (EPOCHS - warmup_epochs)))
 
 scheduler = torch.optim.lr_scheduler.LambdaLR(optimizer, get_lr)
-
-# V2: Label smoothing
 criterion = nn.CrossEntropyLoss(label_smoothing=LABEL_SMOOTHING)
 
 print(f"\n{'='*60}")
-print(f"🚀 Training V2 for {EPOCHS} epochs on {device}...")
+print(f"🚀 Training ViT on Celeb-DF for {EPOCHS} epochs on {device}...")
 print(f"   Data: {len(train_ds)} train, {len(val_ds)} val")
 print(f"   LR: {LR}, Label Smoothing: {LABEL_SMOOTHING}")
 print(f"   Unfrozen layers: last 6 + classifier + layernorm")
@@ -283,7 +267,7 @@ print(f"{'='*60}\n")
 
 best_val_acc = 0.0
 patience_counter = 0
-PATIENCE = 7  # V2: more patience (was 5)
+PATIENCE = 7 
 
 for epoch in range(EPOCHS):
     # --- Train ---
@@ -338,7 +322,7 @@ for epoch in range(EPOCHS):
                     val_fn += 1
 
     val_acc = val_correct / max(val_total, 1) * 100
-    lr_now = scheduler.get_last_lr()[0] * LR  # account for lambda
+    lr_now = scheduler.get_last_lr()[0] * LR 
 
     improved = ""
     if val_acc > best_val_acc:
@@ -365,112 +349,23 @@ for epoch in range(EPOCHS):
 print(f"\n✅ Best validation accuracy: {best_val_acc:.1f}%")
 print(f"💾 Model saved to: {SAVE_DIR}")
 
-# ---- STEP 10: COMPREHENSIVE benchmark (V2: test ALL forgery types) ----
-print("\n" + "=" * 60)
-print("📊 V2 Benchmark: 20 real + 5 per forgery type = 40 videos")
-print("   Testing 5 frames per video (was 1) for a fairer eval")
-print("=" * 60)
-
-# Reload best model
-model = ViTForImageClassification.from_pretrained(SAVE_DIR).to(device).eval()
-
-def predict_video(video_path, n_frames=5):
-    """Predict using multiple frames and majority vote."""
-    cap = cv2.VideoCapture(video_path)
-    total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    if total <= 0:
-        cap.release()
-        return None, 0, 0
-
-    # Sample n_frames evenly
-    indices = [int(total * (i + 1) / (n_frames + 1)) for i in range(n_frames)]
-    fake_votes = 0
-    total_fake_prob = 0
-
-    for idx in indices:
-        cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
-        ret, frame = cap.read()
-        if not ret:
-            continue
-        img = crop_face(Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)))
-        inputs = processor(images=img, return_tensors="pt").to(device)
-        with torch.no_grad():
-            probs = torch.softmax(model(**inputs).logits, dim=1)
-        p_fake = float(probs[0][1])
-        total_fake_prob += p_fake
-        if p_fake > 0.5:
-            fake_votes += 1
-
-    cap.release()
-    avg_fake = total_fake_prob / max(n_frames, 1)
-    final_pred = 1 if fake_votes > n_frames / 2 else 0  # majority vote
-    return final_pred, avg_fake, fake_votes
-
-# Test real
-print("\n--- REAL videos ---")
-correct_real, total_real = 0, 0
-for v in sorted(os.listdir(real_dir))[:20]:
-    if not v.endswith(".mp4"): continue
-    pred, avg_fake, votes = predict_video(os.path.join(real_dir, v))
-    if pred is None: continue
-    total_real += 1
-    status = "✅" if pred == 0 else "❌"
-    label = "Real" if pred == 0 else "Fake"
-    print(f"  {status} {v}: {label} (avg_fake={avg_fake:.3f}, fake_votes={votes}/5)")
-    if pred == 0: correct_real += 1
-
-# Test each forgery type separately
-results_by_type = {}
-for forgery in fake_dirs:
-    fd = os.path.join(DATASET, forgery)
-    if not os.path.exists(fd): continue
-
-    print(f"\n--- {forgery.upper()} (fake) ---")
-    correct, total = 0, 0
-    for v in sorted(os.listdir(fd))[:5]:
-        if not v.endswith(".mp4"): continue
-        pred, avg_fake, votes = predict_video(os.path.join(fd, v))
-        if pred is None: continue
-        total += 1
-        status = "✅" if pred == 1 else "❌"
-        label = "Fake" if pred == 1 else "Real"
-        print(f"  {status} {v}: {label} (avg_fake={avg_fake:.3f}, fake_votes={votes}/5)")
-        if pred == 1: correct += 1
-    results_by_type[forgery] = (correct, total)
-
-# Summary
-total_fake_correct = sum(c for c, t in results_by_type.values())
-total_fake_all = sum(t for c, t in results_by_type.values())
-total_correct = correct_real + total_fake_correct
-total_all = total_real + total_fake_all
-
-print(f"\n{'='*60}")
-print(f"📊 RESULTS BY FORGERY TYPE:")
-print(f"   Real:            {correct_real}/{total_real} ({correct_real/max(total_real,1)*100:.0f}%)")
-for forgery, (c, t) in results_by_type.items():
-    print(f"   {forgery:16s}: {c}/{t} ({c/max(t,1)*100:.0f}%)")
-print(f"   {'─'*40}")
-print(f"   Overall:         {total_correct}/{total_all} ({total_correct/max(total_all,1)*100:.0f}%)")
-print(f"{'='*60}")
-
-# ---- Auto-download ----
+# ---- STEP 10: Auto-download ----
 print("\n📥 Preparing download...")
 try:
     import shutil
     from google.colab import files
-    shutil.make_archive('/content/vit_finetuned_ffpp_v2', 'zip', SAVE_DIR)
+    shutil.make_archive('/content/vit_finetuned_celebdf', 'zip', SAVE_DIR)
     print("✅ Downloading model zip...")
-    files.download('/content/vit_finetuned_ffpp_v2.zip')
+    files.download('/content/vit_finetuned_celebdf.zip')
 except:
     print(f"""
 ╔══════════════════════════════════════════════════════════╗
-║  🎉 DONE! Download your fine-tuned model:               ║
+║  🎉 DONE! Download your Celeb-DF ViT model:             ║
 ║                                                          ║
 ║  1. In Colab, click the 📁 Files panel on the left       ║
-║  2. Navigate to /content/vit_finetuned_ffpp/             ║
+║  2. Navigate to /content/vit_finetuned_celebdf/          ║
 ║  3. Download ALL files in that folder                    ║
 ║  4. Place them in your project at:                       ║
-║     kitahack/models/vit_finetuned_ffpp/                  ║
-║  5. The model_loader.py will auto-detect them            ║
+║     kitahack/models/vit_finetuned_celebdf/               ║
 ╚══════════════════════════════════════════════════════════╝
 """)
